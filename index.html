@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="OyoConnect is the easiest way to discover trusted businesses, verified services and local professionals across Oyo State, Nigeria."
+    />
+    <title>OyoConnect — Find trusted businesses in Oyo State</title>
+  </head>
+  <body>
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem('oyoconnect_theme');
+          if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          } else if (theme) {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

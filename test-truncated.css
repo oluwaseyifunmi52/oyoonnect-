@@ -1,0 +1,160 @@
+﻿/* ==========================================================================
+   OYOCONNECT — GLOBAL STYLESHEET (src/index.css)
+   ==========================================================================
+   ARCHITECTURE
+   All design tokens live in :root (PART 1). Components consume tokens via
+   var(--token). Dark mode is handled by overriding tokens under :root.dark,
+   so never hard-code colors that should adapt to the theme.
+
+   SECTION MAP
+     1. Design Tokens & Dark Theme        (:root / :root.dark)
+     2. Reset, Base Elements & Layout
+     3. Buttons, Forms & Form Controls
+     4. Navigation (Navbar, Submenu, User Menu, Notifications)
+     5. Auth, Account & Loading Skeletons
+     6. Footer
+     7. Marketing & Landing
+     8. Business Profile, Reviews & Ratings
+     9. Static Pages (About, How It Works, 404, Help)
+    10. Dashboard & Admin
+    11. Wallet
+    12. Services Dashboard
+    13. Data & Bill Payments
+    14. Help Center
+    15. Settings
+
+   MAINTENANCE NOTES
+     - Keep new component styles inside the matching PART section.
+     - Reuse --space-*, --radius-*, --shadow-*, --color tokens; avoid literals.
+     - Merge duplicate selectors instead of re-declaring them.
+   ==========================================================================
+
+:root {
+  /* ===== Brand Colors ===== */
+  --brand: #0f766e;
+  --brand-dark: #115e59;
+  --brand-deeper: #134e4a;
+  --brand-soft: #f0fdfa;
+  --brand-line: #99f6e4;
+
+  --whatsapp: #16a34a;
+  --whatsapp-dark: #15803d;
+
+  /* ===== Neutral Colors ===== */
+  --ink: #0f172a;
+  --muted: #475569;
+  --subtle: #64748b;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+
+  --bg: #ffffff;
+  --surface: #f8fafc;
+  --surface-2: #f1f5f9;
+
+  /* ===== Semantic Colors ===== */
+  --success: #16a34a;
+  --success-soft: #ecfdf5;
+  --success-line: #a7f3d0;
+  --warning: #d97706;
+  --warning-soft: #fffbeb;
+  --warning-line: #fde68a;
+  --error: #dc2626;
+  --error-soft: #fef2f2;
+  --error-line: #fecaca;
+
+  /* ===== Typography Scale ===== */
+  --font: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-base: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 30px;
+  --fs-4xl: 36px;
+  --fs-5xl: 48px;
+  --fs-6xl: 60px;
+
+  --lh-tight: 1.15;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.65;
+
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+
+  /* ===== Spacing Scale ===== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ===== Border Radius Scale ===== */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+
+  /* ===== Shadow Scale ===== */
+  --shadow-xs: 0 1px 2px rgb(15 23 42 / 0.04);
+  --shadow-sm: 0 1px 3px rgb(15 23 42 / 0.08), 0 1px 2px rgb(15 23 42 / 0.06);
+  --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.1), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+  --shadow-lg: 0 16px 40px -12px rgb(15 23 42 / 0.18), 0 4px 12px -4px rgb(15 23 42 / 0.1);
+  --shadow-xl: 0 24px 60px -16px rgb(15 23 42 / 0.22);
+
+  /* ===== Container Widths ===== */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1160px;
+  --container-2xl: 1280px;
+
+  /* ===== Breakpoints ===== */
+  --bp-sm: 480px;
+  --bp-md: 640px;
+  --bp-lg: 768px;
+  --bp-xl: 900px;
+  --bp-2xl: 1000px;
+  --bp-3xl: 1200px;
+
+  /* ===== Z-Index Scale ===== */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+
+  /* ===== Transitions ===== */
+  --transition-fast: 120ms ease;
+  --transition-normal: 180ms ease;
+  --transition-slow: 280ms ease;
+
+  /* ===== Layout ===== */
+  --header-h: 68px;
+
+  /* ===== Extended Tokens ===== */
+  --card: #ffffff;
+  --card-bg: var(--card);
+  --border: var(--line);
+  --text: var(--ink);
+}
+

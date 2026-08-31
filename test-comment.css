@@ -1,0 +1,11 @@
+﻿:root {
+  --brand: #0f766e;
+  --border: var(--line);
+  --text: var(--ink);
+}
+
+/* ===== Dark Mode ===== */
+
+:root.dark {
+  --brand: #19A58F;
+}
