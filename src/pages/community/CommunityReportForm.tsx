@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Loader2, AlertCircle, CheckCircle2, MapPin, Image, X } from 'lucide-react'
 import { Input, Select, Textarea } from '../../components/ui/Input'
 import { Button, ButtonLink } from '../../components/ui/Button'
 import { SectionHeading } from '../../components/ui/SectionHeading'
-import { CommunityPhotoUpload } from '../../components/community/CommunityPhotoUpload'
+import { Card } from '../../components/ui/Card'
+import { Badge } from '../../components/ui/Badge'
 import { FormProgress } from '../../components/common/FormProgress'
 import { GoogleLocationPicker } from '../../components/maps/GoogleLocationPicker'
 import { communityCategoryBySlug } from '../../data/communityCategories'
@@ -19,10 +20,10 @@ const REPORT_CATEGORIES: CommunityCategory[] = [
 ]
 
 const progressSteps = [
-  { label: 'Category & Details' },
+  { label: 'Details' },
   { label: 'Location' },
   { label: 'Photos' },
-  { label: 'Review & Submit' },
+  { label: 'Review' },
 ]
 
 export function CommunityReportForm() {
@@ -43,6 +44,8 @@ export function CommunityReportForm() {
 
   const handleImagesChange = useCallback((images: File[]) => {
     setForm((prev) => ({ ...prev, images }))
+    const previews = images.map((file) => URL.createObjectURL(file))
+    setPreviewImages(previews)
   }, [])
 
   const validateStep = (step: number): boolean => {
@@ -98,7 +101,6 @@ export function CommunityReportForm() {
         authorAvatar: user.avatar,
       })
 
-      // Create notification for the reporter
       notificationService.addNotification({
         category: 'community',
         title: 'Community Report Submitted',
@@ -129,26 +131,24 @@ export function CommunityReportForm() {
 
   if (submitted) {
     return (
-      <main className="page community-report-page">
-        <div className="container container--narrow">
-          <div className="report-success">
-            <div className="success-icon">
-              <CheckCircle2 size={64} />
-            </div>
-            <h1>Report Submitted Successfully!</h1>
-            <p>
-              Thank you for contributing to the community. Your report will be reviewed by
-              our moderation team and then made visible on the community page.
-            </p>
-            <div className="success-actions">
-              <ButtonLink to="/community" variant="outline">
-                <ArrowLeft size={18} />
-                Back to Community
-              </ButtonLink>
-              <ButtonLink to="/community/report" variant="primary">
-                Submit Another Report
-              </ButtonLink>
-            </div>
+      <main className="auth-page">
+        <div className="auth-page__container report-success">
+          <div className="report-success__icon">
+            <CheckCircle2 size={64} aria-hidden="true" />
+          </div>
+          <h1 className="report-success__title">Report Submitted Successfully!</h1>
+          <p className="report-success__description">
+            Thank you for contributing to the community. Your report will be reviewed by
+            our moderation team and then made visible on the community page.
+          </p>
+          <div className="report-success__actions">
+            <ButtonLink to="/community" variant="outline" size="lg" fullWidth>
+              <ArrowLeft size={18} aria-hidden="true" />
+              Back to Community
+            </ButtonLink>
+            <ButtonLink to="/community/report" variant="primary" size="lg" fullWidth>
+              Submit Another Report
+            </ButtonLink>
           </div>
         </div>
       </main>
@@ -157,26 +157,25 @@ export function CommunityReportForm() {
 
   if (!isAuthenticated) {
     return (
-      <main className="page community-report-page">
-        <div className="container container--narrow">
-          <div className="report-auth-required">
-            <AlertCircle size={48} />
-            <h2>Sign In Required</h2>
-            <p>You need to be signed in to submit a community report.</p>
-            <ButtonLink to="/login?redirect=/community/report" variant="primary" size="lg">
-              Sign In / Sign Up
-            </ButtonLink>
-          </div>
+      <main className="auth-page">
+        <div className="auth-page__container report-auth-required">
+          <AlertCircle size={48} aria-hidden="true" />
+          <h2 className="report-auth-required__title">Sign In Required</h2>
+          <p className="report-auth-required__description">You need to be signed in to submit a community report.</p>
+          <ButtonLink to="/login?redirect=/community/report" variant="primary" size="lg" fullWidth>
+            Sign In / Sign Up
+          </ButtonLink>
         </div>
       </main>
     )
   }
 
   return (
-    <main className="page community-report-page">
+    <main className="report-form-page">
       <div className="container container--narrow">
         <ButtonLink to="/community" variant="ghost" className="page-back-link" onClick={handleBack}>
-          <ArrowLeft size={18} />
+          <ArrowLeft size={18} aria-hidden="true" />
+          Back
         </ButtonLink>
 
         <FormProgress
@@ -192,7 +191,8 @@ export function CommunityReportForm() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="community-report-form" noValidate>
+        <form onSubmit={handleSubmit} className="report-form" noValidate>
+          {/* Step 1: Category & Details */}
           {activeStep === 1 && (
             <div className="form-step" role="tabpanel" aria-labelledby="step-1-heading">
               <SectionHeading
@@ -202,54 +202,66 @@ export function CommunityReportForm() {
                 subtitle="Select a category and describe the issue"
               />
 
-              <Select
-                label="Category"
-                name="category"
-                required
-                value={form.category || ''}
-                onChange={(value) => updateForm('category', value)}
-                options={REPORT_CATEGORIES.map((c) => {
-                  const cat = communityCategoryBySlug(c)
-                  return { value: c, label: cat?.name || c }
-                })}
-                placeholder="Select a category"
-                error={errors.category}
-              />
+              <div className="form-group">
+                <label htmlFor="report-category" className="form-label">Category <span className="required" aria-hidden="true">*</span></label>
+                <Select
+                  id="report-category"
+                  name="category"
+                  required
+                  value={form.category || ''}
+                  onChange={(value) => updateForm('category', value)}
+                  options={REPORT_CATEGORIES.map((c) => {
+                    const cat = communityCategoryBySlug(c)
+                    return { value: c, label: cat?.name || c }
+                  })}
+                  placeholder="Select a category"
+                  error={errors.category}
+                  icon={<AlertCircle size={18} />}
+                />
+              </div>
 
-              <Input
-                label="Title"
-                name="title"
-                placeholder="Brief, descriptive title (e.g., 'Pothole on Ring Road near Challenge')"
-                required
-                value={form.title || ''}
-                onChange={(e) => updateForm('title', e.target.value)}
-                error={errors.title}
-                maxLength={100}
-              />
+              <div className="form-group">
+                <label htmlFor="report-title" className="form-label">Title <span className="required" aria-hidden="true">*</span></label>
+                <Input
+                  id="report-title"
+                  name="title"
+                  placeholder="Brief, descriptive title (e.g., 'Pothole on Ring Road near Challenge')"
+                  required
+                  value={form.title || ''}
+                  onChange={(e) => updateForm('title', e.target.value)}
+                  error={errors.title}
+                  maxLength={100}
+                  icon={<MapPin size={18} />}
+                />
+              </div>
 
-              <Textarea
-                label="Description"
-                name="description"
-                placeholder="Describe the issue in detail. Include what you saw, when, and any relevant details..."
-                required
-                value={form.description || ''}
-                onChange={(e) => updateForm('description', e.target.value)}
-                rows={5}
-                error={errors.description}
-                maxLength={2000}
-              />
+              <div className="form-group">
+                <label htmlFor="report-description" className="form-label">Description <span className="required" aria-hidden="true">*</span></label>
+                <Textarea
+                  id="report-description"
+                  name="description"
+                  placeholder="Describe the issue in detail. Include what you saw, when, and any relevant details..."
+                  required
+                  value={form.description || ''}
+                  onChange={(e) => updateForm('description', e.target.value)}
+                  rows={5}
+                  error={errors.description}
+                  maxLength={2000}
+                />
+              </div>
 
               <div className="form-step-actions">
                 <Button type="button" variant="ghost" onClick={handleBack}>
                   Cancel
                 </Button>
-                <Button type="button" variant="primary" onClick={() => validateStep(1) && setActiveStep(2)}>
-                  Next <ArrowLeft size={18} className="rotate-180" />
+                <Button type="button" variant="primary" onClick={() => validateStep(1) && setActiveStep(2)} fullWidth>
+                  Next <ArrowLeft size={18} className="rotate-180" aria-hidden="true" />
                 </Button>
               </div>
             </div>
           )}
 
+          {/* Step 2: Location */}
           {activeStep === 2 && (
             <div className="form-step" role="tabpanel" aria-labelledby="step-2-heading">
               <SectionHeading
@@ -260,92 +272,112 @@ export function CommunityReportForm() {
               />
 
               <div className="form-row">
-                <Select
-                  label="LGA (Local Government Area)"
-                  name="lga"
-                  required
-                  value={form.lga || ''}
-                  onChange={(value) => {
-                    updateForm('lga', value)
-                    updateForm('town', '')
-                    updateForm('area', '')
-                    updateForm('busStop', '')
-                  }}
-                  options={locations.map((l) => ({ value: l.name, label: l.name }))}
-                  placeholder="Select LGA"
-                  error={errors.lga}
-                />
+                <div className="form-group">
+                  <label htmlFor="report-lga" className="form-label">LGA (Local Government Area) <span className="required" aria-hidden="true">*</span></label>
+                  <Select
+                    id="report-lga"
+                    name="lga"
+                    required
+                    value={form.lga || ''}
+                    onChange={(value) => {
+                      updateForm('lga', value)
+                      updateForm('town', '')
+                      updateForm('area', '')
+                      updateForm('busStop', '')
+                    }}
+                    options={locations.map((l) => ({ value: l.name, label: l.name }))}
+                    placeholder="Select LGA"
+                    error={errors.lga}
+                    icon={<MapPin size={18} />}
+                  />
+                </div>
 
-                <Select
-                  label="Town / City"
-                  name="town"
-                  required
-                  value={form.town || ''}
-                  onChange={(value) => {
-                    updateForm('town', value)
-                    updateForm('area', '')
-                    updateForm('busStop', '')
-                  }}
-                  options={
-                    form.lga
-                      ? getTownsForLocation(
-                          locations.find((l) => l.name === form.lga)?.id || '',
-                        ).map((t) => ({ value: t, label: t }))
-                      : []
-                  }
-                  placeholder="Select town"
-                  disabled={!form.lga}
-                  error={errors.town}
-                />
+                <div className="form-group">
+                  <label htmlFor="report-town" className="form-label">Town / City <span className="required" aria-hidden="true">*</span></label>
+                  <Select
+                    id="report-town"
+                    name="town"
+                    required
+                    value={form.town || ''}
+                    onChange={(value) => {
+                      updateForm('town', value)
+                      updateForm('area', '')
+                      updateForm('busStop', '')
+                    }}
+                    options={
+                      form.lga
+                        ? getTownsForLocation(
+                            locations.find((l) => l.name === form.lga)?.id || '',
+                          ).map((t) => ({ value: t, label: t }))
+                        : []
+                    }
+                    placeholder="Select town"
+                    disabled={!form.lga}
+                    error={errors.town}
+                    icon={<MapPin size={18} />}
+                  />
+                </div>
               </div>
 
               <div className="form-row">
-                <Select
-                  label="Area / Neighborhood (Optional)"
-                  name="area"
-                  value={form.area || ''}
-                  onChange={(value) => updateForm('area', value)}
-                  options={
-                    form.town
-                      ? getBusStopsForLocation(
-                          locations.find((l) => l.name === form.lga)?.id || '',
-                        ).map((a) => ({ value: a, label: a }))
-                      : []
-                  }
-                  placeholder="Select area"
-                  disabled={!form.town}
-                />
+                <div className="form-group">
+                  <label htmlFor="report-area" className="form-label">Area / Neighborhood (Optional)</label>
+                  <Select
+                    id="report-area"
+                    name="area"
+                    value={form.area || ''}
+                    onChange={(value) => updateForm('area', value)}
+                    options={
+                      form.town
+                        ? getBusStopsForLocation(
+                            locations.find((l) => l.name === form.lga)?.id || '',
+                          ).map((a) => ({ value: a, label: a }))
+                        : []
+                    }
+                    placeholder="Select area"
+                    disabled={!form.town}
+                    icon={<MapPin size={18} />}
+                  />
+                </div>
 
-                <Select
-                  label="Nearest Bus Stop / Landmark (Optional)"
-                  name="busStop"
-                  value={form.busStop || ''}
-                  onChange={(value) => updateForm('busStop', value)}
-                  options={
-                    form.lga
-                      ? getBusStopsForLocation(
-                          locations.find((l) => l.name === form.lga)?.id || '',
-                        ).map((b) => ({ value: b, label: b }))
-                      : []
-                  }
-                  placeholder="Select landmark"
-                  disabled={!form.lga}
+                <div className="form-group">
+                  <label htmlFor="report-bus-stop" className="form-label">Nearest Bus Stop / Landmark (Optional)</label>
+                  <Select
+                    id="report-bus-stop"
+                    name="busStop"
+                    value={form.busStop || ''}
+                    onChange={(value) => updateForm('busStop', value)}
+                    options={
+                      form.lga
+                        ? getBusStopsForLocation(
+                            locations.find((l) => l.name === form.lga)?.id || '',
+                          ).map((b) => ({ value: b, label: b }))
+                        : []
+                    }
+                    placeholder="Select landmark"
+                    disabled={!form.lga}
+                    icon={<MapPin size={18} />}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="report-address" className="form-label">Street Address <span className="required" aria-hidden="true">*</span></label>
+                <Input
+                  id="report-address"
+                  name="address"
+                  placeholder="e.g. 12 Ring Road, near Challenge Roundabout"
+                  required
+                  value={form.address || ''}
+                  onChange={(e) => updateForm('address', e.target.value)}
+                  error={errors.address}
+                  icon={<MapPin size={18} />}
                 />
               </div>
 
-              <Input
-                label="Street Address"
-                name="address"
-                placeholder="e.g. 12 Ring Road, near Challenge Roundabout"
-                required
-                value={form.address || ''}
-                onChange={(e) => updateForm('address', e.target.value)}
-                error={errors.address}
-              />
-
               <div className="map-section">
-                <label className="field__label">Location on Map</label>
-                <p className="field__hint">Drag the marker or click on the map to set the exact location.</p>
+                <label className="form-label">Location on Map</label>
+                <p className="form-hint">Drag the marker or click on the map to set the exact location.</p>
                 <GoogleLocationPicker
                   latitude={form.latitude ? Number(form.latitude) : undefined}
                   longitude={form.longitude ? Number(form.longitude) : undefined}
@@ -378,16 +410,17 @@ export function CommunityReportForm() {
               </div>
 
               <div className="form-step-actions">
-                <Button type="button" variant="ghost" onClick={() => setActiveStep(1)}>
-                  <ArrowLeft size={18} /> Back
+                <Button type="button" variant="ghost" onClick={() => setActiveStep(1)} fullWidth>
+                  <ArrowLeft size={18} aria-hidden="true" /> Back
                 </Button>
-                <Button type="button" variant="primary" onClick={() => validateStep(2) && setActiveStep(3)}>
-                  Next <ArrowLeft size={18} className="rotate-180" />
+                <Button type="button" variant="primary" onClick={() => validateStep(2) && setActiveStep(3)} fullWidth>
+                  Next <ArrowLeft size={18} className="rotate-180" aria-hidden="true" />
                 </Button>
               </div>
             </div>
           )}
 
+          {/* Step 3: Photos */}
           {activeStep === 3 && (
             <div className="form-step" role="tabpanel" aria-labelledby="step-3-heading">
               <SectionHeading
@@ -397,24 +430,65 @@ export function CommunityReportForm() {
                 subtitle="Add up to 5 photos to help others understand the situation"
               />
 
-              <CommunityPhotoUpload
-                images={form.images || []}
-                onChange={handleImagesChange}
-                maxImages={5}
-                maxSizeMB={5}
-              />
+              <div className="photo-upload">
+                <div className="photo-upload__dropzone" role="button" tabIndex={0} aria-label="Upload photos">
+                  <input
+                    type="file"
+                    id="photo-upload"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []).slice(0, 5)
+                      handleImagesChange(files)
+                    }}
+                    className="photo-upload__input"
+                    aria-hidden="true"
+                  />
+                  <div className="photo-upload__content">
+                    <Image size={32} aria-hidden="true" />
+                    <p>Click or drag photos here</p>
+                    <span className="photo-upload__hint">Up to 5 photos, max 5MB each</span>
+                  </div>
+                </div>
+
+                {previewImages.length > 0 && (
+                  <div className="photo-upload__previews" role="list" aria-label="Uploaded photos">
+                    {previewImages.map((preview, index) => (
+                      <div key={index} className="photo-upload__preview" role="listitem">
+                        <img src={preview} alt={`Preview ${index + 1}`} />
+                        <button
+                          type="button"
+                          className="photo-upload__remove"
+                          onClick={() => {
+                            const newImages = [...(form.images || [])]
+                            newImages.splice(index, 1)
+                            updateForm('images', newImages)
+                            const newPreviews = [...previewImages]
+                            newPreviews.splice(index, 1)
+                            setPreviewImages(newPreviews)
+                          }}
+                          aria-label={`Remove photo ${index + 1}`}
+                        >
+                          <X size={16} aria-hidden="true" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <div className="form-step-actions">
-                <Button type="button" variant="ghost" onClick={() => setActiveStep(2)}>
-                  <ArrowLeft size={18} /> Back
+                <Button type="button" variant="ghost" onClick={() => setActiveStep(2)} fullWidth>
+                  <ArrowLeft size={18} aria-hidden="true" /> Back
                 </Button>
-                <Button type="button" variant="primary" onClick={() => setActiveStep(4)}>
-                  Next <ArrowLeft size={18} className="rotate-180" />
+                <Button type="button" variant="primary" onClick={() => setActiveStep(4)} fullWidth>
+                  Next <ArrowLeft size={18} className="rotate-180" aria-hidden="true" />
                 </Button>
               </div>
             </div>
           )}
 
+          {/* Step 4: Review & Submit */}
           {activeStep === 4 && (
             <div className="form-step" role="tabpanel" aria-labelledby="step-4-heading">
               <SectionHeading
@@ -424,7 +498,7 @@ export function CommunityReportForm() {
                 subtitle="Please verify your report details before submitting"
               />
 
-              <div className="review-section">
+              <Card variant="default" padding="md" className="review-section">
                 <div className="review-item">
                   <span className="review-label">Category</span>
                   <span className="review-value">
@@ -459,7 +533,7 @@ export function CommunityReportForm() {
                     </div>
                   </div>
                 )}
-              </div>
+              </Card>
 
               <div className="disclaimer">
                 <AlertCircle size={18} aria-hidden="true" />
@@ -472,13 +546,13 @@ export function CommunityReportForm() {
               </div>
 
               <div className="form-step-actions">
-                <Button type="button" variant="ghost" onClick={() => setActiveStep(3)}>
-                  <ArrowLeft size={18} /> Back
+                <Button type="button" variant="ghost" onClick={() => setActiveStep(3)} fullWidth>
+                  <ArrowLeft size={18} aria-hidden="true" /> Back
                 </Button>
-                <Button type="submit" size="lg" disabled={submitting}>
+                <Button type="submit" size="lg" disabled={submitting} fullWidth>
                   {submitting ? (
                     <>
-                      <Loader2 size={18} className="spinning" aria-hidden="true" />
+                      <Loader2 size={18} className="btn__spinner" aria-hidden="true" />
                       Submitting...
                     </>
                   ) : (

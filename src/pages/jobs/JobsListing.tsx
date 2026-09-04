@@ -13,26 +13,19 @@ import {
   Truck,
   UtensilsCrossed,
   ArrowUpRight,
+  Search,
+  Filter,
+  MapPin,
 } from 'lucide-react'
-import { JobGrid } from '../../components/jobs/JobGrid'
 import { EmptyState } from '../../components/ui/EmptyState'
-import { ButtonLink } from '../../components/ui/Button'
+import { Button, ButtonLink, Card, Badge, Skeleton, SearchInput, Select } from '../../components/ui'
 import { Pagination } from '../../components/common/Pagination'
-import { SectionHeading } from '../../components/ui/SectionHeading'
 import { jobService } from '../../services/jobService'
 import { jobCategoryBySlug } from '../../data/jobCategories'
 import { JOB_SORT_OPTIONS } from '../../types/jobs'
 import type { Job, JobFilters as JobFiltersType, EmploymentType, ExperienceLevel } from '../../types/jobs'
 
-import { JobsHero } from '../../components/jobs/JobsHero'
-import { OpportunityTypeCard } from '../../components/jobs/OpportunityTypeCard'
-import { CreateOpportunityCard } from '../../components/jobs/CreateOpportunityCard'
-import { JobsSearchRow } from '../../components/jobs/JobsSearchRow'
-import { JobFilterPills } from '../../components/jobs/JobFilterPills'
-import { JobCategoryCard } from '../../components/jobs/JobCategoryCard'
-import { JobsNotificationBanner } from '../../components/jobs/JobsNotificationBanner'
-
-const ITEMS_PER_PAGE = 12
+const ITEMS_PER_PAGE = 10
 
 const CATEGORY_ICONS: Record<string, ReactNode> = {
   'information-technology': <Laptop size={24} />,
@@ -62,10 +55,13 @@ const POPULAR_CATEGORIES = POPULAR_CATEGORY_SLUGS.map((slug) => ({
   icon: CATEGORY_ICONS[slug] ?? <Briefcase size={24} />,
 }))
 
+const EMPLOYMENT_TYPES: EmploymentType[] = ['full-time', 'part-time', 'contract', 'internship', 'apprenticeship']
+
 export function JobsListing() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
+  const [showFilters, setShowFilters] = useState(false)
 
   const filters: JobFiltersType = useMemo(
     () => ({
@@ -183,190 +179,385 @@ export function JobsListing() {
     !!filters.salaryMin ||
     !!filters.featured
 
-  const onFilterPillsChange = (value: EmploymentType | '') => {
-    updateFilters({ employmentType: value || undefined })
+  const activeFiltersCount = useMemo(() => {
+    let count = 0
+    if (filters.query) count++
+    if (filters.category) count++
+    if (filters.location) count++
+    if (filters.employmentType) count++
+    if (filters.experienceLevel) count++
+    if (filters.salaryMin) count++
+    if (filters.featured) count++
+    return count
+  }, [filters])
+
+  const clearAllFilters = () => {
+    setSearchParams(new URLSearchParams())
+  }
+
+  const handleSearch = (value: string) => {
+    if (value.trim()) {
+      updateFilters({ query: value.trim() })
+    } else {
+      updateFilters({ query: undefined })
+    }
   }
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE + 1
   const endIndex = Math.min(currentPage * ITEMS_PER_PAGE, totalItems)
 
   return (
-    <main className="jobs-landing">
-      <JobsHero />
-
-      <section className="opportunities-section" aria-label="Opportunity types">
-        <div className="container">
-          <div className="opportunities-grid">
-            <OpportunityTypeCard
-              icon={<Briefcase size={28} />}
-              title="Find Jobs"
-              description="Search thousands of job opportunities"
-              to="/jobs"
-            />
-            <OpportunityTypeCard
-              icon={<GraduationCap size={28} />}
-              title="Internships"
-              description="Kickstart your career with real experience"
-              to="/jobs?employmentType=internship"
-            />
-            <OpportunityTypeCard
-              icon={<Award size={28} />}
-              title="Apprenticeships"
-              description="Learn, earn and grow in your field"
-              to="/jobs?employmentType=apprenticeship"
-            />
-            <OpportunityTypeCard
-              icon={<Building2 size={28} />}
-              title="Local Opportunities"
-              description="Discover opportunities near you"
-              to="/jobs?location=Ibadan"
-            />
-            <CreateOpportunityCard />
-          </div>
+    <>
+      {/* Hero Section */}
+      <section className="jobs-hero">
+        <div className="jobs-hero__content">
+          <span className="jobs-hero__eyebrow">WORK & OPPORTUNITIES</span>
+          <h1 className="jobs-hero__title">
+            Find Your <span className="jobs-hero__accent">Next Opportunity</span>
+          </h1>
+          <p className="jobs-hero__subtitle">
+            Discover jobs, internships, apprenticeships and local opportunities across
+            Oyo State.
+          </p>
         </div>
       </section>
 
-      <section className="jobs-content-section" aria-label="Browse opportunities">
+      {/* Search & Filters */}
+      <section className="jobs-search-section">
         <div className="container">
-          <div className="jobs-content-layout">
-            <div className="jobs-featured-card jobs-card">
-              <div className="jobs-card__head">
-                <h2 className="jobs-card__title">Featured Opportunities</h2>
-                <Link to="/jobs" className="jobs-card__link">
-                  <span>View all jobs</span>
-                  <ArrowUpRight size={16} />
-                </Link>
-              </div>
-
-              {featuredLoading ? (
-                <JobGrid variant="featured" columns={3} loading />
-              ) : featuredJobs.length > 0 ? (
-                <JobGrid variant="featured" columns={3} jobs={featuredJobs} />
-              ) : (
-                <EmptyState
-                  icon={<Briefcase size={48} />}
-                  title="No featured jobs at the moment."
-                  description="Be the first to showcase a great opportunity!"
-                  action={
-                    <ButtonLink to="/jobs/post" variant="outline" size="sm">
-                      Post the First Job
-                    </ButtonLink>
-                  }
-                />
-              )}
+          <div className="jobs-search-form">
+            <div className="jobs-search-form__field">
+              <label htmlFor="job-search" className="visually-hidden">Search jobs</label>
+              <SearchInput
+                id="job-search"
+                value={filters.query ?? ''}
+                onChange={(v) => updateFilters({ query: v || undefined })}
+                onSearch={handleSearch}
+                placeholder="Job title, keyword or company"
+                ariaLabel="Search jobs"
+              />
             </div>
 
-            <div className="jobs-browse-card jobs-card">
-              <SectionHeading
-                align="left"
-                title="Browse All Jobs"
-                subtitle="Search and filter thousands of opportunities across Oyo State."
+            <div className="jobs-search-form__field">
+              <label htmlFor="job-location" className="visually-hidden">Location</label>
+              <Select
+                id="job-location"
+                value={filters.location ?? ''}
+                onChange={(v) => updateFilters({ location: v || undefined, area: undefined })}
+                placeholder="All Oyo State"
+                icon={<MapPin size={18} />}
+                options={[
+                  { value: '', label: 'All Oyo State' },
+                  ...['Ibadan', 'Oyo', 'Ogboroso', 'Saki', 'Kisi', 'Igboho', 'Eruwa', 'Lanlate'].map((loc) => ({
+                    value: loc,
+                    label: loc,
+                  })),
+                ]}
               />
+            </div>
 
-              <JobsSearchRow
-                query={filters.query ?? ''}
-                location={filters.location ?? ''}
-                onQueryChange={(q) => updateFilters({ query: q || undefined })}
-                onLocationChange={(l) =>
-                  updateFilters({ location: l || undefined, area: undefined })
-                }
-              />
+            <button
+              type="button"
+              className="jobs-search-form__filter-btn"
+              onClick={() => setShowFilters(!showFilters)}
+              aria-expanded={showFilters}
+            >
+              <Filter size={18} aria-hidden="true" />
+              <span>Filters</span>
+              {activeFiltersCount > 0 && <span className="jobs-filter-badge">{activeFiltersCount}</span>}
+            </button>
+          </div>
 
-              <JobFilterPills activeType={activeType} onChange={onFilterPillsChange} />
+          {/* Mobile Filter Drawer */}
+          {showFilters && (
+            <div className="jobs-filter-drawer">
+              <div className="jobs-filter-drawer__backdrop" onClick={() => setShowFilters(false)} />
+              <aside className="jobs-filter-drawer__panel" role="dialog" aria-label="Job filters">
+                <div className="jobs-filter-drawer__header">
+                  <h3>Filters</h3>
+                  <button
+                    type="button"
+                    className="jobs-filter-drawer__close"
+                    onClick={() => setShowFilters(false)}
+                    aria-label="Close filters"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="jobs-filter-drawer__body">
+                  <div className="jobs-filter-group">
+                    <label htmlFor="filter-employment" className="jobs-filter-label">Employment Type</label>
+                    <Select
+                      id="filter-employment"
+                      value={activeType}
+                      onChange={(v) => updateFilters({ employmentType: v || undefined })}
+                      placeholder="All types"
+                      options={[
+                        { value: '', label: 'All types' },
+                        ...EMPLOYMENT_TYPES.map((type) => ({
+                          value: type,
+                          label: type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' '),
+                        })),
+                      ]}
+                    />
+                  </div>
 
-              <div className="jobs-results-toolbar">
-                {!loading && (
-                  <span className="results-summary">
-                    {totalItems > 0
-                      ? `Showing ${startIndex}–${endIndex} of ${totalItems} jobs`
-                      : hasAnyFilters
-                        ? '0 jobs found'
-                        : 'No jobs posted yet'}
-                  </span>
-                )}
-                <label htmlFor="jobs-sort" className="visually-hidden">
-                  Sort by
-                </label>
-                <select
-                  id="jobs-sort"
-                  className="input input--select jobs-results-toolbar__sort"
-                  value={sortBy}
-                  onChange={(e) => updateFilters({ sort: e.target.value })}
-                  aria-label="Sort by"
-                >
-                  {JOB_SORT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="jobs-filter-group">
+                    <label htmlFor="filter-category" className="jobs-filter-label">Category</label>
+                    <Select
+                      id="filter-category"
+                      value={filters.category ?? ''}
+                      onChange={(v) => updateFilters({ category: v || undefined })}
+                      placeholder="All categories"
+                      options={[
+                        { value: '', label: 'All categories' },
+                        ...POPULAR_CATEGORIES.map((cat) => ({
+                          value: cat.slug,
+                          label: cat.name,
+                        })),
+                      ]}
+                    />
+                  </div>
 
-              {loading ? (
-                <JobGrid columns={3} loading />
-              ) : totalItems > 0 ? (
-                <>
-                  <JobGrid columns={3} jobs={paginated.items} />
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={paginated.totalPages}
-                    onPageChange={setCurrentPage}
-                  />
-                </>
-              ) : (
-                <EmptyState
-                  icon={<Briefcase size={36} />}
-                  title={hasAnyFilters ? 'No jobs match your search' : 'No jobs posted yet'}
-                  description={
-                    hasAnyFilters
-                      ? 'Try a different keyword, clear some filters, or explore all jobs.'
-                      : 'Be the first to post a job on OyoConnect.'
-                  }
-                  action={
-                    <ButtonLink
-                      to={hasAnyFilters ? '/jobs' : '/jobs/post'}
-                      variant="primary"
-                      size="sm"
+                  <div className="jobs-filter-group">
+                    <label htmlFor="filter-sort" className="jobs-filter-label">Sort By</label>
+                    <Select
+                      id="filter-sort"
+                      value={sortBy}
+                      onChange={(v) => updateFilters({ sort: v })}
+                      placeholder="Newest first"
+                      options={JOB_SORT_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+                    />
+                  </div>
+
+                  {hasAnyFilters && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="md"
+                      fullWidth
+                      className="jobs-filter-drawer__clear"
+                      onClick={clearAllFilters}
                     >
-                      {hasAnyFilters ? 'Clear all filters' : 'Post a job'}
-                    </ButtonLink>
-                  }
-                />
-              )}
+                      Clear all filters
+                    </Button>
+                  )}
+                </div>
+              </aside>
             </div>
-          </div>
-        </div>
-      </section>
+          )}
 
-      <section className="jobs-categories-section" aria-label="Popular job categories">
-        <div className="container">
-          <SectionHeading
-            align="center"
-            title="Popular Job Categories"
-            subtitle="Explore opportunities by category"
-            eyebrow="BROWSE BY CATEGORY"
-          />
-          <div className="job-categories-grid">
-            {POPULAR_CATEGORIES.map((category) => (
-              <JobCategoryCard
-                key={category.slug}
-                category={{
-                  id: category.slug,
-                  name: category.name,
-                  slug: category.slug,
-                  icon: '',
-                  description: '',
-                }}
-                icon={category.icon}
-                jobCount={categoryCounts[category.slug] ?? 0}
-              />
+          {/* Employment Type Pills (Desktop) */}
+          <div className="jobs-type-pills">
+            {EMPLOYMENT_TYPES.map((type) => (
+              <button
+                key={type}
+                type="button"
+                className={`jobs-type-pill ${activeType === type ? 'active' : ''}`}
+                onClick={() => updateFilters({ employmentType: type })}
+              >
+                {type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ')}
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      <JobsNotificationBanner />
-    </main>
+      {/* Featured Jobs */}
+      <section className="jobs-section">
+        <div className="container">
+          <header className="jobs-section__header">
+            <div>
+              <h2 className="jobs-section__title">Featured Opportunities</h2>
+              <p className="jobs-section__subtitle">Hand-picked opportunities from top employers</p>
+            </div>
+            <Link to="/jobs" className="jobs-section__link">
+              View all <ArrowUpRight size={16} aria-hidden="true" />
+            </Link>
+          </header>
+
+          {featuredLoading ? (
+            <div className="jobs-grid" role="status" aria-label="Loading featured jobs">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} variant="skeleton" className="jobs-skeleton-card">
+                  <div />
+                </Card>
+              ))}
+            </div>
+          ) : featuredJobs.length > 0 ? (
+            <div className="jobs-grid" role="list" aria-label="Featured jobs">
+              {featuredJobs.slice(0, 3).map((job) => (
+                <article key={job.id} className="jobs-card" role="listitem">
+                  <div className="jobs-card__header">
+                    <span className="jobs-card__type">{job.employmentType.charAt(0).toUpperCase() + job.employmentType.slice(1).replace('-', ' ')}</span>
+                    {job.featured && <Badge variant="brand" size="sm">Featured</Badge>}
+                  </div>
+                  <h3 className="jobs-card__title">{job.title}</h3>
+                  <div className="jobs-card__company">
+                    <Building2 size={16} aria-hidden="true" />
+                    <span>{job.employerName}</span>
+                  </div>
+                  <div className="jobs-card__meta">
+                    <span className="jobs-card__location">
+                      <MapPin size={14} aria-hidden="true" />
+                      {job.location.town}, {job.location.lga}
+                    </span>
+                    {job.salary?.min && (
+                      <span className="jobs-card__salary">
+                        ₦{job.salary.min.toLocaleString()}+
+                      </span>
+                    )}
+                  </div>
+                  <ButtonLink to={`/jobs/${job.id}`} variant="primary" size="sm" fullWidth className="jobs-card__btn">
+                    View Job
+                  </ButtonLink>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<Briefcase size={48} />}
+              title="No featured jobs at the moment."
+              description="Be the first to showcase a great opportunity!"
+              action={
+                <ButtonLink to="/jobs/post" variant="outline" size="sm">
+                  Post the First Job
+                </ButtonLink>
+              }
+            />
+          )}
+        </div>
+      </section>
+
+      {/* All Jobs */}
+      <section className="jobs-section jobs-section--tinted">
+        <div className="container">
+          <header className="jobs-section__header">
+            <div>
+              <h2 className="jobs-section__title">All Jobs</h2>
+              <p className="jobs-section__subtitle">Search and filter thousands of opportunities across Oyo State.</p>
+            </div>
+          </header>
+
+          {!loading && (
+            <div className="jobs-results-toolbar">
+              <span className="jobs-results-summary">
+                {totalItems > 0
+                  ? `Showing ${startIndex}–${endIndex} of ${totalItems} jobs`
+                  : hasAnyFilters
+                    ? '0 jobs found'
+                    : 'No jobs posted yet'}
+              </span>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="jobs-grid" role="status" aria-label="Loading jobs">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} variant="skeleton" className="jobs-skeleton-card">
+                  <div />
+                </Card>
+              ))}
+            </div>
+          ) : totalItems > 0 ? (
+            <>
+              <div className="jobs-grid" role="list" aria-label="Job listings">
+                {paginated.items.map((job) => (
+                  <article key={job.id} className="jobs-card" role="listitem">
+                    <div className="jobs-card__header">
+                      <span className="jobs-card__type">{job.employmentType.charAt(0).toUpperCase() + job.employmentType.slice(1).replace('-', ' ')}</span>
+                      {job.featured && <Badge variant="brand" size="sm">Featured</Badge>}
+                    </div>
+                    <h3 className="jobs-card__title">{job.title}</h3>
+                    <div className="jobs-card__company">
+                      <Building2 size={16} aria-hidden="true" />
+                      <span>{job.employerName}</span>
+                    </div>
+                    <div className="jobs-card__meta">
+                      <span className="jobs-card__location">
+                        <MapPin size={14} aria-hidden="true" />
+                        {job.location.town}, {job.location.lga}
+                      </span>
+                      {job.salary?.min && (
+                        <span className="jobs-card__salary">
+                          ₦{job.salary.min.toLocaleString()}+
+                        </span>
+                      )}
+                    </div>
+                    <ButtonLink to={`/jobs/${job.id}`} variant="primary" size="sm" fullWidth className="jobs-card__btn">
+                      View Job
+                    </ButtonLink>
+                  </article>
+                ))}
+              </div>
+              {paginated.totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={paginated.totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              )}
+            </>
+          ) : (
+            <EmptyState
+              icon={<Briefcase size={36} />}
+              title={hasAnyFilters ? 'No jobs match your search' : 'No jobs posted yet'}
+              description={
+                hasAnyFilters
+                  ? 'Try a different keyword, clear some filters, or explore all jobs.'
+                  : 'Be the first to post a job on OyoConnect.'
+              }
+              action={
+                <ButtonLink
+                  to={hasAnyFilters ? '/jobs' : '/jobs/post'}
+                  variant="primary"
+                  size="sm"
+                >
+                  {hasAnyFilters ? 'Clear all filters' : 'Post a job'}
+                </ButtonLink>
+              }
+            />
+          )}
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="jobs-section">
+        <div className="container">
+          <header className="jobs-section__header">
+            <div>
+              <span className="jobs-section__eyebrow">BROWSE BY CATEGORY</span>
+              <h2 className="jobs-section__title">Popular Job Categories</h2>
+              <p className="jobs-section__subtitle">Explore opportunities by category</p>
+            </div>
+          </header>
+          <div className="jobs-category-grid" role="list" aria-label="Job categories">
+            {POPULAR_CATEGORIES.map((category) => (
+              <Link
+                key={category.slug}
+                to={`/jobs?category=${category.slug}`}
+                className="jobs-category-card"
+                role="listitem"
+              >
+                <span className="jobs-category-card__icon" aria-hidden="true">
+                  {category.icon}
+                </span>
+                <div className="jobs-category-card__content">
+                  <span className="jobs-category-card__name">{category.name}</span>
+                  <span className="jobs-category-card__count">
+                    {categoryCounts[category.slug] ?? 0} jobs
+                  </span>
+                </div>
+                <ArrowUpRight size={18} className="jobs-category-card__arrow" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
   )
 }
 

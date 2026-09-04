@@ -1,0 +1,100 @@
+/* ==========================================================================
+   CARD — Mobile-first, consistent spacing, 16px border radius
+   ========================================================================== */
+
+.card {
+  border-radius: var(--radius-2xl);
+  transition:
+    box-shadow var(--transition-normal),
+    border-color var(--transition-normal),
+    transform var(--transition-normal);
+}
+
+.card--p-none { padding: 0; }
+.card--p-sm { padding: var(--space-3); }
+.card--p-md { padding: var(--space-4); }
+.card--p-lg { padding: var(--space-5); }
+
+/* Variants */
+.card--default {
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-xs);
+}
+
+.card--default:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card--elevated {
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+}
+
+.card--elevated:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.card--interactive {
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.card--interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--brand-line);
+}
+
+.card--interactive:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.card--skeleton {
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+/* Card sections */
+.card__header {
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.card__footer {
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .card {
+    border-radius: var(--radius-lg);
+  }
+
+  .card--p-md { padding: var(--space-4); }
+  .card--p-lg { padding: var(--space-5); }
+}
+
+/* Dark mode */
+[data-theme="dark"] .card--default,
+[data-theme="dark"] .card--elevated,
+[data-theme="dark"] .card--interactive {
+  background: var(--card);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .card__header,
+[data-theme="dark"] .card__footer {
+  border-color: var(--line);
+}

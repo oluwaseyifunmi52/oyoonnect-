@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, HeartHandshake, Flag, ShieldCheck } from 'lucide-react'
+import { ArrowRight, HeartHandshake, Flag, ShieldCheck, Users, AlertCircle } from 'lucide-react'
 import { formatCurrency } from '../../utils/currency'
 import type { SupportRequest, HelpCategoryType } from '../../types/help'
 import { HELP_CATEGORIES, SUGGESTED_SUPPORT_AMOUNTS } from '../../types/help'
@@ -12,11 +12,7 @@ import {
   HelpIcon,
   StatusBadge,
 } from '../../components/help'
-import { ButtonLink } from '../../components/ui/Button'
-import { SearchInput } from '../../components/ui/SearchInput'
-import { Card } from '../../components/ui/Card'
-import { Badge } from '../../components/ui/Badge'
-import { Skeleton } from '../../components/ui/Skeleton'
+import { Button, ButtonLink, Card, Badge, Skeleton, SearchInput } from '../../components/ui'
 import { helpService } from '../../services/helpService'
 
 const SORT_OPTIONS = [
@@ -124,92 +120,68 @@ export function HelpLandingPage() {
   }
 
   return (
-    <div className="help-page">
-      <div className="help-page__container">
-        <section className="help-hero section--padding">
-          <div className="help-hero__content">
-            <div className="help-hero__trust-indicator">
-              <ShieldCheck size={16} aria-hidden="true" />
-              <span>Requests reviewed before publication</span>
-            </div>
-
-            <h1 className="help-hero__title">OyoConnect Help</h1>
-
-            <p className="help-hero__subtitle">
-              Communities are stronger when we help each other. Connect with verified
-              people in need across Oyo State and make a direct difference.
-            </p>
-
-            <div className="help-hero__actions">
-              <ButtonLink to="/help/request" variant="primary" size="lg">
-                <HelpIcon name="heart" size={20} aria-hidden="true" />
-                Request Help
-              </ButtonLink>
-              <ButtonLink to="/help/requests" variant="secondary" size="lg">
-                <HelpIcon name="users" size={20} aria-hidden="true" />
-                Support Someone
-              </ButtonLink>
-            </div>
+    <>
+      {/* Hero Section */}
+      <section className="help-hero">
+        <div className="help-hero__content">
+          <div className="help-hero__badge">
+            <ShieldCheck size={16} aria-hidden="true" />
+            <span>Requests reviewed before publication</span>
           </div>
 
-          <div className="help-hero__stats">
-            <Card variant="elevated" padding="md" className="help-stat-card">
-              <div className="help-stat-card__icon">
-                <HelpIcon name="alert-circle" size={24} aria-hidden="true" />
-              </div>
-              <div className="help-stat-card__value">—</div>
-              <div className="help-stat-card__label">Active Requests</div>
-            </Card>
-            <Card variant="elevated" padding="md" className="help-stat-card">
-              <div className="help-stat-card__icon">
-                <HelpIcon name="heart" size={24} aria-hidden="true" />
-              </div>
-              <div className="help-stat-card__value">{formatCurrency(0, { compact: true, showDecimals: false })}</div>
-              <div className="help-stat-card__label">Total Support Raised</div>
-            </Card>
-            <Card variant="elevated" padding="md" className="help-stat-card">
-              <div className="help-stat-card__icon">
-                <HelpIcon name="users" size={24} aria-hidden="true" />
-              </div>
-              <div className="help-stat-card__value">—</div>
-              <div className="help-stat-card__label">Community Supporters</div>
-            </Card>
-            <Card variant="elevated" padding="md" className="help-stat-card">
-              <div className="help-stat-card__icon">
-                <HelpIcon name="shield-check" size={24} aria-hidden="true" />
-              </div>
-              <div className="help-stat-card__value">—</div>
-              <div className="help-stat-card__label">Verified Requests</div>
-            </Card>
-          </div>
-        </section>
+          <h1 className="help-hero__title">OyoConnect Help</h1>
 
-        <section className="help-trust section--no-pad" aria-labelledby="trust-heading">
-          <div className="help-trust-grid">
+          <p className="help-hero__description">
+            Connect with verified people in need across Oyo State and make a direct difference.
+          </p>
+
+          <div className="help-hero__actions">
+            <ButtonLink to="/help/request" variant="primary" size="lg" className="help-hero__btn" fullWidth>
+              <HelpIcon name="heart" size={20} aria-hidden="true" />
+              Request Help
+            </ButtonLink>
+            <ButtonLink to="/help/requests" variant="secondary" size="lg" className="help-hero__btn" fullWidth>
+              <HelpIcon name="users" size={20} aria-hidden="true" />
+              Support Someone
+            </ButtonLink>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Indicators */}
+      <section className="help-section">
+        <div className="container">
+          <div className="help-trust-grid" role="list" aria-label="Trust indicators">
             {TRUST_ITEMS.map((item) => {
               const Icon = item.icon
               return (
-                <Card key={item.title} variant="default" padding="md" className="help-trust-item">
-                  <div className="help-trust-icon">
+                <Card key={item.title} variant="default" padding="md" className="help-trust-card" role="listitem">
+                  <div className="help-trust-card__icon">
                     <Icon size={24} aria-hidden="true" />
                   </div>
-                  <h3 className="help-trust__title">{item.title}</h3>
-                  <p className="help-trust__description">{item.description}</p>
+                  <h3 className="help-trust-card__title">{item.title}</h3>
+                  <p className="help-trust-card__description">{item.description}</p>
                 </Card>
               )
             })}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="help-categories section" aria-labelledby="categories-heading">
-          <header className="section-heading section-heading--center">
-            <h2 id="categories-heading" className="section-heading__title">Ways to Help</h2>
-            <p className="section-heading__subtitle">
-              Choose a category that matters to you and support verified needs in your community.
-            </p>
+      {/* Categories */}
+      <section className="help-section help-section--tinted">
+        <div className="container">
+          <header className="help-section__header">
+            <div>
+              <span className="help-section__eyebrow">Ways to Help</span>
+              <h2 className="help-section__title">Choose a category</h2>
+              <p className="help-section__subtitle">
+                Choose a category that matters to you and support verified needs in your community.
+              </p>
+            </div>
           </header>
 
-          <div className="help-categories__grid" role="list" aria-label="Help categories">
+          <div className="help-categories-grid" role="list" aria-label="Help categories">
             {HELP_CATEGORIES.map((category) => (
               <SupportCategoryCard
                 key={category.id}
@@ -220,63 +192,56 @@ export function HelpLandingPage() {
             ))}
           </div>
 
-          <div className="section__action">
-            <Link to="/help/requests" className="btn btn--outline btn--lg help-view-all">
+          <div className="help-section__action">
+            <Link to="/help/requests" className="help-view-all-link">
               Browse All Requests <ArrowRight size={18} aria-hidden="true" />
             </Link>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="help-requests section--tinted" aria-labelledby="requests-heading">
-          <div className="help-requests__header">
+      {/* Featured Requests */}
+      <section className="help-section">
+        <div className="container">
+          <header className="help-section__header">
             <div>
-              <h2 id="requests-heading" className="section-heading__title">Featured Support Requests</h2>
-              <p className="section-heading__subtitle">
+              <h2 className="help-section__title">Featured Support Requests</h2>
+              <p className="help-section__subtitle">
                 Verified requests that currently need community support.
               </p>
             </div>
+            <Link to="/help/requests" className="help-section__link">
+              View all <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          </header>
 
-            <div className="help-requests__controls">
-              <div className="help-requests__search-wrapper">
-                <SearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Search support requests..."
-                  ariaLabel="Search support requests"
-                />
-              </div>
+          <div className="help-requests-toolbar">
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search support requests..."
+              ariaLabel="Search support requests"
+            />
 
-              <div className="help-requests__filters">
-                <select
-                  value={sortBy}
-                  onChange={handleSortChange}
-                  className="help-requests__sort-select"
-                  aria-label="Sort requests"
-                >
-                  {SORT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            <select
+              value={sortBy}
+              onChange={handleSortChange}
+              className="help-sort-select"
+              aria-label="Sort requests"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {isLoading ? (
-            <div className="help-requests__grid" role="list" aria-label="Support requests">
+            <div className="help-requests-grid" role="list" aria-label="Support requests">
               {[...Array(6)].map((_, i) => (
-                <Card key={i} variant="skeleton" className="skeleton-card">
-                  <Skeleton className="skeleton--media" />
-                  <div className="card__body">
-                    <Skeleton className="skeleton--text skeleton--wide" />
-                    <Skeleton className="skeleton--text skeleton--mid" />
-                    <Skeleton className="skeleton--text" />
-                    <div className="card__actions">
-                      <Skeleton className="skeleton--btn" />
-                      <Skeleton className="skeleton--btn" />
-                    </div>
-                  </div>
+                <Card key={i} variant="skeleton" className="help-request-skeleton">
+                  <div />
                 </Card>
               ))}
             </div>
@@ -305,70 +270,79 @@ export function HelpLandingPage() {
               </div>
             </div>
           ) : (
-            <div className="help-requests__grid" role="list" aria-label="Support requests">
-              {filteredRequests.slice(0, 6).map((request) => (
-                <SupportRequestCard
-                  key={request.id}
-                  request={request}
-                  onSupportClick={(req) => {
-                    window.location.href = `/help/requests/${req.id}?support=true`
-                  }}
-                />
-              ))}
-            </div>
-          )}
+            <>
+              <div className="help-requests-grid" role="list" aria-label="Support requests">
+                {filteredRequests.slice(0, 6).map((request) => (
+                  <SupportRequestCard
+                    key={request.id}
+                    request={request}
+                    onSupportClick={(req) => {
+                      window.location.href = `/help/requests/${req.id}?support=true`
+                    }}
+                  />
+                ))}
+              </div>
 
-          {filteredRequests.length > 6 && (
-            <div className="section__action">
-              <Link to="/help/requests" className="btn btn--primary btn--lg">
-                View All Requests <ArrowRight size={18} aria-hidden="true" />
-              </Link>
-            </div>
+              {filteredRequests.length > 6 && (
+                <div className="help-section__action">
+                  <ButtonLink to="/help/requests" variant="primary" size="lg">
+                    View All Requests <ArrowRight size={18} aria-hidden="true" />
+                  </ButtonLink>
+                </div>
+              )}
+            </>
           )}
-        </section>
+        </div>
+      </section>
 
-        <section className="help-how section" aria-labelledby="how-it-works-heading">
-          <header className="section-heading section-heading--center">
-            <h2 id="how-it-works-heading" className="section-heading__title">How It Works</h2>
-            <p className="section-heading__subtitle">
-              A clear process designed to help protect both requesters and supporters.
-            </p>
+      {/* How It Works */}
+      <section className="help-section help-section--tinted">
+        <div className="container">
+          <header className="help-section__header">
+            <div>
+              <span className="help-section__eyebrow">How It Works</span>
+              <h2 className="help-section__title">A clear, safe process</h2>
+              <p className="help-section__subtitle">
+                Designed to help protect both requesters and supporters.
+              </p>
+            </div>
           </header>
 
           <div className="help-steps" role="list">
             {HOW_IT_WORKS_STEPS.map((step, index) => (
               <Card key={step.title} variant="default" padding="md" className="help-step" role="listitem">
-                <div className="help-step__icon">
-                  <span className="help-step__number">{index + 1}</span>
-                </div>
+                <div className="help-step__number">{index + 1}</div>
                 <h3 className="help-step__title">{step.title}</h3>
                 <p className="help-step__description">{step.description}</p>
               </Card>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="help-final-cta section--no-pad" aria-labelledby="cta-heading">
-          <Card variant="elevated" padding="lg" className="help-final-cta__card">
-            <div className="help-final-cta__content">
-              <h2 id="cta-heading" className="help-final-cta__title">Ready to Make a Difference?</h2>
-              <p className="help-final-cta__description">
+      {/* Final CTA */}
+      <section className="help-section help-section--tinted">
+        <div className="container">
+          <Card variant="elevated" padding="lg" className="help-cta-card">
+            <div className="help-cta-card__content">
+              <h2 className="help-cta-card__title">Ready to Make a Difference?</h2>
+              <p className="help-cta-card__description">
                 Explore verified support requests, contribute to a cause that matters to you,
                 or submit a genuine request for review.
               </p>
             </div>
-            <div className="help-final-cta__actions">
-              <Link to="/help/requests" className="btn btn--primary btn--lg">
+            <div className="help-cta-card__actions">
+              <ButtonLink to="/help/requests" variant="primary" size="lg">
                 Browse Requests <ArrowRight size={18} aria-hidden="true" />
-              </Link>
-              <Link to="/help/request" className="btn btn--outline btn--lg">
+              </ButtonLink>
+              <ButtonLink to="/help/request" variant="outline" size="lg">
                 Request Help
-              </Link>
+              </ButtonLink>
             </div>
           </Card>
-        </section>
-      </div>
-    </div>
+        </div>
+      </section>
+    </>
   )
 }
 

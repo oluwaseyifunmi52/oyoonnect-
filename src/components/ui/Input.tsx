@@ -1,4 +1,5 @@
-import type { InputHTMLAttributes, SelectHTMLAttributes, ReactNode, ChangeEvent, TextareaHTMLAttributes } from 'react'
+import type { InputHTMLAttributes, SelectHTMLAttributes, ReactNode, ChangeEvent, TextareaHTMLAttributes, ForwardRefExoticComponent, RefAttributes } from 'react'
+import './Input.css'
 
 interface FieldProps {
   label: string
@@ -29,25 +30,28 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   rightIcon?: ReactNode
 }
 
-export function Input({ label = '', id, className = '', hint, error, icon, rightIcon, ...props }: InputProps) {
-  const inputId = id ?? props.name ?? label
-  const hasIcon = !!icon
-  const hasRight = !!rightIcon
+export const Input = Object.assign(
+  (function Input({ label = '', id, className = '', hint, error, icon, rightIcon, ...props }: InputProps) {
+    const inputId = id ?? props.name ?? label
+    const hasIcon = !!icon
+    const hasRight = !!rightIcon
 
-  return (
-    <Field label={label} htmlFor={inputId} hint={hint} error={error}>
-      {hasIcon || hasRight ? (
-        <div className="input-wrapper">
-          {hasIcon ? <span className="input-icon" aria-hidden="true">{icon}</span> : null}
+    return (
+      <Field label={label} htmlFor={inputId} hint={hint} error={error}>
+        {hasIcon || hasRight ? (
+          <div className="input-wrapper">
+            {hasIcon ? <span className="input-icon" aria-hidden="true">{icon}</span> : null}
+            <input id={inputId} className={`input ${className}`} {...props} />
+            {hasRight ? <span className="input-icon input-icon--right" aria-hidden="true">{rightIcon}</span> : null}
+          </div>
+        ) : (
           <input id={inputId} className={`input ${className}`} {...props} />
-          {hasRight ? <span className="input-icon input-icon--right" aria-hidden="true">{rightIcon}</span> : null}
-        </div>
-      ) : (
-        <input id={inputId} className={`input ${className}`} {...props} />
-      )}
-    </Field>
-  )
-}
+        )}
+      </Field>
+    )
+  }) as ForwardRefExoticComponent<InputProps & RefAttributes<HTMLInputElement>>,
+  { displayName: 'Input' }
+)
 
 export interface SelectOption {
   value: string
@@ -67,29 +71,41 @@ interface SelectProps extends SelectHTMLProps {
   error?: string
 }
 
-export function Select({
-  label,
-  id,
-  className = '',
-  options = [],
-  placeholder = 'Select an option',
-  icon,
-  children,
-  onChange,
-  error,
-  ...props
-}: SelectProps) {
-  const selectId = id ?? props.name ?? label ?? 'select'
-  const hasIcon = !!icon
-  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value
-    if (onChange) onChange(value)
-  }
-  return (
-    <Field label={label ?? ''} htmlFor={selectId} error={error}>
-      {hasIcon ? (
-        <div className="input-wrapper">
-          <span className="input-icon" aria-hidden="true">{icon}</span>
+export const Select = Object.assign(
+  (function Select({
+    label,
+    id,
+    className = '',
+    options = [],
+    placeholder = 'Select an option',
+    icon,
+    children,
+    onChange,
+    error,
+    ...props
+  }: SelectProps) {
+    const selectId = id ?? props.name ?? label ?? 'select'
+    const hasIcon = !!icon
+    const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+      const value = event.target.value
+      if (onChange) onChange(value)
+    }
+    return (
+      <Field label={label ?? ''} htmlFor={selectId} error={error}>
+        {hasIcon ? (
+          <div className="input-wrapper">
+            <span className="input-icon" aria-hidden="true">{icon}</span>
+            <select id={selectId} className={`input input--select ${className}`} onChange={handleChange} {...props}>
+              {placeholder && <option value="">{placeholder}</option>}
+              {options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+              {children}
+            </select>
+          </div>
+        ) : (
           <select id={selectId} className={`input input--select ${className}`} onChange={handleChange} {...props}>
             {placeholder && <option value="">{placeholder}</option>}
             {options.map((option) => (
@@ -99,21 +115,12 @@ export function Select({
             ))}
             {children}
           </select>
-        </div>
-      ) : (
-        <select id={selectId} className={`input input--select ${className}`} onChange={handleChange} {...props}>
-          {placeholder && <option value="">{placeholder}</option>}
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-          {children}
-        </select>
-      )}
-    </Field>
-  )
-}
+        )}
+      </Field>
+    )
+  }) as ForwardRefExoticComponent<SelectProps & RefAttributes<HTMLSelectElement>>,
+  { displayName: 'Select' }
+)
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string
@@ -121,11 +128,14 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: string
 }
 
-export function Textarea({ label, id, className = '', hint, error, ...props }: TextareaProps) {
-  const textareaId = id ?? props.name ?? label
-  return (
-    <Field label={label} htmlFor={textareaId} hint={hint} error={error}>
-      <textarea id={textareaId} className={`input textarea ${className}`} {...props} />
-    </Field>
-  )
-}
+export const Textarea = Object.assign(
+  (function Textarea({ label, id, className = '', hint, error, ...props }: TextareaProps) {
+    const textareaId = id ?? props.name ?? label
+    return (
+      <Field label={label} htmlFor={textareaId} hint={hint} error={error}>
+        <textarea id={textareaId} className={`input textarea ${className}`} {...props} />
+      </Field>
+    )
+  }) as ForwardRefExoticComponent<TextareaProps & RefAttributes<HTMLTextAreaElement>>,
+  { displayName: 'Textarea' }
+)

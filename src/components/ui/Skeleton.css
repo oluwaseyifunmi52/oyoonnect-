@@ -1,0 +1,98 @@
+/* ==========================================================================
+   SKELETON — Mobile-first loading placeholders
+   ========================================================================== */
+
+.skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    100deg,
+    var(--surface-2) 40%,
+    var(--surface-2) 50%,
+    var(--surface-2) 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Variants */
+.skeleton--text {
+  height: 14px;
+  width: 60%;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton--text.skeleton--wide {
+  width: 85%;
+}
+
+.skeleton--text.skeleton--mid {
+  width: 45%;
+}
+
+.skeleton--media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+}
+
+.skeleton--avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.skeleton--btn {
+  height: 48px;
+  width: 96px;
+  border-radius: var(--radius-md);
+}
+
+.skeleton--badge {
+  width: 100px;
+  height: 28px;
+  border-radius: var(--radius-full);
+}
+
+.skeleton--circle {
+  border-radius: 50%;
+}
+
+.skeleton--rect {
+  border-radius: var(--radius-sm);
+}
+
+/* Skeleton card pattern */
+.skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.skeleton-card .skeleton--media {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* Dark mode */
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(
+    100deg,
+    var(--surface-2) 40%,
+    var(--surface-2) 50%,
+    var(--surface-2) 60%
+  );
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--surface-2);
+  }
+}

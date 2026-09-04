@@ -1,0 +1,95 @@
+/* ==========================================================================
+   BADGE — Mobile-first, consistent sizing
+   ========================================================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.badge--sm {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.badge--md {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* Variants */
+.badge--brand {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  border: 1px solid var(--brand-line);
+}
+
+.badge--success {
+  background: var(--success-soft);
+  color: var(--success);
+  border: 1px solid var(--success-line);
+}
+
+.badge--warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border: 1px solid var(--warning-line);
+}
+
+.badge--error {
+  background: var(--error-soft);
+  color: var(--error);
+  border: 1px solid var(--error-line);
+}
+
+.badge--neutral {
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
+.badge--info {
+  background: var(--color-info-subtle, #eff6ff);
+  color: var(--color-info, #0ea5e9);
+  border: 1px solid var(--color-info, #0ea5e9);
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .badge--sm {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+  }
+
+  .badge--md {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-sm);
+  }
+}
+
+/* Dark mode */
+[data-theme="dark"] .badge--brand {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  border-color: var(--brand-line);
+}
+
+[data-theme="dark"] .badge--neutral {
+  background: var(--surface-2);
+  color: var(--muted);
+  border-color: var(--line);
+}

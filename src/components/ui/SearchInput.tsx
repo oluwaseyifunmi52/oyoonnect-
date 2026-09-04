@@ -1,5 +1,6 @@
-import { useState, type KeyboardEvent } from 'react'
+import { useRef, useState, type KeyboardEvent, type ForwardRefExoticComponent, type RefAttributes } from 'react'
 import { Search, X } from 'lucide-react'
+import './SearchInput.css'
 
 interface SearchInputProps {
   value?: string
@@ -10,59 +11,67 @@ interface SearchInputProps {
   disabled?: boolean
   className?: string
   ariaLabel?: string
+  autoFocus?: boolean
 }
 
-export function SearchInput({
-  value = '',
-  placeholder = 'Search...',
-  onChange,
-  onClear,
-  onSearch,
-  disabled = false,
-  className = '',
-  ariaLabel = 'Search',
-}: SearchInputProps) {
-  const [isFocused, setIsFocused] = useState(false)
+export const SearchInput = Object.assign(
+  (function SearchInput({
+    value = '',
+    placeholder = 'Search...',
+    onChange,
+    onClear,
+    onSearch,
+    disabled = false,
+    className = '',
+    ariaLabel = 'Search',
+    autoFocus = false,
+  }: SearchInputProps) {
+    const [isFocused, setIsFocused] = useState(false)
+    const inputRef = useRef<HTMLInputElement>(null)
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && onSearch) {
-      onSearch(value)
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && onSearch) {
+        onSearch(value)
+      }
     }
-  }
 
-  const clear = () => {
-    onChange('')
-    onClear?.()
-  }
+    const clear = () => {
+      onChange('')
+      onClear?.()
+      inputRef.current?.focus()
+    }
 
-  const hasValue = value.length > 0
+    const hasValue = value.length > 0
 
-  return (
-    <div className={`search-input-wrapper ${isFocused ? 'search-input-wrapper--focused' : ''} ${className}`}>
-      <Search size={18} className="search-input__icon" aria-hidden="true" />
-      <input
-        type="search"
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        disabled={disabled}
-        className="search-input__field"
-        aria-label={ariaLabel}
-      />
-      {hasValue && (
-        <button
-          type="button"
-          className="search-input__clear"
-          onClick={clear}
-          aria-label="Clear search"
+    return (
+      <div className={`search-input-wrapper ${isFocused ? 'search-input-wrapper--focused' : ''} ${className}`}>
+        <Search size={20} className="search-input__icon" aria-hidden="true" />
+        <input
+          ref={inputRef}
+          type="search"
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           disabled={disabled}
-        >
-          <X size={14} aria-hidden="true" />
-        </button>
-      )}
-    </div>
-  )
-}
+          autoFocus={autoFocus}
+          className="search-input__field"
+          aria-label={ariaLabel}
+        />
+        {hasValue && !disabled && (
+          <button
+            type="button"
+            className="search-input__clear"
+            onClick={clear}
+            aria-label="Clear search"
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
+        )}
+      </div>
+    )
+  }) as ForwardRefExoticComponent<SearchInputProps & RefAttributes<HTMLDivElement>>,
+  { displayName: 'SearchInput' }
+)

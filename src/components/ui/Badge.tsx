@@ -1,12 +1,31 @@
-import type { ReactNode } from 'react'
+import type { HTMLAttributes, ReactNode, ForwardRefExoticComponent, RefAttributes } from 'react'
+import './Badge.css'
 
-type BadgeTone = 'brand' | 'verified' | 'neutral' | 'success'
+type BadgeVariant = 'brand' | 'success' | 'warning' | 'error' | 'neutral' | 'info'
+type BadgeSize = 'sm' | 'md'
 
-interface BadgeProps {
-  tone?: BadgeTone
+interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+  variant?: BadgeVariant
+  size?: BadgeSize
   children: ReactNode
+  dot?: boolean
 }
 
-export function Badge({ tone = 'neutral', children }: BadgeProps) {
-  return <span className={`badge badge--${tone}`}>{children}</span>
-}
+export const Badge = Object.assign(
+  (function Badge({
+    variant = 'neutral',
+    size = 'md',
+    className = '',
+    children,
+    dot = false,
+    ...props
+  }: BadgeProps) {
+    return (
+      <span className={`badge badge--${variant} badge--${size} ${className}`} {...props}>
+        {dot && <span className="badge__dot" aria-hidden="true" />}
+        {children}
+      </span>
+    )
+  }) as ForwardRefExoticComponent<BadgeProps & RefAttributes<HTMLSpanElement>>,
+  { displayName: 'Badge' }
+)
