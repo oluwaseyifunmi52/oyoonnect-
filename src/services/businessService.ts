@@ -1,201 +1,158 @@
-import type { Business, BusinessFilters, Category, Location, Review } from '../types/business'
-import {
-  businesses,
-  businessById,
-  featuredBusinesses,
-  getBusinessesByOwner,
-  getBusinessesByStatus,
-  getApprovedBusinesses,
-  searchBusinesses,
-  sortBusinesses,
-  paginateBusinesses,
-  getCategoryCounts,
-  getLocationCounts,
-  getBusinessStats,
-  categories,
-  locations,
-} from '../data/businesses'
-import { reviews, getReviewsByBusinessId, calculateAverageRating, getReviewCount as getReviewCountByBusiness, getRatingDistribution, sortReviews } from '../data/reviews'
-
-interface BusinessStats {
-  total: number
-  approved: number
-  verified: number
-  pending: number
-  rejected: number
-  totalViews: number
-  totalMessages?: number
-  totalClicks?: number
-  totalWhatsApp?: number
-}
+import { apiClient, type ApiResponse, ApiError } from './apiClient'
+import type { Business, BusinessFilters, Category, Location, BusinessStats, Review, ReviewStatus } from '../types/business'
 
 interface PaginatedResult<T> {
   items: T[]
   totalPages: number
   totalItems: number
+  currentPage: number
+  itemsPerPage: number
+}
+
+function handleApiResponse<T>(response: ApiResponse<T>): T {
+  if (!response.success) {
+    throw new Error(response.message || 'API request failed')
+  }
+  return response.data
+}
+
+function handleApiError(error: unknown): never {
+  if (error instanceof ApiError) throw error
+  throw new ApiError(0, error instanceof Error ? error.message : 'Network error')
 }
 
 export const businessService = {
   async search(filters: BusinessFilters): Promise<Business[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(searchBusinesses(filters))
-      }, 100)
+    const params = new URLSearchParams()
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '' && value !== false) {
+        params.set(key, String(value))
+      }
     })
+    const response = await apiClient.get<ApiResponse<Business[]>>(`/businesses/search?${params.toString()}`)
+    return handleApiResponse(response)
   },
 
   sort(items: Business[], sortBy: string): Business[] {
-    return sortBusinesses(items, sortBy)
+    const sorted = [...items]
+    switch (sortBy) {
+      case 'rating':
+        return sorted.sort((a, b) => b.rating - a.rating)
+      case 'reviews':
+        return sorted.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0))
+      case 'name':
+        return sorted.sort((a, b) => a.name.localeCompare(b.name))
+      case 'newest':
+        return sorted.sort(
+          (a, b) =>
+            new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
+        )
+      default:
+        return sorted
+    }
   },
 
   paginate<T>(items: T[], page: number, itemsPerPage: number): PaginatedResult<T> {
-    return paginateBusinesses(items, page, itemsPerPage)
+    const totalItems = items.length
+    const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage))
+    const startIndex = (page - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return {
+      items: items.slice(startIndex, endIndex),
+      totalPages,
+      totalItems,
+      currentPage: page,
+      itemsPerPage,
+    }
   },
 
   async getById(id: string): Promise<Business | undefined> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(businessById(id))
-      }, 100)
-    })
+    try {
+      const response = await apiClient.get<ApiResponse<Business>>(`/businesses/${id}`)
+      return handleApiResponse(response)
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) {
+        return undefined
+      }
+      throw error
+    }
   },
 
   async getAll(): Promise<Business[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(businesses)
-      }, 100)
-    })
+    const response = await apiClient.get<ApiResponse<Business[]>>('/businesses')
+    return handleApiResponse(response)
+  },
+
+  async getMyBusinesses(): Promise<Business[]> {
+    const response = await apiClient.get<ApiResponse<Business[]>>('/businesses/my-businesses')
+    return handleApiResponse(response)
   },
 
   async getByOwner(ownerId: string): Promise<Business[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(getBusinessesByOwner(ownerId))
-      }, 100)
-    })
+    const response = await apiClient.get<ApiResponse<Business[]>>(`/businesses/owner/${ownerId}`)
+    return handleApiResponse(response)
   },
 
   async create(data: Partial<Business>): Promise<Business> {
-    const newBusiness: Business = {
-      id: `biz-${Date.now().toString(36)}`,
-      name: data.name || 'Untitled Business',
-      category: data.category || '',
-      location: data.location || '',
-      area: data.area,
-      state: data.state || 'Oyo',
-      rating: data.rating ?? 0,
-      reviewCount: data.reviewCount ?? 0,
-      verified: data.verified ?? false,
-      phone: data.phone || '',
-      whatsapp: data.whatsapp || '',
-      email: data.email,
-      website: data.website,
-      address: data.address || '',
-      description: data.description || '',
-      services: data.services || [],
-      openingHours: data.openingHours || [],
-      image: data.image || '',
-      gallery: data.gallery || [],
-      featured: data.featured ?? false,
-      priceRange: data.priceRange,
-      status: data.status ?? 'pending',
-      ownerId: data.ownerId,
-      createdAt: data.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      logo: data.logo,
-      coverImage: data.coverImage,
-      socialLinks: data.socialLinks,
-      verification: data.verification,
-      busStop: data.busStop,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      locationData: data.locationData,
-      payoutDetails: data.payoutDetails,
-      servicePrices: data.servicePrices,
-      messageCount: data.messageCount ?? 0,
-      phoneClicks: data.phoneClicks ?? 0,
-      whatsappClicks: data.whatsappClicks ?? 0,
-    }
-    return newBusiness
+    const response = await apiClient.post<ApiResponse<Business>>('/businesses', data)
+    return handleApiResponse(response)
   },
 
   async update(id: string, data: Partial<Business>): Promise<Business> {
-    const existing = businessById(id)
-    if (!existing) {
-      throw new Error(`Business with id ${id} not found`)
-    }
-    return { ...existing, ...data, updatedAt: new Date().toISOString() }
+    const response = await apiClient.patch<ApiResponse<Business>>(`/businesses/${id}`, data)
+    return handleApiResponse(response)
   },
 
   async delete(id: string): Promise<void> {
-    const idx = businesses.findIndex((b) => b.id === id)
-    if (idx !== -1) {
-      businesses.splice(idx, 1)
-    }
-  },
-
-  approve(id: string): void {
-    const business = businesses.find((b) => b.id === id)
-    if (business) {
-      business.status = 'approved'
-      business.updatedAt = new Date().toISOString()
-    }
-  },
-
-  verify(id: string): void {
-    const business = businesses.find((b) => b.id === id)
-    if (business) {
-      business.status = 'verified'
-      business.verified = true
-      business.updatedAt = new Date().toISOString()
-    }
-  },
-
-  reject(id: string): void {
-    const business = businesses.find((b) => b.id === id)
-    if (business) {
-      business.status = 'rejected'
-      business.updatedAt = new Date().toISOString()
-    }
-  },
-
-  getCategoryCounts(): Record<string, number> {
-    return getCategoryCounts()
+    const response = await apiClient.delete<ApiResponse<void>>(`/businesses/${id}`)
+    handleApiResponse(response)
   },
 
   async getStats(ownerId: string): Promise<BusinessStats> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const stats = getBusinessStats(ownerId)
-        resolve({
-          ...stats,
-          totalMessages: stats.totalViews,
-          totalClicks: stats.totalViews,
-          totalWhatsApp: stats.totalViews,
-        })
-      }, 100)
-    })
+    const response = await apiClient.get<ApiResponse<BusinessStats>>(`/businesses/stats/${ownerId}`)
+    return handleApiResponse(response)
   },
 
   async getFeatured(): Promise<Business[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(featuredBusinesses())
-      }, 100)
-    })
+    const response = await apiClient.get<ApiResponse<Business[]>>('/businesses/featured')
+    return handleApiResponse(response)
   },
 
   getCategories(): Category[] {
-    return categories
+    return []
+  },
+
+  async fetchCategories(): Promise<Category[]> {
+    const response = await apiClient.get<ApiResponse<Category[]>>('/categories')
+    return handleApiResponse(response)
   },
 
   getLocations(): Location[] {
-    return locations
+    return []
+  },
+
+  async fetchLocations(): Promise<Location[]> {
+    const response = await apiClient.get<ApiResponse<Location[]>>('/locations')
+    return handleApiResponse(response)
   },
 
   getLocationCounts(): Record<string, number> {
-    return getLocationCounts()
+    return {}
+  },
+
+  async approve(id: string): Promise<Business> {
+    const response = await apiClient.patch<ApiResponse<Business>>(`/businesses/${id}/approve`, {})
+    return handleApiResponse(response)
+  },
+
+  async verify(id: string): Promise<Business> {
+    const response = await apiClient.patch<ApiResponse<Business>>(`/businesses/${id}/verify`, {})
+    return handleApiResponse(response)
+  },
+
+  async reject(id: string): Promise<Business> {
+    const response = await apiClient.patch<ApiResponse<Business>>(`/businesses/${id}/reject`, {})
+    return handleApiResponse(response)
   },
 }
 
@@ -228,63 +185,54 @@ export const draftService = {
 
 export const reviewService = {
   async getByBusiness(businessId: string): Promise<Review[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(getReviewsByBusinessId(businessId))
-      }, 100)
-    })
+    const response = await apiClient.get<ApiResponse<Review[]>>(`/businesses/${businessId}/reviews`)
+    return handleApiResponse(response)
   },
 
   async getAverageRating(businessId: string): Promise<number> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const businessReviews = getReviewsByBusinessId(businessId)
-        resolve(calculateAverageRating(businessReviews))
-      }, 100)
-    })
+    const response = await apiClient.get<ApiResponse<{ averageRating: number }>>(`/businesses/${businessId}/reviews/stats`)
+    const data = handleApiResponse(response)
+    return data.averageRating
   },
 
   async getReviewCount(businessId: string): Promise<number> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(getReviewCountByBusiness(businessId))
-      }, 100)
-    })
+    const response = await apiClient.get<ApiResponse<{ reviewCount: number }>>(`/businesses/${businessId}/reviews/count`)
+    const data = handleApiResponse(response)
+    return data.reviewCount
   },
 
   async getRatingDistribution(businessId: string): Promise<Record<number, number>> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const businessReviews = getReviewsByBusinessId(businessId)
-        resolve(getRatingDistribution(businessReviews))
-      }, 100)
-    })
+    const response = await apiClient.get<ApiResponse<Record<number, number>>>(`/businesses/${businessId}/reviews/distribution`)
+    return handleApiResponse(response)
   },
 
-  async addMockReview(review: {
+  async addReview(data: {
     businessId: string
     userName: string
     rating: number
     comment: string
     verified?: boolean
-    status?: Review['status']
   }): Promise<Review> {
-    const newReview: Review = {
-      id: `rev-${Date.now().toString(36)}`,
-      businessId: review.businessId,
-      userName: review.userName,
-      rating: review.rating,
-      comment: review.comment,
-      verified: review.verified ?? false,
-      status: review.status ?? 'pending',
-      createdAt: new Date().toISOString(),
-    }
-    reviews.push(newReview)
-    return newReview
+    const response = await apiClient.post<ApiResponse<Review>>(`/businesses/${data.businessId}/reviews`, {
+      userName: data.userName,
+      rating: data.rating,
+      comment: data.comment,
+    })
+    return handleApiResponse(response)
   },
 
   getSorted(reviews: Review[], sortBy: 'newest' | 'highest' | 'lowest'): Review[] {
-    return sortReviews(reviews, sortBy)
+    const sorted = [...reviews]
+    switch (sortBy) {
+      case 'newest':
+        return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      case 'highest':
+        return sorted.sort((a, b) => b.rating - a.rating)
+      case 'lowest':
+        return sorted.sort((a, b) => a.rating - b.rating)
+      default:
+        return sorted
+    }
   },
 
   getFiltered(reviews: Review[], rating: number | 'all'): Review[] {
@@ -304,12 +252,10 @@ export const favoritesService = {
   },
 
   async getFavoriteBusinesses(): Promise<Business[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const favIds = this.getFavorites()
-        resolve(businesses.filter((b) => favIds.includes(b.id)))
-      }, 100)
-    })
+    const favoriteIds = this.getFavorites()
+    if (favoriteIds.length === 0) return []
+    const response = await apiClient.get<ApiResponse<Business[]>>(`/businesses/favorites?ids=${favoriteIds.join(',')}`)
+    return handleApiResponse(response)
   },
 
   add(businessId: string): void {
@@ -342,4 +288,4 @@ export const favoritesService = {
   },
 }
 
-export const getApprovedBusinessesList = getApprovedBusinesses
+export const getApprovedBusinessesList = businessService.getAll

@@ -129,7 +129,7 @@ function BusinessProfile() {
 
     setSubmittingReview(true)
     try {
-      const newReview = await reviewService.addMockReview({
+      const newReview = await reviewService.addReview({
         businessId: business.id,
         userName: reviewForm.userName.trim(),
         rating: reviewForm.rating,

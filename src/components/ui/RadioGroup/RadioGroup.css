@@ -1,0 +1,123 @@
+/* ==========================================================================
+   RADIO GROUP — Primitive component
+   ========================================================================== */
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.radio-group--inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.radio-group__label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  user-select: none;
+}
+
+.radio__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.radio__circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.radio__circle::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-brand);
+  transform: scale(0);
+  transition: transform var(--transition-fast);
+}
+
+.radio__input:checked + .radio__circle {
+  border-color: var(--color-brand);
+}
+
+.radio__input:checked + .radio__circle::after {
+  transform: scale(1);
+}
+
+.radio__input:focus-visible + .radio__circle {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.radio__input:disabled + .radio__circle {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.radio:hover:not(:has(:disabled)) .radio__circle:not(:has(+ .radio__input:checked)) {
+  border-color: var(--color-brand);
+}
+
+.radio__label {
+  line-height: var(--leading-normal);
+}
+
+/* --- Card-style radio (for category selection) --- */
+.radio--card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--space-4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.radio--card:hover {
+  border-color: var(--color-brand-border);
+  background: var(--color-brand-subtle);
+}
+
+.radio__input:checked + .radio__circle + .radio__card-content .radio--card {
+  border-color: var(--color-brand);
+  background: var(--color-brand-subtle);
+}
+
+.radio--card .radio__circle {
+  display: none;
+}
+
+.radio--card .radio__card-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}

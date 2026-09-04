@@ -10,9 +10,9 @@ const HELP_NAV: { to: string; label: string; icon: typeof HeartHandshake; end?: 
 
 export function HelpLayout() {
   return (
-    <div className="help-layout">
-      <div className="help-layout__bar">
-        <div className="help-layout__bar-inner">
+    <div className="help-layout functional-layout">
+      <header className="help-layout__bar functional-layout__header">
+        <div className="help-layout__bar-inner container">
           <NavLink to="/help" end className="help-layout__brand" aria-label="OyoConnect Help home">
             <Logo subtitle />
           </NavLink>
@@ -25,8 +25,7 @@ export function HelpLayout() {
                   to={item.to}
                   end={item.end}
                   className={({ isActive }) =>
-                    `help-layout__nav-link ${isActive ? 'help-layout__nav-link--active' : ''}`
-                  }
+                    `help-layout__nav-link ${isActive ? 'help-layout__nav-link--active' : ''}`}
                 >
                   <Icon size={16} aria-hidden="true" />
                   <span>{item.label}</span>
@@ -35,8 +34,10 @@ export function HelpLayout() {
             })}
           </nav>
         </div>
-      </div>
-      <Outlet />
+      </header>
+      <main className="functional-layout__main">
+        <Outlet />
+      </main>
     </div>
   )
 }

@@ -20,6 +20,7 @@ export default defineConfig({
       '@context': path.resolve(__dirname, './src/context'),
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@config': path.resolve(__dirname, './src/config'),
+      '@design-system': path.resolve(__dirname, './src/design-system'),
     },
   },
 })

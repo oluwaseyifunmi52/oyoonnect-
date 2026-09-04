@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   User, Phone, Mail, Lock, Building2, MapPin, Plus, Trash2, ArrowLeft, ArrowRight,
   CheckCircle2, AlertCircle, Info, Eye, FolderOpen, ShieldCheck, Image as ImageIcon,
+  Loader2,
 } from 'lucide-react'
 import { Input, Select, Textarea } from '../components/ui/Input'
 import { Button, ButtonLink } from '../components/ui/Button'
@@ -12,6 +13,9 @@ import { MediaUpload } from '../components/business/MediaUpload'
 import type { MediaItem } from '../components/business/MediaUpload'
 import { categories } from '../data/categories'
 import { locations, townsByLocation } from '../data/locations'
+import { businessService } from '../services/businessService'
+import { apiClient } from '../services/apiClient'
+import { useAuth } from '../context/AuthContext'
 
 interface ServiceEntry {
   name: string
@@ -41,12 +45,31 @@ interface WizardData {
   town: string
   area: string
   address: string
+  busStop: string
+  // Opening hours
+  openingHours: Record<
+    string,
+    {
+      open: string
+      close: string
+      closed: boolean
+    }
+  >
   // Step 4 — Services
   services: ServiceEntry[]
   // Step 5 — Media
   logo: MediaItem[]
   cover: MediaItem[]
   photos: MediaItem[]
+  // Social links
+  socialLinks: Record<string, string>
+  // Price range
+  priceRange: '#' | '##' | '###' | '####' | ''
+  // Location coordinates
+  latitude: number
+  longitude: number
+  placeId: string
+  formattedAddress: string
 }
 
 const initialData: WizardData = {
@@ -66,10 +89,26 @@ const initialData: WizardData = {
   town: '',
   area: '',
   address: '',
+  busStop: '',
+  openingHours: {
+    Monday: { open: '09:00', close: '18:00', closed: false },
+    Tuesday: { open: '09:00', close: '18:00', closed: false },
+    Wednesday: { open: '09:00', close: '18:00', closed: false },
+    Thursday: { open: '09:00', close: '18:00', closed: false },
+    Friday: { open: '09:00', close: '18:00', closed: false },
+    Saturday: { open: '09:00', close: '18:00', closed: false },
+    Sunday: { open: '09:00', close: '18:00', closed: true },
+  },
   services: [],
   logo: [],
   cover: [],
   photos: [],
+  socialLinks: {},
+  priceRange: '##',
+  latitude: 0,
+  longitude: 0,
+  placeId: '',
+  formattedAddress: '',
 }
 
 const STEPS = [
@@ -93,6 +132,9 @@ export function BusinessRegistration() {
   const [data, setData] = useState<WizardData>(initialData)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const { user } = useAuth()
 
   const setField = <K extends keyof WizardData>(key: K, value: WizardData[K]) => {
     setData((prev) => ({ ...prev, [key]: value }))
@@ -102,6 +144,16 @@ export function BusinessRegistration() {
       delete next[key as string]
       return next
     })
+  }
+
+  const uploadMedia = async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await apiClient.upload<{ url: string }>('/upload/image', formData)
+    if (!response.success) {
+      throw new Error(response.message || 'Upload failed')
+    }
+    return response.data.url
   }
 
   const categoryOptions = useMemo(
@@ -215,10 +267,78 @@ export function BusinessRegistration() {
     return done
   }, [step])
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!validateStep(6)) return
-    setSubmitted(true)
+    if (!user) {
+      setSubmitError('You must be logged in to register a business')
+      return
+    }
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      const openingHoursArray = Object.entries(data.openingHours).map(([days, hours]) => ({
+        days,
+        hours: hours.closed ? 'Closed' : `${hours.open} - ${hours.close}`,
+      }))
+
+      const servicesWithPrices: Record<string, string> = {}
+      data.services.forEach((service, index) => {
+        if (service.name && service.price) {
+          servicesWithPrices[service.name] = service.price
+        }
+      })
+
+      const businessData = {
+        name: data.businessName,
+        description: data.description,
+        category: data.category,
+        state: data.state,
+        lga: data.lga,
+        town: data.town,
+        area: data.area,
+        busStop: data.busStop || '',
+        address: data.address,
+        phone: data.businessPhone,
+        whatsapp: data.businessPhone,
+        email: data.businessEmail,
+        website: data.website,
+        logo: data.logo[0]?.uploadedUrl || data.logo[0]?.src || '',
+        coverImage: data.cover[0]?.uploadedUrl || data.cover[0]?.src || '',
+        gallery: data.photos.map(p => p.uploadedUrl || p.src),
+        services: data.services.map(s => s.name),
+        servicePrices: servicesWithPrices,
+        openingHours: openingHoursArray,
+        socialLinks: data.socialLinks,
+        priceRange: data.priceRange,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        placeId: data.placeId,
+        formattedAddress: data.formattedAddress,
+        locationData: {
+          state: data.state,
+          lga: data.lga,
+          town: data.town,
+          area: data.area,
+          busStop: data.busStop || '',
+          address: data.address,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          placeId: data.placeId,
+          formattedAddress: data.formattedAddress,
+        },
+        status: 'pending',
+        featured: false,
+      }
+
+      await businessService.create(businessData)
+      setSubmitted(true)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to submit registration. Please try again.'
+      setSubmitError(message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   // Clean up any errors that reference removed services
@@ -232,13 +352,13 @@ export function BusinessRegistration() {
             <div className="success-icon">
               <CheckCircle2 size={48} />
             </div>
-            <h1>Registration Form Ready</h1>
+            <h1>Registration Submitted</h1>
             <p className="business-registration__demo-message">
-              Your business registration form is ready. Backend integration is required to submit and save your information.
+              Your business registration has been submitted for review. You will be notified once it's approved.
             </p>
             <div className="business-registration__demo-actions">
-              <ButtonLink to="/business" variant="outline">Back to Business Portal</ButtonLink>
-              <ButtonLink to="/" variant="primary">Return Home</ButtonLink>
+              <ButtonLink to="/business/dashboard" variant="primary">Go to Dashboard</ButtonLink>
+              <ButtonLink to="/" variant="outline">Return Home</ButtonLink>
             </div>
           </div>
         </div>
@@ -271,14 +391,14 @@ export function BusinessRegistration() {
           className="business-registration__progress"
         />
 
-        {step !== 6 && (
-          <div className="business-registration__demo-note" role="note">
-            <Info size={16} aria-hidden="true" />
-            <span>Frontend preview — your details are held in this browser session only and are not saved.</span>
-          </div>
-        )}
-
         <form onSubmit={step === 6 ? handleSubmit : (e) => e.preventDefault()} className="business-registration__card" noValidate>
+
+        {submitError && (
+            <div className="auth-error" role="alert">
+              <AlertCircle size={18} aria-hidden="true" />
+              <span>{submitError}</span>
+            </div>
+          )}
           {step === 1 && (
             <div className="business-registration__section">
               <h2 className="business-registration__section-title">Owner Details</h2>
@@ -470,19 +590,22 @@ export function BusinessRegistration() {
           {step === 5 && (
             <div className="business-registration__section">
               <h2 className="business-registration__section-title">Business Media</h2>
-              <p className="business-registration__section-hint">Images are previewed locally only and not uploaded anywhere.</p>
+              <p className="business-registration__section-hint">Images will be uploaded to the server when you submit.</p>
               <div className="business-registration__media">
                 <MediaUpload
                   label="Business Logo" variant="single" maxFiles={1} recommended="Square · PNG or JPG"
                   value={data.logo} onChange={(items) => setField('logo', items.slice(-1))}
+                  onUpload={uploadMedia}
                 />
                 <MediaUpload
                   label="Cover Image" variant="single" maxFiles={1} recommended="Wide banner · 1200×400px"
                   value={data.cover} onChange={(items) => setField('cover', items.slice(-1))}
+                  onUpload={uploadMedia}
                 />
                 <MediaUpload
                   label="Business Photos" variant="grid" maxFiles={6} recommended="PNG or JPG"
                   value={data.photos} onChange={(items) => setField('photos', items)}
+                  onUpload={uploadMedia}
                 />
               </div>
             </div>
@@ -589,15 +712,24 @@ export function BusinessRegistration() {
             ) : (
               <p className="business-registration__agree-hint">
                 <ShieldCheck size={16} aria-hidden="true" />
-                Submitting is a frontend preview — no data is sent to a server.
+                By submitting, you agree to our Terms of Service and Privacy Policy.
               </p>
             )}
           </div>
 
           {step === 6 && (
             <div className="business-registration__submit-row">
-              <Button type="submit" variant="primary" size="lg">
-                Submit Registration <ArrowRight size={18} />
+              <Button type="submit" variant="primary" size="lg" disabled={submitting}>
+                {submitting ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    Submit Registration <ArrowRight size={18} />
+                  </>
+                )}
               </Button>
             </div>
           )}

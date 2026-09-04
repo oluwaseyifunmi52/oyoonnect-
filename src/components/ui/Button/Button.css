@@ -1,0 +1,161 @@
+/* ==========================================================================
+   BUTTON — Primitive component
+   ========================================================================== */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-family);
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+
+.button:disabled,
+.button[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* --- Sizes --- */
+.button--sm {
+  height: 36px;
+  padding-inline: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.button--md {
+  height: 44px;
+  padding-inline: var(--space-5);
+  font-size: var(--text-base);
+}
+
+.button--lg {
+  height: 52px;
+  padding-inline: var(--space-6);
+  font-size: var(--text-lg);
+}
+
+/* --- Variants --- */
+
+/* Primary — Main CTA */
+.button--primary {
+  background: var(--color-brand);
+  color: white;
+  box-shadow: 0 2px 8px -2px rgb(15 122 92 / 0.4);
+}
+
+.button--primary:hover:not(:disabled) {
+  background: var(--color-brand-hover);
+  box-shadow: 0 4px 16px -4px rgb(15 122 92 / 0.3);
+}
+
+.button--primary:active:not(:disabled) {
+  background: var(--color-brand-hover);
+  transform: scale(0.98);
+}
+
+/* Secondary — Alternative action */
+.button--secondary {
+  background: var(--color-brand-subtle);
+  color: var(--color-brand);
+  border-color: var(--color-brand-border);
+}
+
+.button--secondary:hover:not(:disabled) {
+  background: var(--color-brand-border);
+  color: var(--color-brand-hover);
+}
+
+/* Outline — Tertiary action */
+.button--outline {
+  background: transparent;
+  color: var(--color-brand);
+  border-color: var(--color-border-strong);
+}
+
+.button--outline:hover:not(:disabled) {
+  background: var(--color-brand-subtle);
+  border-color: var(--color-brand);
+  color: var(--color-brand-hover);
+}
+
+/* Ghost — Minimal action */
+.button--ghost {
+  background: transparent;
+  color: var(--color-brand);
+  border-color: transparent;
+}
+
+.button--ghost:hover:not(:disabled) {
+  background: var(--color-brand-subtle);
+  color: var(--color-brand-hover);
+}
+
+/* Destructive — Dangerous action */
+.button--destructive {
+  background: var(--color-error);
+  color: white;
+  box-shadow: 0 2px 8px -2px rgb(220 38 38 / 0.4);
+}
+
+.button--destructive:hover:not(:disabled) {
+  background: #B91C1C;
+  box-shadow: 0 4px 16px -4px rgb(220 38 38 / 0.3);
+}
+
+/* Success — Positive action (rare) */
+.button--success {
+  background: var(--color-success);
+  color: white;
+  box-shadow: 0 2px 8px -2px rgb(22 163 74 / 0.4);
+}
+
+.button--success:hover:not(:disabled) {
+  background: #15803D;
+  box-shadow: 0 4px 16px -4px rgb(22 163 74 / 0.3);
+}
+
+/* --- Loading state --- */
+.button__spinner {
+  width: 1em;
+  height: 1em;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* --- Full width --- */
+.button--full {
+  width: 100%;
+}
+
+/* --- Icon only --- */
+.button--icon {
+  padding-inline: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.button--icon.button--md {
+  width: 44px;
+  height: 44px;
+}
+
+.button--icon.button--lg {
+  width: 52px;
+  height: 52px;
+}

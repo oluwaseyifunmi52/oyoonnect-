@@ -19,6 +19,7 @@ function SearchResults() {
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const filters: BusinessFilters = useMemo(() => ({
     query: searchParams.get('q') ?? undefined,
@@ -41,12 +42,15 @@ function SearchResults() {
     setCurrentPage(1)
     const loadResults = async () => {
       setLoading(true)
+      setError(null)
       try {
         const businesses = await businessService.search(filters)
         const sorted = businessService.sort(businesses, sortBy)
         setResults(sorted)
         setTotalItems(sorted.length)
-      } catch {
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load search results'
+        setError(message)
         setResults([])
         setTotalItems(0)
       } finally {
@@ -174,7 +178,18 @@ function SearchResults() {
         </aside>
 
         <div className="search-page__results">
-          {loading ? (
+          {error ? (
+            <EmptyState
+              icon={<SearchX size={36} />}
+              title="Unable to load results"
+              description={error}
+              action={
+                <ButtonLink to="/search" variant="primary" onClick={() => window.location.reload()}>
+                  Retry
+                </ButtonLink>
+              }
+            />
+          ) : loading ? (
             <BusinessGrid businesses={[]} loading />
           ) : totalItems > 0 ? (
             <>

@@ -49,7 +49,7 @@ export default function BusinessDashboard() {
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const [business, setBusiness] = useState<Business | null>(null)
+  const [businesses, setBusinesses] = useState<Business[]>([])
 
   useEffect(() => {
     if (!user || !isBusinessOwner) return
@@ -57,10 +57,10 @@ export default function BusinessDashboard() {
     setLoading(true)
     setError(false)
     businessService
-      .getByOwner(user.id)
+      .getMyBusinesses()
       .then((owned) => {
         if (!mounted) return
-        setBusiness(owned[0] ?? null)
+        setBusinesses(owned)
       })
       .catch(() => {
         if (!mounted) return
@@ -95,9 +95,9 @@ export default function BusinessDashboard() {
       {loading ? (
         <DashboardSkeleton cards={4} sections={2} />
       ) : tab === 'overview' ? (
-        <OverviewTab business={business} />
+        <OverviewTab businesses={businesses} />
       ) : tab === 'profile' ? (
-        <ProfileTab business={business} />
+        <ProfileTab businesses={businesses} />
       ) : tab === 'services' ? (
         <ServicesTab />
       ) : (
@@ -107,8 +107,8 @@ export default function BusinessDashboard() {
   )
 }
 
-function OverviewTab({ business }: { business: Business | null }) {
-  if (!business) {
+function OverviewTab({ businesses }: { businesses: Business[] }) {
+  if (businesses.length === 0) {
     return (
       <>
         <DashboardHeader
@@ -118,19 +118,20 @@ function OverviewTab({ business }: { business: Business | null }) {
         <section className="dash-panel">
           <EmptyState
             icon={<Building2 size={32} />}
-            title="Complete your business setup"
-            description="Finish setting up your business to access your Business Dashboard, services, and enquiries."
-            action={<ButtonLink to="/business/register" variant="primary" size="sm">Complete Business Setup</ButtonLink>}
+            title="No businesses yet"
+            description="You haven't added any businesses yet. Get started by creating your first business listing."
+            action={<ButtonLink to="/business/register" variant="primary" size="sm">Add Your First Business</ButtonLink>}
           />
         </section>
       </>
     )
   }
 
-  const firstName = business.name ? business.name.trim().split(/\s+/)[0] : ''
+  const firstBusiness = businesses[0]
+  const firstName = firstBusiness.name ? firstBusiness.name.trim().split(/\s+/)[0] : ''
   const subtitle = firstName
-    ? `Welcome, ${firstName}. Here's how your business is performing.`
-    : "Here's how your business is performing."
+    ? `Welcome, ${firstName}. Here's how your businesses are performing.`
+    : "Here's how your businesses are performing."
 
   return (
     <>
@@ -143,6 +144,28 @@ function OverviewTab({ business }: { business: Business | null }) {
           ))}
         </div>
       </section>
+
+      {businesses.length > 1 && (
+        <section className="dash-section" aria-label="Your Businesses">
+          <h2 className="dash-panel__title">Your Businesses ({businesses.length})</h2>
+          <div className="business-list">
+            {businesses.map((biz) => (
+              <div key={biz.id} className="business-card">
+                <div className="business-card__info">
+                  <h3 className="business-card__name">{biz.name}</h3>
+                  <p className="business-card__category">{biz.category}</p>
+                  <span className={`status-badge status-badge--${biz.status || 'pending'}`}>
+                    {biz.status?.charAt(0).toUpperCase() + biz.status?.slice(1) || 'Pending'}
+                  </span>
+                </div>
+                <div className="business-card__actions">
+                  <ButtonLink to="/business/profile" variant="secondary" size="sm">Manage</ButtonLink>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="dash-section" aria-label="Quick actions">
         <div className="quick-action-grid">
@@ -167,15 +190,15 @@ function OverviewTab({ business }: { business: Business | null }) {
   )
 }
 
-function ProfileTab({ business }: { business: Business | null }) {
-  if (!business) {
+function ProfileTab({ businesses }: { businesses: Business[] }) {
+  if (businesses.length === 0) {
     return (
       <section className="dash-panel">
         <EmptyState
           icon={<Building2 size={32} />}
-          title="Complete your business setup"
-          description="Set up your business profile to manage it from here."
-          action={<ButtonLink to="/business/register" variant="primary" size="sm">Complete Business Setup</ButtonLink>}
+          title="No businesses yet"
+          description="You haven't added any businesses yet. Get started by creating your first business listing."
+          action={<ButtonLink to="/business/register" variant="primary" size="sm">Add Your First Business</ButtonLink>}
         />
       </section>
     )
@@ -183,11 +206,23 @@ function ProfileTab({ business }: { business: Business | null }) {
 
   return (
     <section className="dash-panel">
-      <h2 className="dash-panel__title">{business.name}</h2>
-      <p className="dash-muted">{business.category || 'Business'}</p>
-      {business.description ? <p className="dash-muted">{business.description}</p> : null}
-      <div className="dash-empty__actions">
-        <ButtonLink to="/business/register" variant="secondary" size="sm">Edit Business Profile</ButtonLink>
+      <h2 className="dash-panel__title">My Businesses ({businesses.length})</h2>
+      <div className="business-list">
+        {businesses.map((business) => (
+          <div key={business.id} className="business-card">
+            <div className="business-card__info">
+              <h3 className="business-card__name">{business.name}</h3>
+              <p className="business-card__category">{business.category || 'Business'}</p>
+              {business.description ? <p className="business-card__description">{business.description}</p> : null}
+              <span className={`status-badge status-badge--${business.status || 'pending'}`}>
+                {business.status?.charAt(0).toUpperCase() + business.status?.slice(1) || 'Pending'}
+              </span>
+            </div>
+            <div className="business-card__actions">
+              <ButtonLink to="/business/register" variant="secondary" size="sm">Edit</ButtonLink>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   )

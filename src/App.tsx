@@ -1,10 +1,17 @@
 import { Suspense, useEffect, lazy } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom'
-import { Navbar } from './components/layout/Navbar'
-import { Footer } from './components/layout/Footer'
 import { ProtectedRoute, PublicOnlyRoute, ServicesRoute, ProviderRoute } from './components/common'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
 import { AdminLayout } from './components/admin/AdminLayout'
+import { PublicLayout } from './layouts/PublicLayout'
+import { JobsLayout } from './layouts/JobsLayout'
+import { CommunityLayout } from './layouts/CommunityLayout'
+import { BusinessLayout } from './layouts/BusinessLayout'
+import { UserLayout } from './layouts/UserLayout'
+import { ServicesCustomerLayout } from './layouts/ServicesCustomerLayout'
+import { WalletLayout } from './layouts/WalletLayout'
+import { AffiliateLayout } from './layouts/AffiliateLayout'
+import { MessagesLayout } from './layouts/MessagesLayout'
 
 const Home = lazy(() => import('./pages/Home'))
 const SearchResults = lazy(() => import('./pages/SearchResults'))
@@ -22,7 +29,6 @@ const SettingsAppearance = lazy(() => import('./pages/SettingsAppearance'))
 const SettingsPrivacy = lazy(() => import('./pages/SettingsPrivacy'))
 const SettingsSecurity = lazy(() => import('./pages/SettingsSecurity'))
 const Notifications = lazy(() => import('./pages/Notifications'))
-// Legacy owner/business-office dashboards were consolidated into /business/dashboard.
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const PendingListings = lazy(() => import('./pages/admin/PendingListings'))
 const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'))
@@ -39,10 +45,6 @@ const AdminReports = lazy(() => import('./pages/admin/AdminReports'))
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
 const Categories = lazy(() => import('./pages/Categories'))
 
-// Business Office pages
-// Legacy business-office dashboard consolidated into /business/dashboard.
-
-// New dual-auth pages
 const BusinessPortal = lazy(() => import('./pages/BusinessPortal'))
 const BusinessRegistration = lazy(() => import('./pages/BusinessRegistration'))
 const ServicesDashboard = lazy(() => import('./pages/ServicesDashboard'))
@@ -51,7 +53,6 @@ const UserDashboard = lazy(() => import('./pages/UserDashboard'))
 const Login = lazy(() => import('./pages/Login'))
 const Signup = lazy(() => import('./pages/Signup'))
 
-// Unified 3-account-type pages
 const AccountPage = lazy(() => import('./pages/AccountPage'))
 const ProviderOnboarding = lazy(() => import('./pages/provider/ProviderOnboarding'))
 const ProviderLayout = lazy(() => import('./pages/provider/ProviderLayout'))
@@ -63,22 +64,17 @@ const ServiceDiscovery = lazy(() => import('./pages/services/ServiceDiscovery'))
 const ServiceRequest = lazy(() => import('./pages/services/ServiceRequest'))
 const MyRequests = lazy(() => import('./pages/services/MyRequests'))
 
-// Unauthorized page
 const Unauthorized = lazy(() => import('./pages/Unauthorized'))
 
-// Job pages
 const JobsListing = lazy(() => import('./pages/jobs/JobsListing'))
 const JobDetail = lazy(() => import('./pages/jobs/JobDetail'))
 const PostJob = lazy(() => import('./pages/jobs/PostJob'))
 
-// Job Seeker pages
 const JobSeekerDashboard = lazy(() => import('./pages/job-seeker/JobSeekerDashboard'))
 const JobSeekerLayout = lazy(() => import('./pages/job-seeker/JobSeekerLayout'))
 
-// Hidden transaction features - accessible via direct URL only (Coming Soon)
 const ComingSoon = lazy(() => import('./pages/ComingSoon'))
 
-// Services pages (hidden from main nav, accessible via direct URL)
 const ServicesHome = lazy(() => import('./pages/ServicesHome'))
 const Data = lazy(() => import('./pages/Data'))
 const Airtime = lazy(() => import('./pages/Airtime'))
@@ -90,26 +86,22 @@ const DigitalProducts = lazy(() => import('./pages/DigitalProducts'))
 const Games = lazy(() => import('./pages/Games'))
 const SocialMedia = lazy(() => import('./pages/SocialMedia'))
 
-// Wallet & Transaction pages (hidden from main nav)
 const Wallet = lazy(() => import('./pages/Wallet'))
 const WalletFund = lazy(() => import('./pages/WalletFund'))
 const WalletTransactions = lazy(() => import('./pages/WalletTransactions'))
 const Transactions = lazy(() => import('./pages/Transactions'))
 const TransactionDetail = lazy(() => import('./pages/TransactionDetail'))
 
-// Affiliate/Share & Earn pages (hidden from main nav)
 const AffiliateDashboard = lazy(() => import('./pages/affiliate/AffiliateDashboard'))
 const AffiliateReferrals = lazy(() => import('./pages/affiliate/Referrals'))
 const AffiliateEarnings = lazy(() => import('./pages/affiliate/Earnings'))
 const AffiliateWithdrawals = lazy(() => import('./pages/affiliate/Withdrawals'))
 
-// Community pages
 const CommunityHome = lazy(() => import('./pages/community/CommunityHome'))
 const CommunityCategoryPage = lazy(() => import('./pages/community/CommunityCategoryPage'))
 const CommunityReportForm = lazy(() => import('./pages/community/CommunityReportForm'))
 const CommunityReportDetail = lazy(() => import('./pages/community/CommunityReportDetail'))
 
-// Help/Community Support pages
 const HelpLandingPage = lazy(() => import('./pages/help/HelpLandingPage'))
 const HelpRequestsPage = lazy(() => import('./pages/help/HelpRequestsPage'))
 const RequestHelpPage = lazy(() => import('./pages/help/RequestHelpPage'))
@@ -148,13 +140,11 @@ function App() {
         Skip to main content
       </a>
       <ScrollToTop />
-      <div className="app">
-        <Navbar />
-        <main id="main-content" className="app__main">
-          <Suspense fallback={<PageSkeleton />}>
-            <ErrorBoundary>
-              <Routes>
-              {/* Public routes */}
+      <Suspense fallback={<PageSkeleton />}>
+        <ErrorBoundary>
+          <Routes>
+            {/* PUBLIC LAYOUT - Marketing/Discovery pages with global Navbar */}
+            <Route element={<PublicLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/business/:id" element={<BusinessProfile />} />
@@ -163,31 +153,11 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/list-business" element={<ListBusiness />} />
 
-              {/* Jobs routes */}
-              <Route path="/jobs" element={<JobsListing />} />
-              <Route path="/jobs/:id" element={<JobDetail />} />
-              <Route path="/jobs/post" element={<PostJob />} />
-
-              {/* Community routes */}
-              <Route path="/community" element={<CommunityHome />} />
-              <Route path="/community/report" element={<CommunityReportForm />} />
-              <Route path="/community/report/:id" element={<CommunityReportDetail />} />
-              <Route path="/community/:categorySlug" element={<CommunityCategoryPage />} />
-
-              {/* Unified auth - ONE ACCOUNT */}
+              {/* Auth pages - public */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/signin" element={<Navigate to="/login" replace />} />
-
-              {/* Account selection page (kept for compatibility, now points to unified) */}
               <Route path="/account-selection" element={<Navigate to="/signup" replace />} />
-
-              {/* User Dashboard - role based */}
-              <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
-              <Route path="/user/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
-              <Route path="/user/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-
-              {/* Single sign-in/sign-up system — legacy auth entry points consolidate here */}
               <Route path="/auth" element={<Navigate to="/login" replace />} />
               <Route path="/services/auth" element={<Navigate to="/login" replace />} />
               <Route path="/help/auth" element={<Navigate to="/login" replace />} />
@@ -211,61 +181,55 @@ function App() {
 
               {/* Business Portal (public landing for business owners) */}
               <Route path="/business" element={<BusinessPortal />} />
-
-              {/* Multi-step business registration wizard (frontend-only) */}
               <Route path="/business/register" element={<BusinessRegistration />} />
               <Route path="/business/onboarding" element={<Navigate to="/business/register" replace />} />
 
               {/* Provider onboarding (upgrade existing account) */}
               <Route path="/provider/onboarding" element={<ProtectedRoute><ProviderOnboarding /></ProtectedRoute>} />
+            </Route>
 
-              {/* Provider workspace (requires service_provider role) */}
-              <Route path="/provider" element={<ProviderRoute><ProviderLayout /></ProviderRoute>}>
-                <Route index element={<ProviderDashboard />} />
-                <Route path="dashboard" element={<ProviderDashboard />} />
-                <Route path="profile" element={<ProviderProfile />} />
-                <Route path="services" element={<ProviderServices />} />
-                <Route path="requests" element={<ProviderRequests />} />
-              </Route>
+            {/* JOBS LAYOUT - Jobs discovery and posting */}
+            <Route element={<JobsLayout />}>
+              <Route path="/jobs" element={<JobsListing />} />
+              <Route path="/jobs/:id" element={<JobDetail />} />
+              <Route path="/jobs/post" element={<PostJob />} />
+            </Route>
 
-              {/* Protected user routes (legacy) */}
-              <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/settings/notifications" element={<SettingsNotifications />} />
-                <Route path="/settings/appearance" element={<SettingsAppearance />} />
-                <Route path="/settings/privacy" element={<SettingsPrivacy />} />
-                <Route path="/settings/security" element={<SettingsSecurity />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/saved" element={<SavedBusinesses />} />
-                <Route path="/favorites" element={<SavedBusinesses />} />
+            {/* COMMUNITY LAYOUT - Community features */}
+            <Route element={<CommunityLayout />}>
+              <Route path="/community" element={<CommunityHome />} />
+              <Route path="/community/report" element={<CommunityReportForm />} />
+              <Route path="/community/report/:id" element={<CommunityReportDetail />} />
+              <Route path="/community/:categorySlug" element={<CommunityCategoryPage />} />
+            </Route>
 
-                {/* Job Seeker routes */}
-                <Route element={<ProtectedRoute><JobSeekerLayout /></ProtectedRoute>}>
-                  <Route index element={<JobSeekerDashboard />} />
-                </Route>
+            {/* HELP LAYOUT - Help/Support pages (already has its own layout) */}
+            <Route element={<HelpLayout />}>
+              <Route path="/help" element={<HelpLandingPage />} />
+              <Route path="/help/categories" element={<HelpLandingPage />} />
+              <Route path="/help/requests" element={<HelpRequestsPage />} />
+              <Route path="/help/requests/:id" element={<SupportRequestDetailsPage />} />
+              <Route path="/help/request/:id" element={<SupportRequestDetailsPage />} />
+              <Route
+                path="/help/request"
+                element={
+                  <ProtectedRoute>
+                    <RequestHelpPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/help/request/success"
+                element={
+                  <ProtectedRoute>
+                    <RequestSuccessPage />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
 
-                {/* Unified account & service-request routes */}
-                <Route path="/account" element={<AccountPage />} />
-                <Route path="/my-requests" element={<MyRequests />} />
-
-                {/* Hidden transaction features - Coming Soon pages */}
-                <Route path="/messages" element={<ComingSoon feature="Messages" description="Direct messages from businesses and support are being developed. You'll be able to chat securely from this dashboard." />} />
-                <Route path="/wallet" element={<ComingSoon feature="Wallet" description="Wallet functionality is being developed. You'll be able to manage funds, track transactions, and make payments securely." />} />
-                <Route path="/wallet/fund" element={<ComingSoon feature="Wallet Funding" description="Add funds to your wallet using multiple payment methods." />} />
-                <Route path="/wallet/transactions" element={<ComingSoon feature="Wallet Transactions" description="View your complete transaction history." />} />
-                <Route path="/transactions" element={<ComingSoon feature="Transactions" description="View all your platform transactions in one place." />} />
-                <Route path="/transactions/:id" element={<ComingSoon feature="Transaction Details" description="View detailed information about a specific transaction." />} />
-
-                {/* Affiliate/Share & Earn routes - Coming Soon */}
-                <Route path="/affiliate" element={<ComingSoon feature="Affiliate Dashboard" description="Track your referrals, earnings, and withdrawals." />} />
-                <Route path="/affiliate/referrals" element={<ComingSoon feature="Referrals" description="View and manage your referral network." />} />
-                <Route path="/affiliate/earnings" element={<ComingSoon feature="Earnings" description="Track your affiliate earnings and commissions." />} />
-                <Route path="/affiliate/withdrawals" element={<ComingSoon feature="Withdrawals" description="Request withdrawals of your affiliate earnings." />} />
-
-              </Route>
-
-              {/* Services hub — find & request local services (customer-facing) */}
+            {/* SERVICES CUSTOMER LAYOUT - Customer-facing services */}
+            <Route element={<ServicesCustomerLayout />}>
               <Route path="/services" element={<ServiceDiscovery />} />
               <Route path="/services/request" element={<ServiceRequest />} />
               <Route element={<ServicesRoute><Outlet /></ServicesRoute>}>
@@ -284,8 +248,10 @@ function App() {
                 <Route path="/services/transactions" element={<ComingSoon feature="Transactions" description="View your transaction history." />} />
                 <Route path="/services/profile" element={<Profile />} />
               </Route>
+            </Route>
 
-              {/* Business owner frontend preview routes */}
+            {/* BUSINESS LAYOUT - Business owner dashboard/workspace */}
+            <Route element={<ProtectedRoute><BusinessLayout /></ProtectedRoute>}>
               <Route path="/business/dashboard" element={<BusinessDashboard />} />
               <Route path="/business/profile" element={<BusinessDashboard />} />
               <Route path="/business/services" element={<BusinessDashboard />} />
@@ -296,68 +262,96 @@ function App() {
               <Route path="/business/analytics" element={<BusinessDashboard />} />
               <Route path="/business/verification" element={<BusinessDashboard />} />
               <Route path="/business/settings" element={<BusinessDashboard />} />
+            </Route>
 
-              {/* Legacy owner / business-office dashboards consolidated into the single Business Dashboard */}
-              <Route path="/owner/dashboard" element={<Navigate to="/business/dashboard" replace />} />
-              <Route path="/owner/listings" element={<Navigate to="/business/dashboard" replace />} />
-              <Route path="/owner/add-business" element={<Navigate to="/business/register" replace />} />
-              <Route path="/owner/listings/:id/edit" element={<Navigate to="/business/dashboard" replace />} />
-              <Route path="/business-office" element={<Navigate to="/business/dashboard" replace />} />
-              <Route path="/business-office/profile" element={<Navigate to="/business/dashboard" replace />} />
-              <Route path="/business-office/work" element={<Navigate to="/business/dashboard" replace />} />
-              <Route path="/business-office/jobs" element={<Navigate to="/business/dashboard" replace />} />
+            {/* USER LAYOUT - User dashboard/profile/settings */}
+            <Route element={<ProtectedRoute><UserLayout /></ProtectedRoute>}>
+              <Route path="/dashboard" element={<UserDashboard />} />
+              <Route path="/user/dashboard" element={<UserDashboard />} />
+              <Route path="/user/profile" element={<Profile />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/settings/notifications" element={<SettingsNotifications />} />
+              <Route path="/settings/appearance" element={<SettingsAppearance />} />
+              <Route path="/settings/privacy" element={<SettingsPrivacy />} />
+              <Route path="/settings/security" element={<SettingsSecurity />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/saved" element={<SavedBusinesses />} />
+              <Route path="/favorites" element={<SavedBusinesses />} />
+              <Route path="/account" element={<AccountPage />} />
+              <Route path="/my-requests" element={<MyRequests />} />
+            </Route>
 
-              {/* Admin frontend preview routes */}
-              <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/register" element={<AdminRegister />} />
-              <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-              <Route path="/admin/businesses" element={<AdminLayout><AdminBusinesses /></AdminLayout>} />
-              <Route path="/admin/listings" element={<Navigate to="/admin/businesses" replace />} />
-              <Route path="/admin/categories" element={<AdminLayout><AdminCategories /></AdminLayout>} />
-              <Route path="/admin/verification" element={<AdminLayout><AdminVerification /></AdminLayout>} />
-              <Route path="/admin/jobs" element={<AdminLayout><AdminJobs /></AdminLayout>} />
-              <Route path="/admin/job-categories" element={<AdminLayout><AdminJobCategories /></AdminLayout>} />
-              <Route path="/admin/community" element={<AdminLayout><AdminCommunity /></AdminLayout>} />
-              <Route path="/admin/help" element={<AdminLayout><AdminHelp /></AdminLayout>} />
-              <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
-              <Route path="/admin/reports" element={<AdminLayout><AdminReports /></AdminLayout>} />
-              <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
+            {/* WALLET LAYOUT - Wallet and transactions */}
+            <Route element={<ProtectedRoute><WalletLayout /></ProtectedRoute>}>
+              <Route path="/wallet" element={<ComingSoon feature="Wallet" description="Wallet functionality is being developed. You'll be able to manage funds, track transactions, and make payments securely." />} />
+              <Route path="/wallet/fund" element={<ComingSoon feature="Wallet Funding" description="Add funds to your wallet using multiple payment methods." />} />
+              <Route path="/wallet/transactions" element={<ComingSoon feature="Wallet Transactions" description="View your complete transaction history." />} />
+              <Route path="/transactions" element={<ComingSoon feature="Transactions" description="View all your platform transactions in one place." />} />
+              <Route path="/transactions/:id" element={<ComingSoon feature="Transaction Details" description="View detailed information about a specific transaction." />} />
+            </Route>
 
-                {/* Help/Community Support routes - nested under shared layout */}
-                <Route path="/help" element={<HelpLayout />}>
-                  <Route index element={<HelpLandingPage />} />
-                  <Route path="categories" element={<HelpLandingPage />} />
-                  <Route path="requests" element={<HelpRequestsPage />} />
-                  <Route path="requests/:id" element={<SupportRequestDetailsPage />} />
-                  <Route path="request/:id" element={<SupportRequestDetailsPage />} />
-                  <Route
-                    path="request"
-                    element={
-                      <ProtectedRoute>
-                        <RequestHelpPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="request/success"
-                    element={
-                      <ProtectedRoute>
-                        <RequestSuccessPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                </Route>
+            {/* AFFILIATE LAYOUT - Affiliate/Share & Earn */}
+            <Route element={<ProtectedRoute><AffiliateLayout /></ProtectedRoute>}>
+              <Route path="/affiliate" element={<ComingSoon feature="Affiliate Dashboard" description="Track your referrals, earnings, and withdrawals." />} />
+              <Route path="/affiliate/referrals" element={<ComingSoon feature="Referrals" description="View and manage your referral network." />} />
+              <Route path="/affiliate/earnings" element={<ComingSoon feature="Earnings" description="Track your affiliate earnings and commissions." />} />
+              <Route path="/affiliate/withdrawals" element={<ComingSoon feature="Withdrawals" description="Request withdrawals of your affiliate earnings." />} />
+            </Route>
 
-              {/* Legal pages */}
-              <Route path="/unauthorized" element={<Unauthorized />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            </ErrorBoundary>
-          </Suspense>
-        </main>
-        <Footer />
-      </div>
+            {/* MESSAGES LAYOUT - Messages */}
+            <Route element={<ProtectedRoute><MessagesLayout /></ProtectedRoute>}>
+              <Route path="/messages" element={<ComingSoon feature="Messages" description="Direct messages from businesses and support are being developed. You'll be able to chat securely from this dashboard." />} />
+            </Route>
+
+            {/* PROVIDER WORKSPACE - Service provider workspace */}
+            <Route path="/provider" element={<ProviderRoute><ProviderLayout /></ProviderRoute>}>
+              <Route index element={<ProviderDashboard />} />
+              <Route path="dashboard" element={<ProviderDashboard />} />
+              <Route path="profile" element={<ProviderProfile />} />
+              <Route path="services" element={<ProviderServices />} />
+              <Route path="requests" element={<ProviderRequests />} />
+            </Route>
+
+            {/* JOB SEEKER WORKSPACE - Job seeker dashboard */}
+            <Route element={<ProtectedRoute><JobSeekerLayout /></ProtectedRoute>}>
+              <Route path="/job-seeker" element={<JobSeekerDashboard />} />
+              <Route index element={<JobSeekerDashboard />} />
+            </Route>
+
+            {/* ADMIN LAYOUT - Admin dashboard (already has its own layout) */}
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/register" element={<AdminRegister />} />
+            <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+            <Route path="/admin/businesses" element={<AdminLayout><AdminBusinesses /></AdminLayout>} />
+            <Route path="/admin/listings" element={<Navigate to="/admin/businesses" replace />} />
+            <Route path="/admin/categories" element={<AdminLayout><AdminCategories /></AdminLayout>} />
+            <Route path="/admin/verification" element={<AdminLayout><AdminVerification /></AdminLayout>} />
+            <Route path="/admin/jobs" element={<AdminLayout><AdminJobs /></AdminLayout>} />
+            <Route path="/admin/job-categories" element={<AdminLayout><AdminJobCategories /></AdminLayout>} />
+            <Route path="/admin/community" element={<AdminLayout><AdminCommunity /></AdminLayout>} />
+            <Route path="/admin/help" element={<AdminLayout><AdminHelp /></AdminLayout>} />
+            <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
+            <Route path="/admin/reports" element={<AdminLayout><AdminReports /></AdminLayout>} />
+            <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
+
+            {/* Legacy owner / business-office dashboards consolidated */}
+            <Route path="/owner/dashboard" element={<Navigate to="/business/dashboard" replace />} />
+            <Route path="/owner/listings" element={<Navigate to="/business/dashboard" replace />} />
+            <Route path="/owner/add-business" element={<Navigate to="/business/register" replace />} />
+            <Route path="/owner/listings/:id/edit" element={<Navigate to="/business/dashboard" replace />} />
+            <Route path="/business-office" element={<Navigate to="/business/dashboard" replace />} />
+            <Route path="/business-office/profile" element={<Navigate to="/business/dashboard" replace />} />
+            <Route path="/business-office/work" element={<Navigate to="/business/dashboard" replace />} />
+            <Route path="/business-office/jobs" element={<Navigate to="/business/dashboard" replace />} />
+
+            {/* Legal pages */}
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </ErrorBoundary>
+      </Suspense>
     </BrowserRouter>
   )
 }

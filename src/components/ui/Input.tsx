@@ -52,6 +52,7 @@ export function Input({ label = '', id, className = '', hint, error, icon, right
 export interface SelectOption {
   value: string
   label: string
+  icon?: ReactNode
 }
 
 type SelectHTMLProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, 'children' | 'onChange'>

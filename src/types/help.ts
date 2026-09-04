@@ -13,6 +13,8 @@ export interface HelpCategory {
   icon: string
   description: string
   color: string
+  value: HelpCategoryType
+  label: string
 }
 
 export type SupportRequestStatus =
@@ -224,49 +226,63 @@ export const HELP_CATEGORIES: HelpCategory[] = [
     name: 'School Fees',
     icon: 'graduation-cap',
     description: 'Help students cover tuition, school charges, books, or other approved education expenses.',
-    color: '#3b82f6'
+    color: '#3b82f6',
+    value: 'school-fees',
+    label: 'School Fees'
   },
   {
     id: 'emergency-rent',
     name: 'Emergency Rent',
     icon: 'home',
     description: 'Support someone facing an urgent housing or rent situation.',
-    color: '#f59e0b'
+    color: '#f59e0b',
+    value: 'emergency-rent',
+    label: 'Emergency Rent'
   },
   {
     id: 'medical-emergency',
     name: 'Medical & Emergency Support',
     icon: 'heart-pulse',
     description: 'Help with verified medical expenses or urgent emergency needs.',
-    color: '#ef4444'
+    color: '#ef4444',
+    value: 'medical-emergency',
+    label: 'Medical & Emergency Support'
   },
   {
     id: 'small-business',
     name: 'Small Business Support',
     icon: 'briefcase',
     description: 'Help someone start or restart a small business and become financially independent.',
-    color: '#10b981'
+    color: '#10b981',
+    value: 'small-business',
+    label: 'Small Business Support'
   },
   {
     id: 'tools-equipment',
     name: 'Tools & Work Equipment',
     icon: 'wrench',
     description: 'Help skilled workers get the tools or equipment they need to work and earn.',
-    color: '#8b5cf6'
+    color: '#8b5cf6',
+    value: 'tools-equipment',
+    label: 'Tools & Work Equipment'
   },
   {
     id: 'family-emergency',
     name: 'Family Emergency',
     icon: 'users',
     description: 'Support families facing genuine unexpected financial difficulties.',
-    color: '#ec4899'
+    color: '#ec4899',
+    value: 'family-emergency',
+    label: 'Family Emergency'
   },
   {
     id: 'other-emergency',
     name: 'Other Genuine Emergencies',
     icon: 'alert-triangle',
     description: 'Request community support for another serious and genuine emergency.',
-    color: '#64748b'
+    color: '#64748b',
+    value: 'other-emergency',
+    label: 'Other Genuine Emergencies'
   }
 ]
 

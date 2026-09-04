@@ -55,7 +55,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <main className="page admin-dashboard">
       <div className="container">
-        <div className="admin-layout">
+        <div className="admin-layout functional-layout">
           <aside className={`admin-sidebar ${sidebarOpen ? 'admin-sidebar--open' : ''}`}>
             <div className="admin-sidebar__brand">
               <div className="admin-sidebar__logo" aria-hidden="true">

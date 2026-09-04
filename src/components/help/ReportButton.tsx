@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Flag, Send, AlertCircle, CheckCircle } from 'lucide-react'
 import { Modal } from '../common/Modal'
 import { Button } from '../ui/Button'
+import { FormField } from '../ui/FormField'
+import { Input } from '../ui/Input'
 
 type ReportReason = 'fraud' | 'misleading' | 'inappropriate' | 'duplicate' | 'other'
 
@@ -135,10 +137,12 @@ export function ReportButton({ requestId, requestTitle, onReport }: ReportButton
             </div>
           </fieldset>
 
-          <div className="report-button__field">
-            <label htmlFor="report-details" className="report-button__field-label">
-              Additional details (optional)
-            </label>
+          <FormField
+            label="Additional details (optional)"
+            htmlFor="report-details"
+            hint="Provide any additional information that will help our review team..."
+            error={submitStatus === 'error' ? 'Failed to submit report. Please try again.' : undefined}
+          >
             <textarea
               id="report-details"
               value={details}
@@ -150,7 +154,7 @@ export function ReportButton({ requestId, requestTitle, onReport }: ReportButton
               disabled={isSubmitting}
             />
             <span className="report-button__char-count">{details.length}/500</span>
-          </div>
+          </FormField>
 
           <div className="modal-footer">
             <Button
@@ -170,13 +174,6 @@ export function ReportButton({ requestId, requestTitle, onReport }: ReportButton
               {isSubmitting ? 'Submitting...' : 'Submit Report'}
             </Button>
           </div>
-
-          {submitStatus === 'error' && (
-            <p className="report-button__error" role="alert">
-              <AlertCircle size={16} aria-hidden="true" />
-              Failed to submit report. Please try again.
-            </p>
-          )}
         </form>
       </Modal>
     </div>

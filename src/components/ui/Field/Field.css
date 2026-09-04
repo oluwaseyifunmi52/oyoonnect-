@@ -1,0 +1,193 @@
+/* ==========================================================================
+   FIELD — Label + Input wrapper
+   ========================================================================== */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field__label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.field__hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.field__error {
+  font-size: var(--text-xs);
+  color: var(--color-error);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.field--error .field__input,
+.field--error .field__select,
+.field--error .field__textarea {
+  border-color: var(--color-error);
+}
+
+.field--error .field__input:focus,
+.field--error .field__select:focus,
+.field--error .field__textarea:focus {
+  box-shadow: 0 0 0 3px var(--color-error-subtle);
+}
+
+/* --- Input wrapper (for icons) --- */
+.field__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field__icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-subtle);
+  pointer-events: none;
+  z-index: 1;
+  transition: color var(--transition-fast);
+}
+
+.field__icon--leading {
+  left: var(--space-3);
+}
+
+.field__icon--trailing {
+  right: var(--space-3);
+}
+
+.field__input--with-leading {
+  padding-left: 44px;
+}
+
+.field__input--with-trailing {
+  padding-right: 44px;
+}
+
+.field__wrapper:focus-within .field__icon {
+  color: var(--color-brand);
+}
+
+/* ==========================================================================
+   INPUT — Base input styles
+   ========================================================================== */
+
+.field__input,
+.field__select,
+.field__textarea {
+  width: 100%;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.field__input::placeholder,
+.field__textarea::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.field__input:hover,
+.field__select:hover,
+.field__textarea:hover {
+  border-color: var(--color-border-strong);
+}
+
+.field__input:focus,
+.field__select:focus,
+.field__textarea:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px rgb(15 122 92 / 0.15);
+}
+
+.field__input:disabled,
+.field__select:disabled,
+.field__textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--color-surface);
+}
+
+/* --- Sizes --- */
+.field__input--sm,
+.field__select--sm,
+.field__textarea--sm {
+  height: 36px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.field__input--md,
+.field__select--md,
+.field__textarea--md {
+  height: 44px;
+  padding: 0 var(--space-4);
+  font-size: var(--text-base);
+}
+
+.field__input--lg,
+.field__select--lg,
+.field__textarea--lg {
+  height: 52px;
+  padding: 0 var(--space-5);
+  font-size: var(--text-lg);
+}
+
+/* --- Select --- */
+.field__select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.field__select:disabled {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* --- Textarea --- */
+.field__textarea {
+  min-height: 120px;
+  padding: var(--space-3) var(--space-4);
+  resize: vertical;
+  line-height: var(--leading-relaxed);
+}
+
+/* --- Password toggle --- */
+.field__password-toggle {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.field__password-toggle:hover {
+  color: var(--color-brand);
+  background: var(--color-brand-subtle);
+}

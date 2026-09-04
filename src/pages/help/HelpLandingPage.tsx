@@ -14,6 +14,9 @@ import {
 } from '../../components/help'
 import { ButtonLink } from '../../components/ui/Button'
 import { SearchInput } from '../../components/ui/SearchInput'
+import { Card } from '../../components/ui/Card'
+import { Badge } from '../../components/ui/Badge'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { helpService } from '../../services/helpService'
 
 const SORT_OPTIONS = [
@@ -150,34 +153,34 @@ export function HelpLandingPage() {
           </div>
 
           <div className="help-hero__stats">
-            <div className="help-stat-card">
+            <Card variant="elevated" padding="md" className="help-stat-card">
               <div className="help-stat-card__icon">
                 <HelpIcon name="alert-circle" size={24} aria-hidden="true" />
               </div>
               <div className="help-stat-card__value">—</div>
               <div className="help-stat-card__label">Active Requests</div>
-            </div>
-            <div className="help-stat-card">
+            </Card>
+            <Card variant="elevated" padding="md" className="help-stat-card">
               <div className="help-stat-card__icon">
                 <HelpIcon name="heart" size={24} aria-hidden="true" />
               </div>
               <div className="help-stat-card__value">{formatCurrency(0, { compact: true, showDecimals: false })}</div>
               <div className="help-stat-card__label">Total Support Raised</div>
-            </div>
-            <div className="help-stat-card">
+            </Card>
+            <Card variant="elevated" padding="md" className="help-stat-card">
               <div className="help-stat-card__icon">
                 <HelpIcon name="users" size={24} aria-hidden="true" />
               </div>
               <div className="help-stat-card__value">—</div>
               <div className="help-stat-card__label">Community Supporters</div>
-            </div>
-            <div className="help-stat-card">
+            </Card>
+            <Card variant="elevated" padding="md" className="help-stat-card">
               <div className="help-stat-card__icon">
                 <HelpIcon name="shield-check" size={24} aria-hidden="true" />
               </div>
               <div className="help-stat-card__value">—</div>
               <div className="help-stat-card__label">Verified Requests</div>
-            </div>
+            </Card>
           </div>
         </section>
 
@@ -186,13 +189,13 @@ export function HelpLandingPage() {
             {TRUST_ITEMS.map((item) => {
               const Icon = item.icon
               return (
-                <div key={item.title} className="help-trust-item">
+                <Card key={item.title} variant="default" padding="md" className="help-trust-item">
                   <div className="help-trust-icon">
                     <Icon size={24} aria-hidden="true" />
                   </div>
                   <h3 className="help-trust__title">{item.title}</h3>
                   <p className="help-trust__description">{item.description}</p>
-                </div>
+                </Card>
               )
             })}
           </div>
@@ -261,7 +264,22 @@ export function HelpLandingPage() {
           </div>
 
           {isLoading ? (
-            <LoadingState variant="list" count={6} />
+            <div className="help-requests__grid" role="list" aria-label="Support requests">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} variant="skeleton" className="skeleton-card">
+                  <Skeleton className="skeleton--media" />
+                  <div className="card__body">
+                    <Skeleton className="skeleton--text skeleton--wide" />
+                    <Skeleton className="skeleton--text skeleton--mid" />
+                    <Skeleton className="skeleton--text" />
+                    <div className="card__actions">
+                      <Skeleton className="skeleton--btn" />
+                      <Skeleton className="skeleton--btn" />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
           ) : error ? (
             <ErrorState
               title="Unable to Load Requests"
@@ -319,19 +337,19 @@ export function HelpLandingPage() {
 
           <div className="help-steps" role="list">
             {HOW_IT_WORKS_STEPS.map((step, index) => (
-              <div key={step.title} className="help-step" role="listitem">
+              <Card key={step.title} variant="default" padding="md" className="help-step" role="listitem">
                 <div className="help-step__icon">
                   <span className="help-step__number">{index + 1}</span>
                 </div>
                 <h3 className="help-step__title">{step.title}</h3>
                 <p className="help-step__description">{step.description}</p>
-              </div>
+              </Card>
             ))}
           </div>
         </section>
 
         <section className="help-final-cta section--no-pad" aria-labelledby="cta-heading">
-          <div className="help-final-cta__card">
+          <Card variant="elevated" padding="lg" className="help-final-cta__card">
             <div className="help-final-cta__content">
               <h2 id="cta-heading" className="help-final-cta__title">Ready to Make a Difference?</h2>
               <p className="help-final-cta__description">
@@ -347,7 +365,7 @@ export function HelpLandingPage() {
                 Request Help
               </Link>
             </div>
-          </div>
+          </Card>
         </section>
       </div>
     </div>

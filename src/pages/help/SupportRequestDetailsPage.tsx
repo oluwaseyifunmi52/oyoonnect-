@@ -28,6 +28,7 @@ import { Modal } from '../../components/common/Modal'
 import { helpService } from '../../services/helpService'
 import { notificationService } from '../../services/notificationService'
 import { PLATFORM_FEE_PERCENTAGE, PAYMENT_GATEWAY_FEE_PERCENTAGE } from '../../types/help'
+import { Card } from '../../components/ui/Card'
 
 const SUGGESTED_AMOUNTS = [1000, 2000, 5000, 10000]
 
@@ -91,7 +92,6 @@ export function SupportRequestDetailsPage() {
           : null,
       )
 
-      // Create notification for the requester
       notificationService.addNotification({
         category: 'account',
         title: 'New Support Received',
@@ -201,39 +201,41 @@ export function SupportRequestDetailsPage() {
             <section className="support-details__progress" aria-labelledby="progress-heading">
               <h2 id="progress-heading" className="support-details__section-title">Funding Progress</h2>
 
-              <ProgressBar
-                value={request.amountRaised}
-                max={request.targetAmount}
-                showPercentage
-                showLabels
-                size="lg"
-              />
+              <Card variant="default" padding="md">
+                <ProgressBar
+                  value={request.amountRaised}
+                  max={request.targetAmount}
+                  showPercentage
+                  showLabels
+                  size="lg"
+                />
+              </Card>
 
               <div className="support-details__progress-stats">
-                <div className="support-details__stat">
+                <Card variant="default" padding="md" className="support-details__stat">
                   <span className="support-details__stat-value">{formatCurrency(request.amountRaised)}</span>
                   <span className="support-details__stat-label">Raised</span>
-                </div>
-                <div className="support-details__stat">
+                </Card>
+                <Card variant="default" padding="md" className="support-details__stat">
                   <span className="support-details__stat-value">{formatCurrency(request.targetAmount)}</span>
                   <span className="support-details__stat-label">Target</span>
-                </div>
-                <div className="support-details__stat">
+                </Card>
+                <Card variant="default" padding="md" className="support-details__stat">
                   <span className="support-details__stat-value">{percentage}%</span>
                   <span className="support-details__stat-label">Funded</span>
-                </div>
-                <div className="support-details__stat">
+                </Card>
+                <Card variant="default" padding="md" className="support-details__stat">
                   <span className="support-details__stat-value">{request.supportersCount}</span>
                   <span className="support-details__stat-label">Supporters</span>
-                </div>
+                </Card>
               </div>
             </section>
 
             <section className="support-details__story" aria-labelledby="story-heading">
               <h2 id="story-heading" className="support-details__section-title">The Story</h2>
-              <div className="support-details__story-content">
+              <Card variant="default" padding="md" className="support-details__story-content">
                 <p>{request.fullStory}</p>
-              </div>
+              </Card>
             </section>
 
             {request.updates && request.updates.length > 0 && (
@@ -241,7 +243,7 @@ export function SupportRequestDetailsPage() {
                 <h2 id="updates-heading" className="support-details__section-title">Updates</h2>
                 <div className="support-details__updates-list">
                   {request.updates.map((update) => (
-                    <article key={update.id} className="support-details__update">
+                    <Card key={update.id} variant="default" padding="md" className="support-details__update">
                       <div className="support-details__update-header">
                         <img
                           src={update.authorAvatar || ''}
@@ -256,7 +258,7 @@ export function SupportRequestDetailsPage() {
                         </div>
                       </div>
                       <p className="support-details__update-content">{update.content}</p>
-                    </article>
+                    </Card>
                   ))}
                 </div>
               </section>
@@ -285,38 +287,38 @@ export function SupportRequestDetailsPage() {
             <section className="support-details__safety" aria-labelledby="safety-heading">
               <h2 id="safety-heading" className="support-details__section-title">Safety & Verification</h2>
               <div className="support-details__safety-grid">
-                <div className="support-details__safety-item">
+                <Card variant="default" padding="md" className="support-details__safety-item">
                   <Shield size={24} aria-hidden="true" />
                   <h3>Reviewed Before Publication</h3>
                   <p>This request was reviewed by our team before going live. Documents and details were verified.</p>
-                </div>
-                <div className="support-details__safety-item">
+                </Card>
+                <Card variant="default" padding="md" className="support-details__safety-item">
                   <AlertCircle size={24} aria-hidden="true" />
                   <h3>Verification ≠ Guarantee</h3>
                   <p>
                     Verification confirms documents were reviewed, but does not guarantee every claim is 100%
                     accurate.
                   </p>
-                </div>
-                <div className="support-details__safety-item">
+                </Card>
+                <Card variant="default" padding="md" className="support-details__safety-item">
                   <CheckCircle size={24} aria-hidden="true" />
                   <h3>Report Concerns</h3>
                   <p>See something suspicious? Use the report button. We investigate every report promptly.</p>
-                </div>
-                <div className="support-details__safety-item">
+                </Card>
+                <Card variant="default" padding="md" className="support-details__safety-item">
                   <ExternalLink size={24} aria-hidden="true" />
                   <h3>Never Share Sensitive Info</h3>
                   <p>
                     OyoConnect will never ask for passwords, PINs, OTPs, or card security information.
                   </p>
-                </div>
+                </Card>
               </div>
               <ReportButton requestId={request.id} requestTitle={request.title} />
             </section>
           </main>
 
           <aside className="support-details__sidebar" aria-labelledby="support-heading">
-            <div className="support-details__support-panel">
+            <Card variant="elevated" padding="lg" className="support-details__support-panel">
               <h2 id="support-heading" className="support-details__panel-title">
                 Support This Request
               </h2>
@@ -346,8 +348,8 @@ export function SupportRequestDetailsPage() {
                       {daysLeft === 0
                         ? 'Deadline today'
                         : daysLeft === 1
-                          ? '1 day left'
-                          : `${daysLeft} days left`}
+                        ? '1 day left'
+                        : `${daysLeft} days left`}
                     </span>
                   </div>
 
@@ -398,9 +400,9 @@ export function SupportRequestDetailsPage() {
                   Share
                 </button>
               </div>
-            </div>
+            </Card>
 
-            <div className="support-details__info-panel">
+            <Card variant="default" padding="md" className="support-details__info-panel">
               <h3 className="support-details__info-title">Request Details</h3>
               <dl className="support-details__info-list">
                 <div className="support-details__info-row">
@@ -431,7 +433,7 @@ export function SupportRequestDetailsPage() {
                   </dd>
                 </div>
               </dl>
-            </div>
+            </Card>
           </aside>
         </div>
       </div>

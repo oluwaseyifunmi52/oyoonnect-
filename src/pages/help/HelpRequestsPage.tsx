@@ -11,6 +11,9 @@ import {
 } from '../../components/help'
 import { SearchInput } from '../../components/ui/SearchInput'
 import { Select } from '../../components/ui/Input'
+import { Card } from '../../components/ui/Card'
+import { Badge } from '../../components/ui/Badge'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { helpService } from '../../services/helpService'
 
 const SORT_OPTIONS = [
@@ -19,9 +22,9 @@ const SORT_OPTIONS = [
   { value: 'most-supported', label: 'Most Supported' },
   { value: 'verified', label: 'Verified' },
   { value: 'urgent', label: 'Urgent' },
-] as const
+]
 
-const CATEGORY_OPTIONS: Array<{ value: string; label: string; icon?: string }> = [
+const CATEGORY_OPTIONS = [
   { value: 'all', label: 'All Categories' },
   ...HELP_CATEGORIES.map((c) => ({ value: c.id, label: c.name, icon: c.icon })),
 ]
@@ -166,7 +169,7 @@ export function HelpRequestsPage() {
                 onChange={handleSortChange}
                 aria-label="Sort requests"
                 className="help-requests__sort-select"
-                options={SORT_OPTIONS as unknown as { value: string; label: string }[]}
+                options={SORT_OPTIONS}
               />
 
               {hasActiveFilters && (
@@ -184,7 +187,22 @@ export function HelpRequestsPage() {
         </div>
 
         {isLoading ? (
-          <LoadingState variant="list" count={6} />
+          <div className="help-requests__grid" role="list" aria-label="Support requests">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} variant="skeleton" className="skeleton-card">
+                <Skeleton className="skeleton--media" />
+                <div className="card__body">
+                  <Skeleton className="skeleton--text skeleton--wide" />
+                  <Skeleton className="skeleton--text skeleton--mid" />
+                  <Skeleton className="skeleton--text" />
+                  <div className="card__actions">
+                    <Skeleton className="skeleton--btn" />
+                    <Skeleton className="skeleton--btn" />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         ) : error ? (
           <ErrorState title="Unable to Load Requests" message={error} onRetry={loadRequests} />
         ) : filteredRequests.length === 0 ? (

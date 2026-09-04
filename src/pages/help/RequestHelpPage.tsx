@@ -6,11 +6,13 @@ import { formatCurrency } from '../../utils/currency'
 import { Button } from '../../components/ui/Button'
 import { Input, Select } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
+import { FormField } from '../../components/ui/FormField'
+import { Card } from '../../components/ui/Card'
 import { ProgressBar, HelpIcon } from '../../components/help'
 import { helpService } from '../../services/helpService'
 import { notificationService } from '../../services/notificationService'
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg']
 
 export function RequestHelpPage() {
@@ -77,7 +79,6 @@ export function RequestHelpPage() {
         }
         break
       case 'evidence':
-        // Documents are optional but if provided, validate them
         if (data.documents.length > 0) {
           const invalidFiles = data.documents.filter(f =>
             f.size > MAX_FILE_SIZE || !ALLOWED_FILE_TYPES.includes(f.type)
@@ -88,7 +89,6 @@ export function RequestHelpPage() {
         }
         break
       case 'review':
-        // No additional validation for review step
         break
     }
 
@@ -118,10 +118,10 @@ export function RequestHelpPage() {
 
   const handleVerifyBank = async () => {
     if (!formData.bankAccount) return
-    
+
     setIsVerifyingBank(true)
     setBankVerificationError(null)
-    
+
     try {
       const result = await helpService.verifyBankAccount(formData.bankAccount)
       if (result.success) {
@@ -148,7 +148,6 @@ export function RequestHelpPage() {
 
   const handleInputChange = (field: keyof RequestHelpFormData, value: string | number | File[] | BankVerificationRequest) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-    // Clear error for this field when user types
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }))
     }
@@ -167,7 +166,6 @@ export function RequestHelpPage() {
     const newFiles = [...formData.documents, ...validFiles].slice(0, 10)
     setFormData(prev => ({ ...prev, documents: newFiles }))
 
-    // Create previews for images
     validFiles.forEach(file => {
       if (file.type.startsWith('image/')) {
         const reader = new FileReader()
@@ -190,21 +188,18 @@ export function RequestHelpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validate all steps
     let allErrors: Partial<Record<keyof RequestHelpFormData, string>> = {}
     REQUEST_HELP_STEPS.forEach(step => {
       const stepErrors = validateStep(step.id, formData)
       allErrors = { ...allErrors, ...stepErrors }
     })
 
-    // Also check bank verification status
     if (bankVerificationStatus !== 'verified') {
       allErrors.bankAccount = 'Bank account must be verified before submitting'
     }
 
     if (Object.keys(allErrors).length > 0) {
       setErrors(allErrors)
-      // Go to first step with error
       const firstErrorStep = REQUEST_HELP_STEPS.find(step =>
         Object.keys(validateStep(step.id, formData)).length > 0
       )
@@ -236,7 +231,6 @@ export function RequestHelpPage() {
       const created = await helpService.createRequest(requestData)
       await helpService.submitForReview(created.id)
 
-      // Create notification for the requester
       notificationService.addNotification({
         category: 'account',
         title: 'Help Request Submitted',
@@ -269,7 +263,6 @@ export function RequestHelpPage() {
   return (
     <div className="request-help-page">
       <div className="container request-help-page__container">
-        {/* Progress Indicator */}
         <nav className="form-progress" aria-label="Request help progress">
           <ol className="form-progress-list">
             {REQUEST_HELP_STEPS.map((step, index) => (
@@ -296,7 +289,7 @@ export function RequestHelpPage() {
         </nav>
 
         {submitStatus === 'success' && (
-          <div className="request-help-page__success" role="alert">
+          <Card variant="elevated" padding="lg" className="request-help-page__success" role="alert">
             <div className="request-help-page__success-icon">
               <Check size={48} aria-hidden="true" />
             </div>
@@ -314,12 +307,11 @@ export function RequestHelpPage() {
                 Browse Other Requests
               </Link>
             </div>
-          </div>
+          </Card>
         )}
 
         {submitStatus !== 'success' && (
           <form onSubmit={handleSubmit} className="request-help-page__form" noValidate>
-            {/* Step 1: Category */}
             {currentStep === 'category' && (
               <fieldset className="request-help-step" aria-labelledby="step-category-title">
                 <legend id="step-category-title" className="request-help-step__legend">
@@ -346,8 +338,8 @@ export function RequestHelpPage() {
                         aria-label={category.name}
                       />
                        <div className="request-help-step__category-icon" style={{ backgroundColor: `${category.color}15`, color: category.color }}>
-                         <HelpIcon name={category.icon} size={28} aria-hidden="true" />
-                       </div>
+                        <HelpIcon name={category.icon} size={28} aria-hidden="true" />
+                      </div>
                       <h4 className="request-help-step__category-name">{category.name}</h4>
                       <p className="request-help-step__category-desc">{category.description}</p>
                     </label>
@@ -373,7 +365,6 @@ export function RequestHelpPage() {
               </fieldset>
             )}
 
-            {/* Step 2: Details */}
             {currentStep === 'details' && (
               <fieldset className="request-help-step" aria-labelledby="step-details-title">
                 <legend id="step-details-title" className="request-help-step__legend">
@@ -384,19 +375,30 @@ export function RequestHelpPage() {
                   Be honest and specific. Supporters want to understand your situation clearly.
                 </p>
 
-                <Input
+                <FormField
                   label="Request Title"
-                  name="title"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="e.g., Final Year Tuition - University of Ibadan"
-                  error={errors.title}
+                  htmlFor="title"
                   hint="A clear, specific title helps supporters understand your need at a glance"
+                  error={errors.title}
                   required
-                />
+                >
+                  <Input
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={(e) => handleInputChange('title', e.target.value)}
+                    placeholder="e.g., Final Year Tuition - University of Ibadan"
+                    required
+                  />
+                </FormField>
 
-                <div className="field">
-                  <label htmlFor="fullStory" className="field__label">Explain Your Situation <span className="required" aria-hidden="true">*</span></label>
+                <FormField
+                  label="Explain Your Situation"
+                  htmlFor="fullStory"
+                  hint="Minimum 50 characters. This will be shown publicly if your request is approved."
+                  error={errors.fullStory}
+                  required
+                >
                   <textarea
                     id="fullStory"
                     name="fullStory"
@@ -407,62 +409,80 @@ export function RequestHelpPage() {
                     rows={8}
                     required
                   />
-                  {errors.fullStory ? (
-                    <p className="field__error"><AlertCircle size={14} aria-hidden="true" /> {errors.fullStory}</p>
-                  ) : (
-                    <p className="field__hint">Minimum 50 characters. This will be shown publicly if your request is approved.</p>
-                  )}
-                </div>
+                </FormField>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                  <Input
+                  <FormField
                     label="Amount Required (₦)"
-                    name="targetAmount"
-                    type="number"
-                    inputMode="numeric"
-                    min="1000"
-                    step="1000"
-                    value={formData.targetAmount || ''}
-                    onChange={(e) => handleInputChange('targetAmount', parseInt(e.target.value) || 0)}
-                    placeholder="e.g., 350000"
-                    error={errors.targetAmount}
+                    htmlFor="targetAmount"
                     hint="Minimum ₦1,000. Be realistic about what you need."
+                    error={errors.targetAmount}
                     required
-                  />
+                  >
+                    <Input
+                      id="targetAmount"
+                      name="targetAmount"
+                      type="number"
+                      inputMode="numeric"
+                      min="1000"
+                      step="1000"
+                      value={formData.targetAmount || ''}
+                      onChange={(e) => handleInputChange('targetAmount', parseInt(e.target.value) || 0)}
+                      placeholder="e.g., 350000"
+                      required
+                    />
+                  </FormField>
 
-                  <Input
+                  <FormField
                     label="Deadline"
-                    name="deadline"
-                    type="date"
-                    value={formData.deadline}
-                    onChange={(e) => handleInputChange('deadline', e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    max={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                    error={errors.deadline}
+                    htmlFor="deadline"
                     hint="When do you need the funds by? Max 1 year."
+                    error={errors.deadline}
                     required
-                  />
+                  >
+                    <Input
+                      id="deadline"
+                      name="deadline"
+                      type="date"
+                      value={formData.deadline}
+                      onChange={(e) => handleInputChange('deadline', e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      max={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                      required
+                    />
+                  </FormField>
                 </div>
 
-                <Input
+                <FormField
                   label="Location"
-                  name="location"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange('location', e.target.value)}
-                  placeholder="e.g., Ibadan, Oyo State (Area/LGA)"
-                  error={errors.location}
+                  htmlFor="location"
                   hint="Your city/town and state. This helps local supporters find you."
+                  error={errors.location}
                   required
-                />
+                >
+                  <Input
+                    id="location"
+                    name="location"
+                    value={formData.location}
+                    onChange={(e) => handleInputChange('location', e.target.value)}
+                    placeholder="e.g., Ibadan, Oyo State (Area/LGA)"
+                    required
+                  />
+                </FormField>
 
-                <Input
+                <FormField
                   label="Optional Supporting Information"
-                  name="supportingInfo"
-                  value={formData.supportingInfo}
-                  onChange={(e) => handleInputChange('supportingInfo', e.target.value)}
-                  placeholder="Any additional context: medical report reference, business registration number, etc."
+                  htmlFor="supportingInfo"
                   hint="This is not shown publicly but helps our verification team"
-                />
+                >
+                  <Input
+                    id="supportingInfo"
+                    name="supportingInfo"
+                    value={formData.supportingInfo}
+                    onChange={(e) => handleInputChange('supportingInfo', e.target.value)}
+                    placeholder="Any additional context: medical report reference, business registration number, etc."
+                  />
+                </FormField>
 
                 <div className="request-help-step__actions">
                   <Button type="button" variant="secondary" onClick={handleBack}>
@@ -476,7 +496,6 @@ export function RequestHelpPage() {
               </fieldset>
             )}
 
-            {/* Step 3: Bank Details */}
             {currentStep === 'bank' && (
               <fieldset className="request-help-step" aria-labelledby="step-bank-title">
                 <legend id="step-bank-title" className="request-help-step__legend">
@@ -496,57 +515,76 @@ export function RequestHelpPage() {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                  <Select
+                  <FormField
                     label="Bank"
-                    name="bankCode"
-                    value={formData.bankAccount?.bankCode || ''}
-                    onChange={(value) => handleInputChange('bankAccount', { ...formData.bankAccount, bankCode: value } as BankVerificationRequest)}
-                    placeholder="Select your bank"
-                    required
-                    options={[
-                      { value: '035', label: 'Wema Bank' },
-                      { value: '044', label: 'Access Bank' },
-                      { value: '058', label: 'GTBank' },
-                      { value: '057', label: 'Zenith Bank' },
-                      { value: '011', label: 'First Bank' },
-                      { value: '070', label: 'Fidelity Bank' },
-                      { value: '214', label: 'First City Monument Bank' },
-                      { value: '033', label: 'United Bank for Africa' },
-                      { value: '050', label: 'EcoBank' },
-                      { value: '221', label: 'Stanbic IBTC Bank' },
-                      { value: '063', label: 'Diamond Bank' },
-                      { value: '068', label: 'Standard Chartered Bank' },
-                      { value: '232', label: 'Sterling Bank' },
-                      { value: '032', label: 'Union Bank' },
-                      { value: '215', label: 'Unity Bank' },
-                    ]}
-                  />
-
-                  <Input
-                    label="Account Number"
-                    name="accountNumber"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={10}
-                    value={formData.bankAccount?.accountNumber || ''}
-                    onChange={(e) => handleInputChange('bankAccount', { ...formData.bankAccount, accountNumber: e.target.value } as BankVerificationRequest)}
-                    placeholder="10-digit account number"
+                    htmlFor="bankCode"
                     error={errors.bankAccount}
-                    hint="Your 10-digit NUBAN account number"
                     required
-                  />
+                  >
+                    <Select
+                      id="bankCode"
+                      name="bankCode"
+                      value={formData.bankAccount?.bankCode || ''}
+                      onChange={(value) => handleInputChange('bankAccount', { ...formData.bankAccount, bankCode: value } as BankVerificationRequest)}
+                      placeholder="Select your bank"
+                      required
+                      options={[
+                        { value: '035', label: 'Wema Bank' },
+                        { value: '044', label: 'Access Bank' },
+                        { value: '058', label: 'GTBank' },
+                        { value: '057', label: 'Zenith Bank' },
+                        { value: '011', label: 'First Bank' },
+                        { value: '070', label: 'Fidelity Bank' },
+                        { value: '214', label: 'First City Monument Bank' },
+                        { value: '033', label: 'United Bank for Africa' },
+                        { value: '050', label: 'EcoBank' },
+                        { value: '221', label: 'Stanbic IBTC Bank' },
+                        { value: '063', label: 'Diamond Bank' },
+                        { value: '068', label: 'Standard Chartered Bank' },
+                        { value: '232', label: 'Sterling Bank' },
+                        { value: '032', label: 'Union Bank' },
+                        { value: '215', label: 'Unity Bank' },
+                      ]}
+                    />
+                  </FormField>
+
+                  <FormField
+                    label="Account Number"
+                    htmlFor="accountNumber"
+                    hint="Your 10-digit NUBAN account number"
+                    error={errors.bankAccount}
+                    required
+                  >
+                    <Input
+                      id="accountNumber"
+                      name="accountNumber"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={10}
+                      value={formData.bankAccount?.accountNumber || ''}
+                      onChange={(e) => handleInputChange('bankAccount', { ...formData.bankAccount, accountNumber: e.target.value } as BankVerificationRequest)}
+                      placeholder="10-digit account number"
+                      required
+                    />
+                  </FormField>
                 </div>
 
-                <Input
+                <FormField
                   label="Account Name"
-                  name="accountName"
-                  value={formData.bankAccount?.accountName || ''}
-                  onChange={(e) => handleInputChange('bankAccount', { ...formData.bankAccount, accountName: e.target.value } as BankVerificationRequest)}
-                  placeholder="As it appears on your bank account"
-                  error={errors.bankAccount}
+                  htmlFor="accountName"
                   hint="This must match the name on your bank account for verification"
+                  error={errors.bankAccount}
                   required
-                />
+                >
+                  <Input
+                    id="accountName"
+                    name="accountName"
+                    value={formData.bankAccount?.accountName || ''}
+                    onChange={(e) => handleInputChange('bankAccount', { ...formData.bankAccount, accountName: e.target.value } as BankVerificationRequest)}
+                    placeholder="As it appears on your bank account"
+                    required
+                  />
+                </FormField>
 
                 {bankVerificationStatus === 'verification_pending' && (
                   <div className="request-help-step__verification-status">
@@ -596,7 +634,6 @@ export function RequestHelpPage() {
               </fieldset>
             )}
 
-            {/* Step 4: Evidence */}
             {currentStep === 'evidence' && (
               <fieldset className="request-help-step" aria-labelledby="step-evidence-title">
                 <legend id="step-evidence-title" className="request-help-step__legend">
@@ -616,26 +653,33 @@ export function RequestHelpPage() {
                   </div>
                 </div>
 
-                <div className="request-help-step__dropzone">
-                  <input
-                    type="file"
-                    id="documents"
-                    name="documents"
-                    multiple
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={handleFileChange}
-                    className="request-help-step__file-input"
-                    aria-describedby="file-hint"
-                    disabled={isSubmitting}
-                  />
-                  <label htmlFor="documents" className="request-help-step__dropzone-label">
-                    <Upload size={32} aria-hidden="true" />
-                    <span>Click or drag files here</span>
-                    <span id="file-hint" className="request-help-step__file-hint">
-                      PDF, JPG, PNG up to 5MB each. Max 10 files.
-                    </span>
-                  </label>
-                </div>
+                <FormField
+                  label="Upload Documents"
+                  htmlFor="documents"
+                  hint="PDF, JPG, PNG up to 5MB each. Max 10 files."
+                  error={errors.documents}
+                >
+                  <div className="request-help-step__dropzone">
+                    <input
+                      type="file"
+                      id="documents"
+                      name="documents"
+                      multiple
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={handleFileChange}
+                      className="request-help-step__file-input"
+                      aria-describedby="file-hint"
+                      disabled={isSubmitting}
+                    />
+                    <label htmlFor="documents" className="request-help-step__dropzone-label">
+                      <Upload size={32} aria-hidden="true" />
+                      <span>Click or drag files here</span>
+                      <span id="file-hint" className="request-help-step__file-hint">
+                        PDF, JPG, PNG up to 5MB each. Max 10 files.
+                      </span>
+                    </label>
+                  </div>
+                </FormField>
 
                 {formData.documents.length > 0 && (
                   <div className="request-help-step__files" role="list" aria-label="Uploaded documents">
@@ -661,13 +705,6 @@ export function RequestHelpPage() {
                   </div>
                 )}
 
-                {errors.documents && (
-                  <p className="request-help-step__error" role="alert">
-                    <AlertCircle size={16} aria-hidden="true" />
-                    {errors.documents}
-                  </p>
-                )}
-
                 <div className="request-help-step__actions">
                   <Button type="button" variant="secondary" onClick={handleBack}>
                     <ChevronLeft size={18} aria-hidden="true" />
@@ -680,7 +717,6 @@ export function RequestHelpPage() {
               </fieldset>
             )}
 
-            {/* Step 5: Review */}
             {currentStep === 'review' && (
               <fieldset className="request-help-step" aria-labelledby="step-review-title">
                 <legend id="step-review-title" className="request-help-step__legend">
@@ -691,7 +727,7 @@ export function RequestHelpPage() {
                   Please review your request carefully before submitting. You can go back to edit any section.
                 </p>
 
-                <div className="request-help-step__review">
+                <Card variant="default" padding="md" className="request-help-step__review">
                   <div className="request-help-step__review-section">
                     <h4 className="request-help-step__review-heading">Category</h4>
                     <Badge tone="brand">{formData.category ? formatCategoryName(formData.category) : 'Not selected'}</Badge>
@@ -738,7 +774,7 @@ export function RequestHelpPage() {
                       <p>{formData.documents.length > 0 ? `${formData.documents.length} file(s) attached` : 'No documents'}</p>
                     </div>
                   </div>
-                </div>
+                </Card>
 
                 <div className="request-help-step__important-notice">
                   <Shield size={20} aria-hidden="true" />
@@ -749,10 +785,15 @@ export function RequestHelpPage() {
                   </div>
                 </div>
 
-                <div className="request-help-step__confirm">
+                <FormField
+                  label=""
+                  htmlFor="confirm"
+                  className="request-help-step__confirm"
+                >
                   <label className="request-help-step__confirm-label">
                     <input
                       type="checkbox"
+                      id="confirm"
                       checked={confirmed}
                       onChange={(e) => setConfirmed(e.target.checked)}
                       className="request-help-step__confirm-input"
@@ -762,7 +803,7 @@ export function RequestHelpPage() {
                       read the platform's support and verification guidelines.
                     </span>
                   </label>
-                </div>
+                </FormField>
 
                 <div className="request-help-step__actions">
                   <Button type="button" variant="secondary" onClick={handleBack}>

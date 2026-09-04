@@ -76,3 +76,4 @@ export function GamesGrid({ products }: GamesGridProps) {
 }
 
 export default GamesGrid
+

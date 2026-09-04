@@ -23,8 +23,8 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
     try {
       const [featured, cats, locs] = await Promise.all([
         businessService.getFeatured(),
-        Promise.resolve(businessService.getCategories()),
-        Promise.resolve(businessService.getLocations()),
+        businessService.fetchCategories(),
+        businessService.fetchLocations(),
       ])
       setFeaturedBusinesses(featured)
       setCategories(cats)

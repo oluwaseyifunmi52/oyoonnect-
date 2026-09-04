@@ -1,0 +1,97 @@
+/* ==========================================================================
+   SEARCH INPUT — Primitive component
+   ========================================================================== */
+
+.search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input__icon {
+  position: absolute;
+  left: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-subtle);
+  pointer-events: none;
+  z-index: 1;
+  transition: color var(--transition-fast);
+}
+
+.search-input__field {
+  width: 100%;
+  padding: 0 var(--space-4) 0 44px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search-input__field::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.search-input__field:hover {
+  border-color: var(--color-border-strong);
+}
+
+.search-input__field:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px rgb(15 122 92 / 0.15);
+}
+
+.search-input__field:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--color-surface);
+}
+
+.search-input:focus-within .search-input__icon {
+  color: var(--color-brand);
+}
+
+.search-input__clear {
+  position: absolute;
+  right: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.search-input__clear:hover {
+  color: var(--color-brand);
+  background: var(--color-brand-subtle);
+}
+
+/* --- Sizes --- */
+.search-input--sm .search-input__field {
+  height: 36px;
+  font-size: var(--text-sm);
+  padding-left: 36px;
+}
+
+.search-input--md .search-input__field {
+  height: 44px;
+  font-size: var(--text-base);
+  padding-left: 44px;
+}
+
+.search-input--lg .search-input__field {
+  height: 52px;
+  font-size: var(--text-lg);
+  padding-left: 48px;
+}

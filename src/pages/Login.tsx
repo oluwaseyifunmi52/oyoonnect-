@@ -69,15 +69,18 @@ export default function Login() {
           <div className="auth-split__brand-inner">
             <Logo to="/" subtitle />
             <h2 className="auth-split__brand-title">
-              Welcome back to OyoConnect — your account for business, jobs, community and help.
+              Welcome back to OyoConnect
             </h2>
+            <p className="auth-split__brand-subtitle">
+              Your account for business, jobs, community and help — all in one place.
+            </p>
             <ul className="auth-split__benefits">
               {LOGIN_BENEFITS.map((b) => (
                 <li key={b.label}>
                   <span className="auth-split__benefit-icon">
                     <b.icon size={18} />
                   </span>
-                  {b.label}
+                  <span className="auth-split__benefit-text">{b.label}</span>
                 </li>
               ))}
             </ul>
@@ -93,7 +96,7 @@ export default function Login() {
           </div>
 
           <div className="auth-card auth-card--wide">
-            <Link to="/" className="auth-back-link">
+            <Link to="/" className="auth-back-link" aria-label="Back to home">
               <ArrowLeft size={18} /> Back
             </Link>
 

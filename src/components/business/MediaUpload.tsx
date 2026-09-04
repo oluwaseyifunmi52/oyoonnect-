@@ -1,12 +1,16 @@
 import { useRef, useState } from 'react'
 import type { DragEvent, ChangeEvent, KeyboardEvent } from 'react'
-import { ImagePlus, UploadCloud, X, AlertCircle } from 'lucide-react'
+import { ImagePlus, UploadCloud, X, AlertCircle, Loader2 } from 'lucide-react'
+import { apiClient } from '../../services/apiClient'
 
 export interface MediaItem {
   id: string
   name: string
   src: string
   file: File
+  uploadedUrl?: string
+  uploading?: boolean
+  uploadError?: boolean
 }
 
 interface MediaUploadProps {
@@ -18,6 +22,7 @@ interface MediaUploadProps {
   variant?: 'single' | 'grid'
   value: MediaItem[]
   onChange: (items: MediaItem[]) => void
+  onUpload?: (file: File) => Promise<string>
 }
 
 let mediaCounter = 0
@@ -35,10 +40,15 @@ export function MediaUpload({
   variant = 'grid',
   value,
   onChange,
+  onUpload,
 }: MediaUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragOver, setDragOver] = useState(false)
   const [error, setError] = useState('')
+
+  const setMediaItems = (updater: MediaItem[] | ((prev: MediaItem[]) => MediaItem[])) => {
+    onChange(typeof updater === 'function' ? updater(value) : updater)
+  }
 
   const readFile = (file: File): Promise<MediaItem> =>
     new Promise((resolve, reject) => {
@@ -70,7 +80,29 @@ export function MediaUpload({
     const toAdd = images.slice(0, remaining)
     try {
       const items = await Promise.all(toAdd.map(readFile))
-      onChange([...value, ...items])
+      
+      // If upload callback provided, upload files in background
+      if (onUpload) {
+        const itemsWithUpload = items.map(item => ({ ...item, uploading: true }))
+        setMediaItems([...value, ...itemsWithUpload])
+        
+        // Upload each file
+        for (const item of itemsWithUpload) {
+          try {
+            const uploadedUrl = await onUpload(item.file)
+            setMediaItems(prev => prev.map(i => 
+              i.id === item.id ? { ...i, uploadedUrl, uploading: false } : i
+            ))
+          } catch (uploadError) {
+            setMediaItems(prev => prev.map(i => 
+              i.id === item.id ? { ...i, uploading: false, uploadError: true } : i
+            ))
+            setError('Failed to upload one or more images. Please try again.')
+          }
+        }
+      } else {
+        setMediaItems([...value, ...items])
+      }
     } catch {
       setError('Failed to read the selected image(s). Please try again.')
     }
@@ -85,7 +117,7 @@ export function MediaUpload({
   }
 
   const removeItem = (id: string) => {
-    onChange(value.filter((item) => item.id !== id))
+    setMediaItems(prev => prev.filter((item) => item.id !== id))
   }
 
   const handleBrowseClick = () => inputRef.current?.click()
@@ -118,11 +150,24 @@ export function MediaUpload({
               ) : (
                 <img src={item.src} alt={item.name} className="media-upload__img" />
               )}
+              {item.uploading && (
+                <div className="media-upload__uploading-overlay">
+                  <Loader2 size={24} className="animate-spin" aria-hidden="true" />
+                  <span>Uploading...</span>
+                </div>
+              )}
+              {item.uploadError && (
+                <div className="media-upload__upload-error">
+                  <AlertCircle size={16} aria-hidden="true" />
+                  <span>Upload failed</span>
+                </div>
+              )}
               <button
                 type="button"
                 className="media-upload__remove"
                 aria-label={`Remove ${item.name}`}
                 onClick={() => removeItem(item.id)}
+                disabled={item.uploading}
               >
                 <X size={16} />
               </button>

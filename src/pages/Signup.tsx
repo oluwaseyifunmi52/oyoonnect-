@@ -68,6 +68,7 @@ export default function Signup() {
     confirmPassword: '',
   })
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitError, setSubmitError] = useState('')
@@ -288,7 +289,7 @@ export default function Signup() {
                     label="Phone number"
                     type="tel"
                     name="phone"
-                    autoComplete="tel"
+                    autoComplete="off"
                     value={form.phone}
                     onChange={(e) => handleChange('phone', e.target.value)}
                     onBlur={() => handleBlur('phone')}
@@ -333,13 +334,24 @@ export default function Signup() {
                 <div className="signup-field">
                   <Input
                     label="Confirm password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     autoComplete="new-password"
                     value={form.confirmPassword}
                     onChange={(e) => handleChange('confirmPassword', e.target.value)}
                     onBlur={() => handleBlur('confirmPassword')}
                     error={touched.confirmPassword ? errors.confirmPassword : undefined}
+                    rightIcon={
+                      <button
+                        type="button"
+                        className="password-toggle"
+                        onClick={() => setShowConfirmPassword((s) => !s)}
+                        tabIndex={-1}
+                        aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showConfirmPassword ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
+                      </button>
+                    }
                     required
                   />
                 </div>

@@ -1,0 +1,83 @@
+/* ==========================================================================
+   CHECKBOX — Primitive component
+   ========================================================================== */
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  user-select: none;
+}
+
+.checkbox__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.checkbox__box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: white;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.checkbox__input:checked + .checkbox__box {
+  border-color: var(--color-brand);
+  background: var(--color-brand);
+}
+
+.checkbox__input:focus-visible + .checkbox__box {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.checkbox__input:disabled + .checkbox__box {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.checkbox:hover:not(:has(:disabled)) .checkbox__box:not(:has(+ .checkbox__input:checked)) {
+  border-color: var(--color-brand);
+}
+
+.checkbox__label {
+  line-height: var(--leading-normal);
+}
+
+/* --- Indeterminate --- */
+.checkbox__input:indeterminate + .checkbox__box {
+  border-color: var(--color-brand);
+  background: var(--color-brand);
+}
+
+.checkbox__input:indeterminate + .checkbox__box::after {
+  content: '';
+  width: 6px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+}
+
+/* --- Error state --- */
+.checkbox--error .checkbox__box {
+  border-color: var(--color-error);
+}
+
+.checkbox--error .checkbox__input:checked + .checkbox__box,
+.checkbox--error .checkbox__input:indeterminate + .checkbox__box {
+  border-color: var(--color-error);
+  background: var(--color-error);
+}

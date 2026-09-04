@@ -27,7 +27,8 @@
       "@data/*": ["src/data/*"],
       "@context/*": ["src/context/*"],
       "@hooks/*": ["src/hooks/*"],
-      "@config/*": ["src/config/*"]
+      "@config/*": ["src/config/*"],
+      "@design-system/*": ["src/design-system/*"]
     },
 
     /* Linting */

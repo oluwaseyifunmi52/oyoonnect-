@@ -1,0 +1,223 @@
+/* ==========================================================================
+   OYOCONNECT DESIGN SYSTEM — TOKENS
+   Single source of truth for all design decisions.
+   Import this FIRST in main.tsx before any other CSS.
+   ========================================================================== */
+
+:root {
+  /* ==========================================================================
+     COLOR SYSTEM — 12 tokens max, no aliases
+     ========================================================================== */
+
+  /* Brand — single teal */
+  --color-brand: #0F7A5C;
+  --color-brand-hover: #0E6B4F;
+  --color-brand-subtle: #ECFDF5;
+  --color-brand-border: #A7F3D0;
+
+  /* Neutral — 5 steps only */
+  --color-bg: #FFFFFF;
+  --color-surface: #F8FAF9;
+  --color-border: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+  --color-text: #0F172A;
+  --color-text-muted: #64748B;
+  --color-text-subtle: #94A3B8;
+
+  /* Semantic — 4 colors × 2 weights = 8 tokens */
+  --color-success: #16A34A;
+  --color-success-subtle: #F0FDF4;
+  --color-warning: #D97706;
+  --color-warning-subtle: #FFFBEB;
+  --color-error: #DC2626;
+  --color-error-subtle: #FEF2F2;
+  --color-info: #0EA5E9;
+  --color-info-subtle: #EFF6FF;
+
+  /* ==========================================================================
+     TYPOGRAPHY SYSTEM — Fluid scale via clamp()
+     ========================================================================== */
+
+  --font-family: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Fluid type scale — mobile to desktop */
+  --text-display: clamp(2.5rem, 5vw, 3.5rem);      /* 40-56px — hero only */
+  --text-h1: clamp(2rem, 4vw, 2.75rem);            /* 32-44px — page titles */
+  --text-h2: clamp(1.5rem, 3vw, 2rem);             /* 24-32px — section titles */
+  --text-h3: clamp(1.25rem, 2.5vw, 1.5rem);        /* 20-24px — card titles */
+  --text-h4: clamp(1.125rem, 2vw, 1.25rem);        /* 18-20px — subsection */
+  --text-lg: 1.125rem;   /* 18px — large body */
+  --text-base: 1rem;     /* 16px — body */
+  --text-sm: 0.875rem;   /* 14px — secondary */
+  --text-xs: 0.75rem;    /* 12px — caption */
+
+  /* Line heights */
+  --leading-tight: 1.15;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  /* Font weights */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ==========================================================================
+     SPACING SYSTEM — 8-point grid, 12 tokens
+     ========================================================================== */
+
+  --space-0: 0;
+  --space-1: 4px;    /* 0.25rem */
+  --space-2: 8px;    /* 0.5rem */
+  --space-3: 12px;   /* 0.75rem */
+  --space-4: 16px;   /* 1rem */
+  --space-5: 20px;   /* 1.25rem */
+  --space-6: 24px;   /* 1.5rem */
+  --space-8: 32px;   /* 2rem */
+  --space-10: 40px;  /* 2.5rem */
+  --space-12: 48px;  /* 3rem */
+  --space-16: 64px;  /* 4rem */
+  --space-20: 80px;  /* 5rem */
+  --space-24: 96px;  /* 6rem */
+
+  /* ==========================================================================
+     BORDER RADIUS — 4 values only
+     ========================================================================== */
+
+  --radius-sm: 6px;    /* inputs, buttons, badges, pills */
+  --radius-md: 10px;   /* cards, modals, dropdowns, panels */
+  --radius-lg: 14px;   /* hero sections, primary containers */
+  --radius-full: 999px; /* avatars, pills ONLY */
+
+  /* ==========================================================================
+     SHADOW SYSTEM — 3 levels, no layering
+     ========================================================================== */
+
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06);
+  --shadow-md: 0 4px 12px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 12px 24px rgb(15 23 42 / 0.1);
+
+  /* ==========================================================================
+     CONTAINER WIDTHS
+     ========================================================================== */
+
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1200px;
+  --container-2xl: 1400px;
+
+  /* ==========================================================================
+     RESPONSIVE BREAKPOINTS — Mobile-first
+     ========================================================================== */
+
+  --bp-sm: 640px;    /* Mobile landscape / small tablet */
+  --bp-md: 768px;    /* Tablet portrait */
+  --bp-lg: 1024px;   /* Tablet landscape / small desktop */
+  --bp-xl: 1280px;   /* Desktop */
+  --bp-2xl: 1536px;  /* Large desktop */
+
+  /* ==========================================================================
+     Z-INDEX SCALE
+     ========================================================================== */
+
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+
+  /* ==========================================================================
+     TRANSITIONS
+     ========================================================================== */
+
+  --transition-fast: 120ms ease;
+  --transition-normal: 180ms ease;
+  --transition-slow: 280ms ease;
+
+  /* ==========================================================================
+     LAYOUT
+     ========================================================================== */
+
+  --header-height: 68px;
+}
+
+/* ==========================================================================
+   DARK MODE — Override only what changes
+   ========================================================================== */
+
+[data-theme="dark"] {
+  --color-brand: #14B8A6;
+  --color-brand-hover: #5EEAD4;
+  --color-brand-subtle: #123E35;
+  --color-brand-border: #205047;
+
+  --color-bg: #0F172A;
+  --color-surface: #1E293B;
+  --color-border: #2A3634;
+  --color-border-strong: #344744;
+  --color-text: #E5E7EB;
+  --color-text-muted: #9CA3AF;
+  --color-text-subtle: #8A9E99;
+
+  --color-success: #22C55E;
+  --color-success-subtle: #1E2E2B;
+  --color-warning: #F59E0B;
+  --color-warning-subtle: #2A2418;
+  --color-error: #EF4444;
+  --color-error-subtle: #2A1A1A;
+  --color-info: #38BDF8;
+  --color-info-subtle: #1E2A3A;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.25);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 12px 24px rgb(0 0 0 / 0.45);
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   FOCUS VISIBLE — Consistent focus rings
+   ========================================================================== */
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* Remove focus ring for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ==========================================================================
+   SELECTION
+   ========================================================================== */
+
+::selection {
+  background: var(--color-brand-border);
+  color: var(--color-brand);
+}
+
+[data-theme="dark"] ::selection {
+  background: var(--color-brand-border);
+  color: var(--color-brand-hover);
+}

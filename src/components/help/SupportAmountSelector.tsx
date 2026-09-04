@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { formatCurrency } from '../../utils/currency'
 import { PLATFORM_FEE_PERCENTAGE, PAYMENT_GATEWAY_FEE_PERCENTAGE, SUGGESTED_SUPPORT_AMOUNTS } from '../../types/help'
+import { Card } from '../ui/Card'
+import { FormField } from '../ui/FormField'
+import { Input } from '../ui/Input'
 
 interface SupportAmountSelectorProps {
   suggestedAmounts?: readonly number[]
@@ -69,52 +72,57 @@ export function SupportAmountSelector({
   const { platformFee, gatewayFee, totalFees, totalCharge } = calculateFees(currentAmount)
 
   return (
-    <div className="support-amount-selector">
-      <fieldset className="support-amount-selector__fieldset">
-        <legend className="support-amount-selector__legend">Choose an amount to support</legend>
-
-        <div className="support-amount-selector__grid" role="radiogroup" aria-label="Suggested support amounts">
-          {suggestedAmounts.map((amount) => (
+    <Card variant="default" padding="md" className="support-amount-selector">
+      <FormField
+        label="Choose an amount to support"
+        htmlFor="support-amount"
+        hint="Select a suggested amount or enter a custom amount"
+      >
+        <fieldset className="support-amount-selector__fieldset" id="support-amount">
+          <div className="support-amount-selector__grid" role="radiogroup" aria-label="Suggested support amounts">
+            {suggestedAmounts.map((amount) => (
+              <button
+                key={amount}
+                type="button"
+                role="radio"
+                aria-checked={!isCustom && selectedAmount === amount}
+                className={`support-amount-selector__option ${!isCustom && selectedAmount === amount ? 'support-amount-selector__option--selected' : ''}`}
+                onClick={() => handleSuggestedClick(amount)}
+              >
+                {formatCurrency(amount, { showDecimals: false })}
+              </button>
+            ))}
             <button
-              key={amount}
               type="button"
               role="radio"
-              aria-checked={!isCustom && selectedAmount === amount}
-              className={`support-amount-selector__option ${!isCustom && selectedAmount === amount ? 'support-amount-selector__option--selected' : ''}`}
-              onClick={() => handleSuggestedClick(amount)}
+              aria-checked={isCustom}
+              className={`support-amount-selector__option support-amount-selector__option--custom ${isCustom ? 'support-amount-selector__option--selected' : ''}`}
+              onClick={() => {
+                setIsCustom(true)
+                setCustomAmount('')
+              }}
             >
-              {formatCurrency(amount, { showDecimals: false })}
+              <Input
+                id="custom-amount"
+                type="text"
+                inputMode="numeric"
+                placeholder="Custom amount"
+                value={customAmount}
+                onChange={handleCustomChange}
+                onBlur={handleCustomBlur}
+                onFocus={() => setIsCustom(true)}
+                className="support-amount-selector__custom-input"
+                aria-label="Custom amount in Naira"
+                maxLength={8}
+              />
             </button>
-          ))}
-          <button
-            type="button"
-            role="radio"
-            aria-checked={isCustom}
-            className={`support-amount-selector__option support-amount-selector__option--custom ${isCustom ? 'support-amount-selector__option--selected' : ''}`}
-            onClick={() => {
-              setIsCustom(true)
-              setCustomAmount('')
-            }}
-          >
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="Custom"
-              value={customAmount}
-              onChange={handleCustomChange}
-              onBlur={handleCustomBlur}
-              onFocus={() => setIsCustom(true)}
-              className="support-amount-selector__custom-input"
-              aria-label="Custom amount in Naira"
-              maxLength={8}
-            />
-          </button>
-        </div>
+          </div>
 
-        {isCustom && customAmount && (
-          <p className="support-amount-selector__hint">Minimum amount: ₦100</p>
-        )}
-      </fieldset>
+          {isCustom && customAmount && (
+            <p className="support-amount-selector__hint">Minimum amount: ₦100</p>
+          )}
+        </fieldset>
+      </FormField>
 
       {showFeeBreakdown && currentAmount > 0 && (
         <div className="support-amount-selector__fee-breakdown">
@@ -143,6 +151,6 @@ export function SupportAmountSelector({
           </p>
         </div>
       )}
-    </div>
+    </Card>
   )
 }
