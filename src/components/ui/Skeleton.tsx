@@ -63,3 +63,30 @@ export const SkeletonCircle = ({ size = 48, className = '', ...props }: HTMLAttr
 export const SkeletonRect = ({ width = '100%', height = 16, className = '', ...props }: HTMLAttributes<HTMLDivElement> & { width?: string | number; height?: string | number }) => (
   <Skeleton variant="rect" width={width} height={height} className={className} {...props} />
 )
+
+interface SkeletonCardProps extends HTMLAttributes<HTMLDivElement> {
+  className?: string
+}
+
+export function SkeletonCard({ className = '', ...props }: SkeletonCardProps) {
+  return (
+    <div
+      className={`skeleton-card card ${className}`}
+      role="status"
+      aria-label="Loading card"
+      {...props}
+    >
+      <SkeletonMedia />
+      <div className="card__body">
+        <SkeletonText style={{ width: '70%' }} className="card__title" />
+        <SkeletonText style={{ width: '40%' }} />
+        <SkeletonText style={{ width: '90%' }} />
+        <SkeletonText style={{ width: '80%' }} />
+        <div className="card__actions">
+          <Skeleton variant="btn" width={96} />
+          <Skeleton variant="btn" width={96} />
+        </div>
+      </div>
+    </div>
+  )
+}
