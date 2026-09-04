@@ -29,7 +29,7 @@ export const businessService = {
         params.set(key, String(value))
       }
     })
-    const response = await apiClient.get<ApiResponse<Business[]>>(`/businesses/search?${params.toString()}`)
+    const response = await apiClient.get<Business[]>(`/businesses/search?${params.toString()}`)
     return handleApiResponse(response)
   },
 
@@ -68,7 +68,7 @@ export const businessService = {
 
   async getById(id: string): Promise<Business | undefined> {
     try {
-      const response = await apiClient.get<ApiResponse<Business>>(`/businesses/${id}`)
+      const response = await apiClient.get<Business>(`/businesses/${id}`)
       return handleApiResponse(response)
     } catch (error) {
       if (error instanceof ApiError && error.status === 404) {
@@ -79,42 +79,42 @@ export const businessService = {
   },
 
   async getAll(): Promise<Business[]> {
-    const response = await apiClient.get<ApiResponse<Business[]>>('/businesses')
+    const response = await apiClient.get<Business[]>('/businesses')
     return handleApiResponse(response)
   },
 
   async getMyBusinesses(): Promise<Business[]> {
-    const response = await apiClient.get<ApiResponse<Business[]>>('/businesses/my-businesses')
+    const response = await apiClient.get<Business[]>('/businesses/my-businesses')
     return handleApiResponse(response)
   },
 
   async getByOwner(ownerId: string): Promise<Business[]> {
-    const response = await apiClient.get<ApiResponse<Business[]>>(`/businesses/owner/${ownerId}`)
+    const response = await apiClient.get<Business[]>(`/businesses/owner/${ownerId}`)
     return handleApiResponse(response)
   },
 
   async create(data: Partial<Business>): Promise<Business> {
-    const response = await apiClient.post<ApiResponse<Business>>('/businesses', data)
+    const response = await apiClient.post<Business>('/businesses', data)
     return handleApiResponse(response)
   },
 
   async update(id: string, data: Partial<Business>): Promise<Business> {
-    const response = await apiClient.patch<ApiResponse<Business>>(`/businesses/${id}`, data)
+    const response = await apiClient.patch<Business>(`/businesses/${id}`, data)
     return handleApiResponse(response)
   },
 
   async delete(id: string): Promise<void> {
-    const response = await apiClient.delete<ApiResponse<void>>(`/businesses/${id}`)
+    const response = await apiClient.delete<void>(`/businesses/${id}`)
     handleApiResponse(response)
   },
 
   async getStats(ownerId: string): Promise<BusinessStats> {
-    const response = await apiClient.get<ApiResponse<BusinessStats>>(`/businesses/stats/${ownerId}`)
+    const response = await apiClient.get<BusinessStats>(`/businesses/stats/${ownerId}`)
     return handleApiResponse(response)
   },
 
   async getFeatured(): Promise<Business[]> {
-    const response = await apiClient.get<ApiResponse<Business[]>>('/businesses/featured')
+    const response = await apiClient.get<Business[]>('/businesses/featured')
     return handleApiResponse(response)
   },
 
@@ -123,7 +123,7 @@ export const businessService = {
   },
 
   async fetchCategories(): Promise<Category[]> {
-    const response = await apiClient.get<ApiResponse<Category[]>>('/categories')
+    const response = await apiClient.get<Category[]>('/categories')
     return handleApiResponse(response)
   },
 
@@ -132,7 +132,7 @@ export const businessService = {
   },
 
   async fetchLocations(): Promise<Location[]> {
-    const response = await apiClient.get<ApiResponse<Location[]>>('/locations')
+    const response = await apiClient.get<Location[]>('/locations')
     return handleApiResponse(response)
   },
 
@@ -140,18 +140,27 @@ export const businessService = {
     return {}
   },
 
+  async getCategoryCounts(): Promise<Record<string, number>> {
+    try {
+      const response = await apiClient.get<Record<string, number>>('/categories/counts')
+      return handleApiResponse(response)
+    } catch {
+      return {}
+    }
+  },
+
   async approve(id: string): Promise<Business> {
-    const response = await apiClient.patch<ApiResponse<Business>>(`/businesses/${id}/approve`, {})
+    const response = await apiClient.patch<Business>(`/businesses/${id}/approve`, {})
     return handleApiResponse(response)
   },
 
   async verify(id: string): Promise<Business> {
-    const response = await apiClient.patch<ApiResponse<Business>>(`/businesses/${id}/verify`, {})
+    const response = await apiClient.patch<Business>(`/businesses/${id}/verify`, {})
     return handleApiResponse(response)
   },
 
   async reject(id: string): Promise<Business> {
-    const response = await apiClient.patch<ApiResponse<Business>>(`/businesses/${id}/reject`, {})
+    const response = await apiClient.patch<Business>(`/businesses/${id}/reject`, {})
     return handleApiResponse(response)
   },
 }
@@ -185,24 +194,24 @@ export const draftService = {
 
 export const reviewService = {
   async getByBusiness(businessId: string): Promise<Review[]> {
-    const response = await apiClient.get<ApiResponse<Review[]>>(`/businesses/${businessId}/reviews`)
+    const response = await apiClient.get<Review[]>(`/businesses/${businessId}/reviews`)
     return handleApiResponse(response)
   },
 
   async getAverageRating(businessId: string): Promise<number> {
-    const response = await apiClient.get<ApiResponse<{ averageRating: number }>>(`/businesses/${businessId}/reviews/stats`)
+    const response = await apiClient.get<{ averageRating: number }>(`/businesses/${businessId}/reviews/stats`)
     const data = handleApiResponse(response)
     return data.averageRating
   },
 
   async getReviewCount(businessId: string): Promise<number> {
-    const response = await apiClient.get<ApiResponse<{ reviewCount: number }>>(`/businesses/${businessId}/reviews/count`)
+    const response = await apiClient.get<{ reviewCount: number }>(`/businesses/${businessId}/reviews/count`)
     const data = handleApiResponse(response)
     return data.reviewCount
   },
 
   async getRatingDistribution(businessId: string): Promise<Record<number, number>> {
-    const response = await apiClient.get<ApiResponse<Record<number, number>>>(`/businesses/${businessId}/reviews/distribution`)
+    const response = await apiClient.get<Record<number, number>>(`/businesses/${businessId}/reviews/distribution`)
     return handleApiResponse(response)
   },
 
@@ -212,8 +221,9 @@ export const reviewService = {
     rating: number
     comment: string
     verified?: boolean
+    status?: ReviewStatus
   }): Promise<Review> {
-    const response = await apiClient.post<ApiResponse<Review>>(`/businesses/${data.businessId}/reviews`, {
+    const response = await apiClient.post<Review>(`/businesses/${data.businessId}/reviews`, {
       userName: data.userName,
       rating: data.rating,
       comment: data.comment,
@@ -254,7 +264,7 @@ export const favoritesService = {
   async getFavoriteBusinesses(): Promise<Business[]> {
     const favoriteIds = this.getFavorites()
     if (favoriteIds.length === 0) return []
-    const response = await apiClient.get<ApiResponse<Business[]>>(`/businesses/favorites?ids=${favoriteIds.join(',')}`)
+    const response = await apiClient.get<Business[]>(`/businesses/favorites?ids=${favoriteIds.join(',')}`)
     return handleApiResponse(response)
   },
 

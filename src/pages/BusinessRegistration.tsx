@@ -310,7 +310,7 @@ export function BusinessRegistration() {
         servicePrices: servicesWithPrices,
         openingHours: openingHoursArray,
         socialLinks: data.socialLinks,
-        priceRange: data.priceRange,
+        priceRange: data.priceRange || undefined,
         latitude: data.latitude,
         longitude: data.longitude,
         placeId: data.placeId,
@@ -327,7 +327,7 @@ export function BusinessRegistration() {
           placeId: data.placeId,
           formattedAddress: data.formattedAddress,
         },
-        status: 'pending',
+        status: 'pending' as const,
         featured: false,
       }
 

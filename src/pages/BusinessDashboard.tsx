@@ -133,6 +133,12 @@ function OverviewTab({ businesses }: { businesses: Business[] }) {
     ? `Welcome, ${firstName}. Here's how your businesses are performing.`
     : "Here's how your businesses are performing."
 
+  const getStatusLabel = (status?: string) => {
+    const s = status ?? 'pending'
+    return s.charAt(0).toUpperCase() + s.slice(1)
+  }
+  const getStatusClass = (status?: string) => `status-badge status-badge--${status ?? 'pending'}`
+
   return (
     <>
       <DashboardHeader title="Business Dashboard" subtitle={subtitle} />
@@ -154,8 +160,8 @@ function OverviewTab({ businesses }: { businesses: Business[] }) {
                 <div className="business-card__info">
                   <h3 className="business-card__name">{biz.name}</h3>
                   <p className="business-card__category">{biz.category}</p>
-                  <span className={`status-badge status-badge--${biz.status || 'pending'}`}>
-                    {biz.status?.charAt(0).toUpperCase() + biz.status?.slice(1) || 'Pending'}
+                  <span className={getStatusClass(biz.status)}>
+                    {getStatusLabel(biz.status)}
                   </span>
                 </div>
                 <div className="business-card__actions">
@@ -191,6 +197,12 @@ function OverviewTab({ businesses }: { businesses: Business[] }) {
 }
 
 function ProfileTab({ businesses }: { businesses: Business[] }) {
+  const getStatusLabel = (status?: string) => {
+    const s = status ?? 'pending'
+    return s.charAt(0).toUpperCase() + s.slice(1)
+  }
+  const getStatusClass = (status?: string) => `status-badge status-badge--${status ?? 'pending'}`
+
   if (businesses.length === 0) {
     return (
       <section className="dash-panel">
@@ -214,8 +226,8 @@ function ProfileTab({ businesses }: { businesses: Business[] }) {
               <h3 className="business-card__name">{business.name}</h3>
               <p className="business-card__category">{business.category || 'Business'}</p>
               {business.description ? <p className="business-card__description">{business.description}</p> : null}
-              <span className={`status-badge status-badge--${business.status || 'pending'}`}>
-                {business.status?.charAt(0).toUpperCase() + business.status?.slice(1) || 'Pending'}
+              <span className={getStatusClass(business.status)}>
+                {getStatusLabel(business.status)}
               </span>
             </div>
             <div className="business-card__actions">
