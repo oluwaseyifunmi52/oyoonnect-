@@ -23301,6 +23301,32 @@ a {
   }
 }
 
+/* --- 13. Overflow guard: category/job/community cards never exceed viewport --- */
+@media (max-width: 640px) {
+  .container { padding-inline: 16px; }
+  .category-grid, .popular-grid, .jobs-grid, .community-grid,
+  .help-categories-grid, .business-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .card, .category-card, .job-card, .community-card {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+}
+@media (min-width: 641px) and (max-width: 900px) {
+  .category-grid, .popular-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 430px) {
+  .navbar__inner { gap: 8px; }
+  .logo__name { font-size: 16px; }
+  .logo__subtitle { font-size: 10px; }
+}
+html, body { max-width: 100%; overflow-x: clip; }
+img, svg { max-width: 100%; }
+* { min-width: 0; }
+
 
 
 
