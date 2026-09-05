@@ -5,14 +5,14 @@ import { formatCurrency } from '../../utils/currency'
 import type { SupportRequest, HelpCategoryType } from '../../types/help'
 import { HELP_CATEGORIES, SUGGESTED_SUPPORT_AMOUNTS } from '../../types/help'
 import {
-  SupportCategoryCard,
-  SupportRequestCard,
-  LoadingState,
-  ErrorState,
-  HelpIcon,
-  StatusBadge,
-} from '../../components/help'
-import { Button, ButtonLink, Card, Badge, Skeleton, SearchInput } from '../../components/ui'
+  Button,
+  ButtonLink,
+  Card,
+  Badge,
+  Skeleton,
+  SearchInput,
+  SectionHeading,
+} from '../../components/ui'
 import { helpService } from '../../services/helpService'
 
 const SORT_OPTIONS = [
@@ -48,22 +48,26 @@ const HOW_IT_WORKS_STEPS = [
   {
     icon: 'graduation-cap',
     title: 'Request Help',
-    description: 'Choose a category, share your story, and provide the required supporting information.',
+    description:
+      'Choose a category, share your story, and provide the required supporting information.',
   },
   {
     icon: 'shield-check',
     title: 'Review & Verification',
-    description: 'Requests are reviewed before publication based on the platform verification process.',
+    description:
+      'Requests are reviewed before publication based on the platform verification process.',
   },
   {
     icon: 'heart',
     title: 'Community Support',
-    description: 'Approved requests can receive support from members of the community.',
+    description:
+      'Approved requests can receive support from members of the community.',
   },
   {
     icon: 'heart-handshake',
     title: 'Secure Completion',
-    description: 'Support and payout processes follow the platform payment and verification rules.',
+    description:
+      'Support and payout processes follow the platform payment and verification rules.',
   },
 ]
 
@@ -123,27 +127,39 @@ export function HelpLandingPage() {
     <>
       {/* Hero Section */}
       <section className="help-hero">
-        <div className="help-hero__content">
-          <div className="help-hero__badge">
-            <ShieldCheck size={16} aria-hidden="true" />
-            <span>Requests reviewed before publication</span>
-          </div>
+        <div className="container">
+          <div className="help-hero__content">
+            <div className="help-hero__badge">
+              <ShieldCheck size={16} aria-hidden="true" />
+              <span>Requests reviewed before publication</span>
+            </div>
 
-          <h1 className="help-hero__title">OyoConnect Help</h1>
+            <h1 className="help-hero__title">OyoConnect Help</h1>
 
-          <p className="help-hero__description">
-            Connect with verified people in need across Oyo State and make a direct difference.
-          </p>
+            <p className="help-hero__description">
+              Connect with verified people in need across Oyo State and make a direct difference.
+            </p>
 
-          <div className="help-hero__actions">
-            <ButtonLink to="/help/request" variant="primary" size="lg" className="help-hero__btn" fullWidth>
-              <HelpIcon name="heart" size={20} aria-hidden="true" />
-              Request Help
-            </ButtonLink>
-            <ButtonLink to="/help/requests" variant="secondary" size="lg" className="help-hero__btn" fullWidth>
-              <HelpIcon name="users" size={20} aria-hidden="true" />
-              Support Someone
-            </ButtonLink>
+            <div className="help-hero__actions">
+              <ButtonLink
+                to="/help/request"
+                variant="primary"
+                size="lg"
+                className="help-hero__btn fullWidth"
+              >
+                <HelpIcon name="heart" size={20} aria-hidden="true" />
+                Request Help
+              </ButtonLink>
+              <ButtonLink
+                to="/help/requests"
+                variant="secondary"
+                size="lg"
+                className="help-hero__btn fullWidth"
+              >
+                <HelpIcon name="users" size={20} aria-hidden="true" />
+                Support Someone
+              </ButtonLink>
+            </div>
           </div>
         </div>
       </section>
@@ -155,7 +171,13 @@ export function HelpLandingPage() {
             {TRUST_ITEMS.map((item) => {
               const Icon = item.icon
               return (
-                <Card key={item.title} variant="default" padding="md" className="help-trust-card" role="listitem">
+                <Card
+                  key={item.title}
+                  variant="default"
+                  padding="md"
+                  className="help-trust-card"
+                  role="listitem"
+                >
                   <div className="help-trust-card__icon">
                     <Icon size={24} aria-hidden="true" />
                   </div>
@@ -269,7 +291,7 @@ export function HelpLandingPage() {
                 </Link>
               </div>
             </div>
-          ) : (
+          ) : filteredRequests.length > 0 ? (
             <>
               <div className="help-requests-grid" role="list" aria-label="Support requests">
                 {filteredRequests.slice(0, 6).map((request) => (
@@ -291,7 +313,7 @@ export function HelpLandingPage() {
                 </div>
               )}
             </>
-          )}
+          ) : null}
         </div>
       </section>
 

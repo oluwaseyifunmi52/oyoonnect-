@@ -102,7 +102,7 @@ function ForgotPassword() {
                   error={fieldErrors.email}
                 />
 
-                <Button type="submit" size="lg" className="auth-submit" disabled={loading || isDevAuth} title={isDevAuth ? DEV_RECOVERY_MESSAGE : undefined}>
+                <Button type="submit" size="lg" className="auth-submit" disabled={loading || isDevAuth} title={isDevAuth ? DEV_RECOVERY_MESSAGE : undefined} fullWidth>
                   {loading ? (
                     <>
                       <Loader2 size={18} className="btn__spinner" aria-hidden="true" />

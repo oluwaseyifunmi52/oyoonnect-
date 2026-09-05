@@ -63,21 +63,21 @@ export default function Login() {
 
   return (
     <main className="auth-page">
-      <div className="auth-page__container">
-        <div className="auth-page__header">
+      <div className="auth-card">
+        <div className="auth-header">
           <Logo to="/" subtitle />
-          <h1 className="auth-page__title">Welcome back</h1>
-          <p className="auth-page__subtitle">Sign in to your OyoConnect account to continue.</p>
+          <h1 className="section-heading__title">Welcome back</h1>
+          <p className="section-heading__subtitle">Sign in to your OyoConnect account to continue.</p>
         </div>
 
         {error && (
-          <div className="auth-page__error" role="alert">
+          <div className="auth-error" role="alert">
             <AlertCircle size={18} aria-hidden="true" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="auth-page__form" noValidate>
+        <form onSubmit={handleSubmit} className="auth-form" noValidate>
           <Input
             label="Email or Phone Number"
             id="identifier"
@@ -89,52 +89,45 @@ export default function Login() {
             icon={<User size={18} />}
           />
 
-          <div className="auth-page__field">
-            <label className="auth-page__label" htmlFor="login-password">
-              Password <span className="required" aria-hidden="true">*</span>
-            </label>
-            <div className="auth-page__input-wrapper">
-              <span className="auth-page__input-icon" aria-hidden="true">
-                <Lock size={18} />
-              </span>
-              <input
-                id="login-password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="auth-page__input"
-                autoComplete="current-password"
-                required
-              />
+          <Input
+            label="Password"
+            id="login-password"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            autoComplete="current-password"
+            required
+            icon={<Lock size={18} />}
+            rightIcon={
               <button
                 type="button"
-                className="auth-page__password-toggle"
+                className="password-toggle"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 aria-pressed={showPassword}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
-            </div>
-          </div>
+            }
+          />
 
-          <div className="auth-page__options">
-            <label className="auth-page__checkbox">
+          <div className="auth-form-row">
+            <label className="auth-checkbox">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
               />
-              <span className="auth-page__checkbox-custom" aria-hidden="true" />
+              <span className="auth-checkbox__custom" aria-hidden="true" />
               <span>Remember me</span>
             </label>
-            <Link to="/forgot-password" className="auth-page__link">
+            <Link to="/forgot-password" className="auth-link">
               Forgot password?
             </Link>
           </div>
 
-          <Button type="submit" size="lg" className="auth-page__submit" disabled={loading} fullWidth>
+          <Button type="submit" size="lg" className="auth-submit" disabled={loading} fullWidth>
             {loading ? (
               <>
                 <Loader2 size={18} className="btn__spinner" aria-hidden="true" /> Signing in...
@@ -145,21 +138,21 @@ export default function Login() {
           </Button>
         </form>
 
-        <p className="auth-page__footer">
+        <p className="auth-footer">
           Don&apos;t have an account?{' '}
-          <Link to={`/signup${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} className="auth-page__link">
+          <Link to={`/signup${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} className="auth-link">
             Create account
           </Link>
         </p>
 
-        <p className="auth-page__footer auth-page__footer--secondary">
-          <Link to="/business/register" className="auth-page__link">
+        <p className="auth-footer auth-footer--bare">
+          <Link to="/business/register" className="auth-link">
             <Building2 size={14} /> Want to list a business?
           </Link>
         </p>
 
-        <p className="auth-page__footer auth-page__footer--secondary">
-          <Link to="/provider/onboarding" className="auth-page__link">
+        <p className="auth-footer auth-footer--bare">
+          <Link to="/provider/onboarding" className="auth-link">
             <Briefcase size={14} /> Want to offer your skills?
           </Link>
         </p>

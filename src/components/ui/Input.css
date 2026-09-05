@@ -91,6 +91,11 @@
 .input-icon--right {
   left: auto;
   right: 12px;
+  pointer-events: auto;
+}
+
+.input-icon--right button {
+  pointer-events: auto;
 }
 
 .input:focus + .input-icon,

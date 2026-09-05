@@ -44,7 +44,7 @@
   --primary-hover: var(--brand-dark);
   --primary-light: var(--brand-soft);
   --danger: var(--error);
-  --info: #0F7A5C;
+  --info: #0EA5E9;
   --on-primary: #ffffff;
 
   /* ===== Semantic Colors ===== */
@@ -103,6 +103,7 @@
   --space-24: 96px;
 
   /* ===== Border Radius ===== */
+  --radius-none: 0px;
   --radius-sm: 6px;
   --radius: 8px;
   --radius-md: 10px;
@@ -246,8 +247,8 @@
 }
 
 [data-theme="dark"] ::selection {
-  background: var(--brand-border);
-  color: var(--brand-hover);
+  background: var(--brand-line);
+  color: var(--brand-dark);
 }
 
 /* ===== Global overflow prevention ===== */

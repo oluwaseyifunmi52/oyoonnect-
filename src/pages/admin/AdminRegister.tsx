@@ -131,47 +131,44 @@ function AdminRegister() {
               required
             />
 
-            <div className="field">
-              <label className="field__label" htmlFor="adminSetupPassword">Password</label>
-              <div className="password-input-wrapper">
-                <input
-                  id="adminSetupPassword"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={(event) => setField('password', event.target.value)}
-                  placeholder="At least 8 characters"
-                  autoComplete="new-password"
-                  className="input password-input"
-                  required
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
+            <div>
+              <Input
+                label="Password"
+                id="adminSetupPassword"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={(event) => setField('password', event.target.value)}
+                placeholder="At least 8 characters"
+                autoComplete="new-password"
+                error={fieldErrors.password}
+                required
+                rightIcon={
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                }
+              />
               {passwordStrength ? <p className="field__hint">Password strength: {passwordStrength}</p> : null}
-              {fieldErrors.password ? <p className="field__error">{fieldErrors.password}</p> : null}
             </div>
 
-            <div className="field">
-              <label className="field__label" htmlFor="adminSetupConfirmPassword">Confirm Password</label>
-              <div className="password-input-wrapper">
-                <input
-                  id="adminSetupConfirmPassword"
-                  name="confirmPassword"
-                  type={showConfirm ? 'text' : 'password'}
-                  value={form.confirmPassword}
-                  onChange={(event) => setField('confirmPassword', event.target.value)}
-                  placeholder="Confirm password"
-                  autoComplete="new-password"
-                  className="input password-input"
-                  required
-                />
+            <Input
+              label="Confirm Password"
+              id="adminSetupConfirmPassword"
+              name="confirmPassword"
+              type={showConfirm ? 'text' : 'password'}
+              value={form.confirmPassword}
+              onChange={(event) => setField('confirmPassword', event.target.value)}
+              placeholder="Confirm password"
+              autoComplete="new-password"
+              error={fieldErrors.confirmPassword}
+              required
+              rightIcon={
                 <button
                   type="button"
                   className="password-toggle"
@@ -180,11 +177,10 @@ function AdminRegister() {
                 >
                   {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-              </div>
-              {fieldErrors.confirmPassword ? <p className="field__error">{fieldErrors.confirmPassword}</p> : null}
-            </div>
+              }
+            />
 
-            <Button type="submit" size="lg" className="auth-submit">
+            <Button type="submit" size="lg" className="auth-submit" fullWidth>
               Create Admin Account
             </Button>
           </form>

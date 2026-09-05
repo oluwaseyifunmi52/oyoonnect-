@@ -202,8 +202,7 @@ export function HelpRequestsPage() {
                 </div>
               </Card>
             ))}
-          </div>
-        ) : error ? (
+          ) : error ? (
           <ErrorState title="Unable to Load Requests" message={error} onRetry={loadRequests} />
         ) : filteredRequests.length === 0 ? (
           <HelpEmptyState

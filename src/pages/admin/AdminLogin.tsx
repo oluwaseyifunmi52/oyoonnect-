@@ -102,24 +102,22 @@ function AdminLogin() {
               error={fieldErrors.email}
             />
 
-            <div className="field">
-              <label className="field__label" htmlFor="adminPassword">Password</label>
-              <div className="password-input-wrapper">
-                <input
-                  id="adminPassword"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  required
-                  value={password}
-                  onChange={(event) => {
-                    setPassword(event.target.value)
-                    if (fieldErrors.password) validateField('password', event.target.value)
-                  }}
-                  onBlur={(event) => validateField('password', event.target.value)}
-                  autoComplete="current-password"
-                  className="input password-input"
-                />
+            <Input
+              label="Password"
+              id="adminPassword"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Enter your password"
+              required
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value)
+                if (fieldErrors.password) validateField('password', event.target.value)
+              }}
+              onBlur={(event) => validateField('password', event.target.value)}
+              autoComplete="current-password"
+              error={fieldErrors.password}
+              rightIcon={
                 <button
                   type="button"
                   className="password-toggle"
@@ -129,11 +127,10 @@ function AdminLogin() {
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-              </div>
-              {fieldErrors.password ? <p className="field__error">{fieldErrors.password}</p> : null}
-            </div>
+              }
+            />
 
-            <Button type="submit" size="lg" className="auth-submit">
+            <Button type="submit" size="lg" className="auth-submit" fullWidth>
               Admin Sign In
             </Button>
           </form>
