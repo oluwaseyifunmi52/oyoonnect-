@@ -13,6 +13,12 @@ import {
   SearchInput,
   SectionHeading,
 } from '../../components/ui'
+import {
+  HelpIcon,
+  SupportCategoryCard,
+  ErrorState,
+  SupportRequestCard,
+} from '../../components/help'
 import { helpService } from '../../services/helpService'
 
 const SORT_OPTIONS = [

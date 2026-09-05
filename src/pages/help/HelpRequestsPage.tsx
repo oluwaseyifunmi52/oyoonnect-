@@ -125,6 +125,31 @@ export function HelpRequestsPage() {
   const hasActiveFilters =
     query !== '' || categoryParam !== 'all' || sortParam !== 'recent' || selectedLocation !== 'all'
 
+  const skeletonCards = Array(6).fill(0).map((_, i) => (
+    <Card key={i} variant="skeleton" className="skeleton-card">
+      <Skeleton className="skeleton--media" />
+      <div className="card__body">
+        <Skeleton className="skeleton--text skeleton--wide" />
+        <Skeleton className="skeleton--text skeleton--mid" />
+        <Skeleton className="skeleton--text" />
+        <div className="card__actions">
+          <Skeleton className="skeleton--btn" />
+          <Skeleton className="skeleton--btn" />
+        </div>
+      </div>
+    </Card>
+  ))
+
+  const requestCards = filteredRequests.map((request) => (
+    <SupportRequestCard
+      key={request.id}
+      request={request}
+      onSupportClick={(req) => {
+        window.location.href = `/help/requests/${req.id}?support=true`
+      }}
+    />
+  ))
+
   return (
     <div className="help-requests-page">
       <div className="help-page__container">
@@ -185,58 +210,29 @@ export function HelpRequestsPage() {
             </div>
           </div>
         </div>
-
-        {isLoading ? (
-          <div className="help-requests__grid" role="list" aria-label="Support requests">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} variant="skeleton" className="skeleton-card">
-                <Skeleton className="skeleton--media" />
-                <div className="card__body">
-                  <Skeleton className="skeleton--text skeleton--wide" />
-                  <Skeleton className="skeleton--text skeleton--mid" />
-                  <Skeleton className="skeleton--text" />
-                  <div className="card__actions">
-                    <Skeleton className="skeleton--btn" />
-                    <Skeleton className="skeleton--btn" />
-                  </div>
-                </div>
-              </Card>
-            ))}
+<div className="help-requests__grid" role="list" aria-label="Support requests">
+          {isLoading ? (
+            <>{skeletonCards}</>
           ) : error ? (
-          <ErrorState title="Unable to Load Requests" message={error} onRetry={loadRequests} />
-        ) : filteredRequests.length === 0 ? (
-          <HelpEmptyState
-            title={query || categoryParam !== 'all' || selectedLocation !== 'all' ? 'No requests match your search' : 'No active support requests'}
-            description={
-              hasActiveFilters
-                ? 'Try adjusting your search or filters to find more requests.'
-                : 'No support requests are currently available. Check back soon.'
-            }
-            primaryAction={{ label: 'Request Help', to: '/help/request' }}
-            secondaryAction={{ label: 'Clear Filters', to: '/help/requests' }}
-          />
-        ) : (
-          <div className="help-requests__grid" role="list" aria-label="Support requests">
-            {filteredRequests.map((request) => (
-              <SupportRequestCard
-                key={request.id}
-                request={request}
-                onSupportClick={(req) => {
-                  window.location.href = `/help/requests/${req.id}?support=true`
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        {filteredRequests.length > 0 && filteredRequests.length >= 20 && (
-          <div className="section__action">
-            <button className="btn btn--outline btn--lg" onClick={() => {}}>
-              Load More
-            </button>
-          </div>
-        )}
+            <ErrorState title="Unable to Load Requests" message={error} onRetry={loadRequests} />
+          ) : filteredRequests.length === 0 ? (
+            <HelpEmptyState
+              title={query || categoryParam !== 'all' || selectedLocation !== 'all' ? 'No requests match your search' : 'No active support requests'}
+              description={
+                hasActiveFilters
+                  ? 'Try adjusting your search or filters to find more requests.'
+                  : 'No support requests are currently available. Check back soon.'
+              }
+              primaryAction={{ label: 'Request Help', to: '/help/request' }}
+              secondaryAction={{ label: 'Clear Filters', to: '/help/requests' }}
+            />
+          ) : (
+            <>{requestCards}</>
+          )}
+        </div>
       </div>
+
+      {filteredRequests.length > 0 && <>{requestCards}</>}
     </div>
   )
 }
