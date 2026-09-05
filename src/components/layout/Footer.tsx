@@ -25,7 +25,7 @@ export function Footer() {
           </ul>
         </div>
 
-        <div className="footer__col">
+        <div className="footer__col footer-explore">
           <h3 className="footer__title">Explore</h3>
           <ul className="footer__links">
             {siteConfig.nav.map((item) => (

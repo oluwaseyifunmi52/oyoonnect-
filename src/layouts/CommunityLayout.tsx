@@ -13,7 +13,7 @@ export function CommunityLayout() {
       <header className="community-layout__header functional-layout__header">
         <div className="community-layout__header-inner container">
           <NavLink to="/community" end className="community-layout__brand" aria-label="OyoConnect Community home">
-            <Logo subtitle />
+            <Logo subtitle link={false} />
           </NavLink>
           <nav className="community-layout__nav" aria-label="Community navigation">
             {COMMUNITY_NAV.map((item) => {

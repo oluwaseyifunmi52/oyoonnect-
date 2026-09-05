@@ -23,7 +23,7 @@ export function ServicesCustomerLayout() {
       <header className="services-customer-layout__header functional-layout__header">
         <div className="services-customer-layout__header-inner container">
           <NavLink to="/services" end className="services-customer-layout__brand" aria-label="OyoConnect Services home">
-            <Logo subtitle />
+            <Logo subtitle link={false} />
           </NavLink>
           <nav className="services-customer-layout__nav" aria-label="Services navigation">
             {SERVICES_CUSTOMER_NAV.map((item) => {

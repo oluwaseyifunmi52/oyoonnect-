@@ -240,6 +240,7 @@ label {
 /* --- Screen reader only --- */
 @media (max-width: 639px) {
   .hide-sm { display: none !important; }
+  .footer-explore { display: none; }
 }
 
 @media (min-width: 640px) {

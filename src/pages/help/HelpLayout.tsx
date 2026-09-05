@@ -14,7 +14,7 @@ export function HelpLayout() {
       <header className="help-layout__bar functional-layout__header">
         <div className="help-layout__bar-inner container">
           <NavLink to="/help" end className="help-layout__brand" aria-label="OyoConnect Help home">
-            <Logo subtitle />
+            <Logo subtitle link={false} />
           </NavLink>
           <nav className="help-layout__nav" aria-label="Help section">
             {HELP_NAV.map((item) => {

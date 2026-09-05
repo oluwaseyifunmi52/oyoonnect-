@@ -14,7 +14,7 @@ export function JobsLayout() {
       <header className="jobs-layout__header functional-layout__header">
         <div className="jobs-layout__header-inner container">
           <NavLink to="/jobs" end className="jobs-layout__brand" aria-label="OyoConnect Jobs home">
-            <Logo subtitle />
+            <Logo subtitle link={false} />
           </NavLink>
           <nav className="jobs-layout__nav" aria-label="Jobs navigation">
             {JOBS_NAV.map((item) => {
