@@ -1,9 +1,23 @@
+import type { LucideIcon } from 'lucide-react'
+import {
+  MapPin,
+  AlertTriangle,
+  Car,
+  Zap,
+  Droplets,
+  Trash2,
+  Hammer,
+  Shield,
+  Bus,
+  Camera,
+} from 'lucide-react'
+
 export interface CommunityCategoryItem {
   slug: string
   name: string
   description: string
   color: string
-  icon: keyof typeof import('lucide-react')
+  icon: LucideIcon
   path: string
 }
 
@@ -13,7 +27,7 @@ export const communityCategories: CommunityCategoryItem[] = [
     name: 'Road Conditions',
     description: 'Report potholes, road damage, erosion, and repair needs',
     color: '#7c3aed',
-    icon: 'MapPin',
+    icon: MapPin,
     path: '/community/roads',
   },
   {
@@ -21,7 +35,7 @@ export const communityCategories: CommunityCategoryItem[] = [
     name: 'Flood Reports',
     description: 'Report flooded areas, drainage issues, and waterlogging',
     color: '#2563eb',
-    icon: 'AlertTriangle',
+    icon: AlertTriangle,
     path: '/community/floods',
   },
   {
@@ -29,7 +43,7 @@ export const communityCategories: CommunityCategoryItem[] = [
     name: 'Traffic Updates',
     description: 'Report congestion, accidents, road closures, and diversions',
     color: '#dc2626',
-    icon: 'Car',
+    icon: Car,
     path: '/community/traffic',
   },
   {
@@ -37,7 +51,7 @@ export const communityCategories: CommunityCategoryItem[] = [
     name: 'Power Reports',
     description: 'Report outages, transformer issues, and electricity supply',
     color: '#f59e0b',
-    icon: 'Zap',
+    icon: Zap,
     path: '/community/power',
   },
   {
@@ -45,7 +59,7 @@ export const communityCategories: CommunityCategoryItem[] = [
     name: 'Water Availability',
     description: 'Report water supply issues, pipe bursts, and shortages',
     color: '#06b6d4',
-    icon: 'Droplets',
+    icon: Droplets,
     path: '/community/water',
   },
   {
@@ -53,7 +67,7 @@ export const communityCategories: CommunityCategoryItem[] = [
     name: 'Waste Reports',
     description: 'Report illegal dumping, overflowing bins, and collection issues',
     color: '#16a34a',
-    icon: 'Trash2',
+    icon: Trash2,
     path: '/community/waste',
   },
   {
@@ -61,7 +75,7 @@ export const communityCategories: CommunityCategoryItem[] = [
     name: 'Construction Updates',
     description: 'Share ongoing projects, road works, and building sites',
     color: '#ea580c',
-    icon: 'Hammer',
+    icon: Hammer,
     path: '/community/construction',
   },
   {
@@ -69,7 +83,7 @@ export const communityCategories: CommunityCategoryItem[] = [
     name: 'Security Alerts',
     description: 'Safety concerns, incidents, and neighborhood alerts',
     color: '#be123c',
-    icon: 'Shield',
+    icon: Shield,
     path: '/community/security',
   },
   {
@@ -77,7 +91,7 @@ export const communityCategories: CommunityCategoryItem[] = [
     name: 'Transport Updates',
     description: 'Bus routes, transport changes, park changes, and fares',
     color: '#7c2d12',
-    icon: 'Bus',
+    icon: Bus,
     path: '/community/transport',
   },
   {
@@ -85,7 +99,7 @@ export const communityCategories: CommunityCategoryItem[] = [
     name: 'Community Photos',
     description: 'Share photos of neighborhoods, events, and community activities',
     color: '#4338ca',
-    icon: 'Camera',
+    icon: Camera,
     path: '/community/photos',
   },
 ]

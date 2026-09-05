@@ -123,16 +123,16 @@ export const Select = Object.assign(
 )
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label: string
+  label?: string
   hint?: string
   error?: string
 }
 
 export const Textarea = Object.assign(
   (function Textarea({ label, id, className = '', hint, error, ...props }: TextareaProps) {
-    const textareaId = id ?? props.name ?? label
+    const textareaId = id ?? props.name ?? label ?? ''
     return (
-      <Field label={label} htmlFor={textareaId} hint={hint} error={error}>
+      <Field label={label ?? ''} htmlFor={textareaId} hint={hint} error={error}>
         <textarea id={textareaId} className={`input textarea ${className}`} {...props} />
       </Field>
     )

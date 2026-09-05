@@ -1,8 +1,8 @@
 import type { ReactNode, HTMLAttributes, ForwardRefExoticComponent, RefAttributes } from 'react'
 import './Card.css'
 
-type CardVariant = 'default' | 'elevated' | 'interactive' | 'skeleton'
-type CardPadding = 'none' | 'sm' | 'md' | 'lg'
+export type CardVariant = 'default' | 'elevated' | 'interactive' | 'skeleton'
+export type CardPadding = 'none' | 'sm' | 'md' | 'lg'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant

@@ -4,20 +4,6 @@ import { CommunityComments } from './CommunityComments'
 import { formatRelativeTime, formatDate } from './utils'
 import { communityCategoryBySlug } from '../../data/communityCategories'
 import type { CommunityReport, CommunityComment } from '../../types/community'
-import type { ComponentType } from 'react'
-
-const ICON_MAP: Record<string, ComponentType<{ size?: number; className?: string }>> = {
-  MapPin,
-  AlertTriangle: MapPin,
-  Car: MapPin,
-  Zap: MapPin,
-  Droplets: MapPin,
-  Trash2: MapPin,
-  Hammer: MapPin,
-  Shield,
-  Bus: MapPin,
-  Camera: MapPin,
-}
 
 interface ReportDetailsProps {
   report: CommunityReport
@@ -39,7 +25,7 @@ export function CommunityReportDetails({
   loading = false,
 }: ReportDetailsProps) {
   const category = communityCategoryBySlug(report.category)
-  const Icon = (category && ICON_MAP[category.icon]) || MapPin
+  const Icon = (category && category.icon) || MapPin
 
   return (
     <article className="report-details">

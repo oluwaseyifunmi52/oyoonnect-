@@ -105,6 +105,8 @@ export interface CommunityFilters {
   status?: ReportStatus
   sort?: 'newest' | 'oldest' | 'most-upvoted' | 'most-commented'
   verified?: boolean
+  limit?: number
+  page?: number
 }
 
 export const COMMUNITY_SORT_OPTIONS: { value: string; label: string }[] = [

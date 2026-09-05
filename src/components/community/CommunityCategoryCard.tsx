@@ -1,33 +1,7 @@
 import { Link } from 'react-router-dom'
-import {
-  MapPin,
-  AlertTriangle,
-  Car,
-  Zap,
-  Droplets,
-  Trash2,
-  Hammer,
-  Shield,
-  Bus,
-  Camera,
-  ArrowRight,
-} from 'lucide-react'
+import { MapPin, ArrowRight } from 'lucide-react'
 import type { CommunityCategoryItem } from '../../data/communityCategories'
 import type { CommunityCategory } from '../../types/community'
-import type { ComponentType } from 'react'
-
-const ICON_MAP: Record<string, ComponentType<{ size?: number; className?: string }>> = {
-  MapPin,
-  AlertTriangle,
-  Car,
-  Zap,
-  Droplets,
-  Trash2,
-  Hammer,
-  Shield,
-  Bus,
-  Camera,
-}
 
 interface CategoryCardProps {
   category: CommunityCategoryItem
@@ -35,7 +9,7 @@ interface CategoryCardProps {
 }
 
 export function CommunityCategoryCard({ category, reportCount }: CategoryCardProps) {
-  const Icon = ICON_MAP[category.icon] || MapPin
+  const Icon = category.icon || MapPin
 
   return (
     <Link to={category.path} className="category-card" role="listitem">

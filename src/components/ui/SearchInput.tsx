@@ -12,7 +12,10 @@ interface SearchInputProps {
   className?: string
   ariaLabel?: string
   autoFocus?: boolean
+  id?: string
 }
+
+export type { SearchInputProps }
 
 export const SearchInput = Object.assign(
   (function SearchInput({

@@ -7,6 +7,7 @@ interface SectionHeadingProps {
   align?: 'left' | 'center'
   action?: ReactNode
   id?: string
+  className?: string
 }
 
 export function SectionHeading({
@@ -16,9 +17,10 @@ export function SectionHeading({
   align = 'center',
   action,
   id,
+  className = '',
 }: SectionHeadingProps) {
   return (
-    <div className={`section-heading section-heading--${align}`} id={id}>
+    <div className={`section-heading section-heading--${align} ${className}`} id={id}>
       {eyebrow ? <p className="section-heading__eyebrow">{eyebrow}</p> : null}
       <h2 className="section-heading__title">{title}</h2>
       {subtitle ? <p className="section-heading__subtitle">{subtitle}</p> : null}

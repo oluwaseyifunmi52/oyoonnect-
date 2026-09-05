@@ -12,8 +12,8 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
   return (
     <div className="profile-header">
       <div className="profile-header__meta">
-        <Badge tone="brand">{business.category}</Badge>
-        {business.verified ? <Badge tone="verified">Verified</Badge> : null}
+        <Badge variant="brand">{business.category}</Badge>
+        {business.verified ? <Badge variant="success">Verified</Badge> : null}
       </div>
 
       <h1 className="profile-header__name">{business.name}</h1>

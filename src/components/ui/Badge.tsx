@@ -1,8 +1,8 @@
 import type { HTMLAttributes, ReactNode, ForwardRefExoticComponent, RefAttributes } from 'react'
 import './Badge.css'
 
-type BadgeVariant = 'brand' | 'success' | 'warning' | 'error' | 'neutral' | 'info'
-type BadgeSize = 'sm' | 'md'
+export type BadgeVariant = 'brand' | 'success' | 'warning' | 'error' | 'neutral' | 'info'
+export type BadgeSize = 'sm' | 'md'
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant

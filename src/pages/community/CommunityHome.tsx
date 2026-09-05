@@ -8,11 +8,10 @@ import {
   Shield,
   CheckCircle,
   AlertCircle,
-  type LucideIcon,
 } from 'lucide-react'
 import { communityCategories } from '../../data/communityCategories'
 import { communityReportsService } from '../../services/communityReportsService'
-import type { CommunityReportStats, CommunityCategory } from '../../types/community'
+import type { CommunityReportStats, CommunityReport } from '../../types/community'
 import { Button, ButtonLink, Card, Badge, Skeleton, SearchInput } from '../../components/ui'
 import { SectionHeading } from '../../components/ui/SectionHeading'
 
@@ -26,7 +25,7 @@ const STAT_CARDS = [
 export function CommunityHome() {
   const [stats, setStats] = useState<CommunityReportStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
-  const [reports, setReports] = useState<CommunityCategory[]>([])
+  const [reports, setReports] = useState<CommunityReport[]>([])
   const [reportsLoading, setReportsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -164,7 +163,9 @@ export function CommunityHome() {
           />
 
           <div className="community-category-grid" role="list" aria-label="Report categories">
-            {communityCategories.map((category) => (
+            {communityCategories.map((category) => {
+              const Icon = category.icon
+              return (
               <Link
                 key={category.slug}
                 to={`/community/${category.slug}`}
@@ -172,14 +173,15 @@ export function CommunityHome() {
                 role="listitem"
               >
                 <span className="community-category-card__icon" aria-hidden="true" style={{ background: `${category.color}15`, color: category.color }}>
-                  <category.icon size={24} />
+                  <Icon size={24} />
                 </span>
                 <div className="community-category-card__content">
                   <span className="community-category-card__name">{category.name}</span>
                   <span className="community-category-card__desc">{category.description}</span>
                 </div>
               </Link>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>

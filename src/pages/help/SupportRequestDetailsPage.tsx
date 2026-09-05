@@ -277,7 +277,7 @@ export function SupportRequestDetailsPage() {
                     <li key={index} className="support-details__document">
                       <FileText size={18} aria-hidden="true" />
                       <span>{doc}</span>
-                      <Badge tone="verified">Verified</Badge>
+                      <Badge variant="success">Verified</Badge>
                     </li>
                   ))}
                 </ul>

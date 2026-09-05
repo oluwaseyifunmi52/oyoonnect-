@@ -1,9 +1,9 @@
-import { useEffect, useRef, type ReactNode, type KeyboardEvent, type ForwardRefExoticComponent, type RefAttributes } from 'react'
+import { useEffect, useRef, type ReactNode, type ForwardRefExoticComponent, type RefAttributes } from 'react'
 import { X } from 'lucide-react'
 import './Modal.css'
 import { createPortal } from 'react-dom'
 
-interface ModalProps {
+export interface ModalProps {
   isOpen: boolean
   onClose: () => void
   title?: string

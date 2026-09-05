@@ -293,7 +293,7 @@ export function JobsListing() {
                     <Select
                       id="filter-employment"
                       value={activeType}
-                      onChange={(v) => updateFilters({ employmentType: v || undefined })}
+                      onChange={(v) => updateFilters({ employmentType: (v || undefined) as EmploymentType | undefined })}
                       placeholder="All types"
                       options={[
                         { value: '', label: 'All types' },

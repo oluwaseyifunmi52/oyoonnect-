@@ -1,16 +1,8 @@
 import { Link } from 'react-router-dom'
 import {
   MapPin,
-  AlertTriangle,
-  AlertCircle,
-  Car,
-  Zap,
-  Droplets,
-  Trash2,
-  Hammer,
   Shield,
-  Bus,
-  Camera,
+  AlertCircle,
   Clock,
   ThumbsUp,
   MessageCircle,
@@ -19,20 +11,6 @@ import { ReportStatusBadge } from './ReportStatusBadge'
 import { formatRelativeTime } from './utils'
 import { communityCategoryBySlug } from '../../data/communityCategories'
 import type { CommunityReport } from '../../types/community'
-import type { ComponentType } from 'react'
-
-const ICON_MAP: Record<string, ComponentType<{ size?: number; className?: string }>> = {
-  MapPin,
-  AlertTriangle,
-  Car,
-  Zap,
-  Droplets,
-  Trash2,
-  Hammer,
-  Shield,
-  Bus,
-  Camera,
-}
 
 interface ReportCardProps {
   report: CommunityReport
@@ -40,7 +18,7 @@ interface ReportCardProps {
 
 export function CommunityReportCard({ report }: ReportCardProps) {
   const category = communityCategoryBySlug(report.category)
-  const Icon = (category && ICON_MAP[category.icon]) || MapPin
+  const Icon = (category && category.icon) || MapPin
 
   return (
     <article className="report-card" role="listitem">
