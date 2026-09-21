@@ -1,0 +1,58 @@
+/* ==========================================================================
+    SESSION SECTION — Sign-out action link
+    ========================================================================== */
+
+.session-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.session-section__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.session-section__label {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
+
+.session-section__hint {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.session-section__signout {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border: none;
+  background: transparent;
+  color: var(--brand);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  padding: var(--space-1) 0;
+  transition: color var(--transition-fast), gap var(--transition-fast);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.session-section__signout:hover {
+  color: var(--brand-dark);
+  gap: var(--space-2);
+}
+
+@media (max-width: 480px) {
+  .session-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

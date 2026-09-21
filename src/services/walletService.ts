@@ -1,3 +1,10 @@
+/**
+ * DEVELOPMENT-ONLY wallet service.
+ *
+ * Uses localStorage for local dev state. In production this will be
+ * replaced by API calls through apiClient. Do not treat the balances
+ * or transactions here as real.
+ */
 import type {
   Wallet,
   VirtualAccount,
@@ -27,68 +34,14 @@ function generateVirtualAccount(): VirtualAccount {
 
 const defaultWallet: Wallet = {
   userId: 'dev-user',
-  balance: 125500,
+  balance: 0,
   currency: 'NGN',
   lastUpdated: new Date().toISOString(),
-  isVerified: true,
-  kycStatus: 'verified',
-  kycCompletedAt: new Date().toISOString(),
+  isVerified: false,
+  kycStatus: 'unverified',
 }
 
-const defaultTransactions: WalletTransaction[] = [
-  {
-    id: 'wt-001',
-    walletId: 'wallet-001',
-    type: 'credit',
-    amount: 50000,
-    balanceBefore: 75500,
-    balanceAfter: 125500,
-    description: 'Bank transfer funding',
-    reference: 'ft_50000_001',
-    status: 'completed',
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'wt-002',
-    walletId: 'wallet-001',
-    type: 'debit',
-    amount: 500,
-    balanceBefore: 125500,
-    balanceAfter: 125000,
-    description: 'Data plan purchase (MTN 5GB)',
-    reference: 'txn_mtn5gb_001',
-    status: 'completed',
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'wt-003',
-    walletId: 'wallet-001',
-    type: 'debit',
-    amount: 50,
-    balanceBefore: 125000,
-    balanceAfter: 124950,
-    description: 'Platform fee - Airtime recharge',
-    reference: 'fee_airtime_002',
-    status: 'completed',
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'wt-004',
-    walletId: 'wallet-001',
-    type: 'credit',
-    amount: 5000,
-    balanceBefore: 124950,
-    balanceAfter: 129950,
-    description: 'Cashback from referral',
-    reference: 'ref_cashback_001',
-    status: 'completed',
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-]
+const defaultTransactions: WalletTransaction[] = []
 
 function getStoredWallet(): Wallet | null {
   try {
@@ -102,7 +55,9 @@ function getStoredWallet(): Wallet | null {
 function setStoredWallet(wallet: Wallet): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(wallet))
-  } catch {}
+  } catch {
+    // ignore storage errors
+  }
 }
 
 function getStoredTransactions(): WalletTransaction[] {
@@ -117,7 +72,9 @@ function getStoredTransactions(): WalletTransaction[] {
 function setStoredTransactions(transactions: WalletTransaction[]): void {
   try {
     localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions))
-  } catch {}
+  } catch {
+    // ignore storage errors
+  }
 }
 
 function getStoredVirtualAccount(): VirtualAccount | null {
@@ -132,7 +89,9 @@ function getStoredVirtualAccount(): VirtualAccount | null {
 function setStoredVirtualAccount(account: VirtualAccount): void {
   try {
     localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account))
-  } catch {}
+  } catch {
+    // ignore storage errors
+  }
 }
 
 export const walletService = {

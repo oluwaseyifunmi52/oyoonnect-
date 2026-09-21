@@ -1,18 +1,16 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { X } from 'lucide-react'
-import type { SupportRequest, HelpCategoryType, HelpFilters } from '../../types/help'
+import type { SupportRequest, HelpCategoryType, HelpFilters, SupportRequestStatus } from '../../types/help'
 import { HELP_CATEGORIES } from '../../types/help'
 import {
   SupportRequestCard,
-  LoadingState,
   ErrorState,
   HelpEmptyState,
 } from '../../components/help'
 import { SearchInput } from '../../components/ui/SearchInput'
 import { Select } from '../../components/ui/Input'
 import { Card } from '../../components/ui/Card'
-import { Badge } from '../../components/ui/Badge'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { helpService } from '../../services/helpService'
 
@@ -29,24 +27,35 @@ const CATEGORY_OPTIONS = [
   ...HELP_CATEGORIES.map((c) => ({ value: c.id, label: c.name, icon: c.icon })),
 ]
 
+const STATUS_OPTIONS: { value: string; label: string }[] = [
+  { value: 'all', label: 'All Statuses' },
+  { value: 'active', label: 'Active' },
+  { value: 'pending_review', label: 'Pending Review' },
+  { value: 'resolved', label: 'Resolved' },
+  { value: 'closed', label: 'Closed' },
+]
+
 export function HelpRequestsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [requests, setRequests] = useState<SupportRequest[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedLocation, setSelectedLocation] = useState('all')
+  const [selectedStatus, setSelectedStatus] = useState('all')
 
   const query = searchParams.get('q') || ''
   const categoryParam = searchParams.get('category') || 'all'
   const sortParam = (searchParams.get('sort') as HelpFilters['sort']) || 'recent'
+  const statusParam = searchParams.get('status') || 'all'
 
-  const loadRequests = async () => {
+  const loadRequests = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
       const data = await helpService.search({
         category: categoryParam !== 'all' ? (categoryParam as HelpCategoryType) : undefined,
         sort: sortParam,
+        status: statusParam !== 'all' ? (statusParam as SupportRequestStatus) : undefined,
         limit: 20,
       })
       setRequests(data)
@@ -55,11 +64,11 @@ export function HelpRequestsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [categoryParam, sortParam, statusParam])
 
   useEffect(() => {
     loadRequests()
-  }, [categoryParam, sortParam])
+  }, [loadRequests])
 
   const locationOptions = useMemo(() => {
     const unique = Array.from(
@@ -123,7 +132,7 @@ export function HelpRequestsPage() {
   }
 
   const hasActiveFilters =
-    query !== '' || categoryParam !== 'all' || sortParam !== 'recent' || selectedLocation !== 'all'
+    query !== '' || categoryParam !== 'all' || sortParam !== 'recent' || selectedLocation !== 'all' || statusParam !== 'all'
 
   const skeletonCards = Array(6).fill(0).map((_, i) => (
     <Card key={i} variant="skeleton" className="skeleton-card">
@@ -179,6 +188,23 @@ export function HelpRequestsPage() {
               />
 
               <Select
+                value={statusParam}
+                onChange={(value) => {
+                  setSearchParams((prev) => {
+                    if (value && value !== 'all') {
+                      prev.set('status', value)
+                    } else {
+                      prev.delete('status')
+                    }
+                    return prev
+                  })
+                }}
+                aria-label="Filter by status"
+                className="help-requests__status-select"
+                options={STATUS_OPTIONS}
+              />
+
+              <Select
                 value={selectedLocation}
                 onChange={setSelectedLocation}
                 aria-label="Filter by location"
@@ -210,7 +236,7 @@ export function HelpRequestsPage() {
             </div>
           </div>
         </div>
-<div className="help-requests__grid" role="list" aria-label="Support requests">
+        <div className="help-requests__grid" role="list" aria-label="Support requests">
           {isLoading ? (
             <>{skeletonCards}</>
           ) : error ? (
@@ -231,8 +257,6 @@ export function HelpRequestsPage() {
           )}
         </div>
       </div>
-
-      {filteredRequests.length > 0 && <>{requestCards}</>}
     </div>
   )
 }

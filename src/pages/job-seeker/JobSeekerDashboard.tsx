@@ -1,17 +1,15 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Link, useLocation, NavLink } from 'react-router-dom'
-import { ArrowLeft, Heart, Briefcase, Clock, CheckCircle2, XCircle, User, FileText, Loader2, Plus, Settings, ArrowRight, ExternalLink, MessageSquare, MapPin } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Heart, Clock, CheckCircle2, XCircle, User, FileText, Plus, Settings, ArrowRight, Video, MapPin } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { jobService } from '../../services/jobService'
-import { applicationService } from '../../services/jobService'
-import { profileService } from '../../services/jobService'
-import { savedJobsService } from '../../services/jobService'
-import { formatSalary, getEmploymentTypeLabel, getApplicationMethodLabel, getExperienceLevelLabel } from '../../types/jobs'
+import { jobService, applicationService, profileService, savedJobsService, interviewService } from '../../services/jobService'
+import { formatSalary, getEmploymentTypeLabel } from '../../types/jobs'
 import { formatDate } from '../../utils/date'
 import type { Job, JobApplication, JobSeekerProfile } from '../../types/jobs'
-import { DashboardHeader, QuickActionCard, StatCard, ActivityList, DashboardSkeleton } from '../../components/dashboard'
+import { DashboardHeader, StatCard, DashboardSkeleton } from '../../components/dashboard'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { ButtonLink } from '../../components/ui/Button'
+import { Badge } from '../../components/ui/Badge'
 import type { LucideIcon } from 'lucide-react'
 
 const TABS = [
@@ -23,12 +21,33 @@ const TABS = [
 
 export default function JobSeekerDashboard() {
   const { user, isAuthenticated, initializing } = useAuth()
-  const location = useLocation()
-  const [activeTab, setActiveTab] = useState<'overview' | 'applications' | 'saved' | 'profile'>('overview')
+  
+  // Get initial tab from URL hash, default to 'overview'
+  const getInitialTab = (): 'overview' | 'applications' | 'saved' | 'profile' => {
+    const hash = window.location.hash.slice(1)
+    const validTabs = ['overview', 'applications', 'saved', 'profile']
+    return validTabs.includes(hash) ? hash as 'overview' | 'applications' | 'saved' | 'profile' : 'overview'
+  }
+  
+  const [activeTab, setActiveTab] = useState<'overview' | 'applications' | 'saved' | 'profile'>(getInitialTab)
+
+  // Sync URL hash with activeTab
+  useEffect(() => {
+    const hash = window.location.hash.slice(1)
+    if (hash && hash !== activeTab) {
+      setActiveTab(hash as 'overview' | 'applications' | 'saved' | 'profile')
+    }
+  }, [])
+
+  const handleTabChange = (tab: 'overview' | 'applications' | 'saved' | 'profile') => {
+    setActiveTab(tab)
+    window.location.hash = tab
+  }
   const [loading, setLoading] = useState(true)
   const [applications, setApplications] = useState<JobApplication[]>([])
   const [savedJobs, setSavedJobs] = useState<Job[]>([])
   const [profile, setProfile] = useState<JobSeekerProfile | undefined>()
+  const [applicationsWithInterviews, setApplicationsWithInterviews] = useState<Set<string>>(new Set())
 
   const [stats, setStats] = useState({
     totalApplications: 0,
@@ -52,6 +71,14 @@ export default function JobSeekerDashboard() {
         setApplications(apps)
         setSavedJobs(saved)
         setProfile(prof)
+
+        const interviewChecks = await Promise.all(
+          apps.map(a => interviewService.getByApplication(a.jobId, a.id))
+        )
+        const appsWithInterviews = new Set(
+          interviewChecks.map((interviews, idx) => interviews.length > 0 ? apps[idx].id : null).filter(Boolean) as string[]
+        )
+        setApplicationsWithInterviews(appsWithInterviews)
 
         setStats({
           totalApplications: apps.length,
@@ -133,16 +160,25 @@ export default function JobSeekerDashboard() {
 
       <section className="dash-section" aria-label="Overview stats">
         <div className="dash-stats">
-          <StatCard label="Total Applications" value={stats.totalApplications} icon={FileText} />
-          <StatCard label="Under Review" value={stats.pending} icon={Clock} hint="Pending review" />
-          <StatCard label="Shortlisted" value={stats.shortlisted} icon={CheckCircle2} hint="Shortlisted" />
-          <StatCard label="Saved Jobs" value={stats.savedJobs} icon={Heart} />
+        <StatCard label="Total Applications" value={stats.totalApplications} icon={FileText} loading={loading} />
+          <StatCard label="Under Review" value={stats.pending} icon={Clock} hint="Pending review" loading={loading} />
+          <StatCard label="Shortlisted" value={stats.shortlisted} icon={CheckCircle2} loading={loading} />
+          <StatCard label="Saved Jobs" value={stats.savedJobs} icon={Heart} loading={loading} />
         </div>
       </section>
 
       <section className="dash-section" aria-label="Quick actions">
         <div className="quick-action-grid">
-          <QuickActionCard to="/jobs" icon={Plus} title="Browse Jobs" description="Find new job opportunities." cta="Browse Jobs" />
+          <Link to="/jobs" className="browse-jobs-card">
+            <span className="browse-jobs-card__icon" aria-hidden="true">
+              <Plus size={20} />
+            </span>
+            <h3 className="browse-jobs-card__title">Find new job opportunities</h3>
+            <p className="browse-jobs-card__desc">Browse available jobs matching your interests and skills.</p>
+            <span className="browse-jobs-card__cta">
+              Browse Jobs <ArrowRight size={16} />
+            </span>
+          </Link>
         </div>
       </section>
 
@@ -150,23 +186,23 @@ export default function JobSeekerDashboard() {
         <section className="dash-panel" aria-labelledby="overview-tabs">
           <h2 id="overview-tabs" className="dash-panel__title">Dashboard</h2>
           <div className="dashboard-tabs" role="tablist" aria-label="Dashboard sections">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                className={`dash-tab ${activeTab === tab.id ? 'is-active' : ''}`}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                role="tab"
-                aria-selected={activeTab === tab.id}
-              >
-                <tab.icon size={18} aria-hidden="true" />
-                {tab.label}
-              </button>
-            ))}
+{TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`dash-tab ${activeTab === tab.id ? 'is-active' : ''}`}
+                  onClick={() => handleTabChange(tab.id as typeof activeTab)}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                >
+                  <tab.icon size={18} aria-hidden="true" />
+                  {tab.label}
+                </button>
+              ))}
           </div>
 
-          {activeTab === 'overview' && (
-            <div role="tabpanel" aria-labelledby="overview-heading">
-              <h3 id="overview-heading" className="dash-panel__title">Recent Applications</h3>
+            {activeTab === 'overview' && (
+            <div role="tabpanel" aria-labelledby="overview-heading" className="dashboard-tabpanel">
+              <h3 id="overview-heading" className="dash-panel__section-title">Recent Applications</h3>
               {recentApplications.length > 0 ? (
                 <ul className="activity-list">
                   {recentApplications.map((app) => {
@@ -189,7 +225,8 @@ export default function JobSeekerDashboard() {
                 </ul>
               ) : (
                 <EmptyState
-                  icon={<FileText size={28} />}
+                  className="dash-empty-state"
+                  icon={<FileText size={24} />}
                   title="No applications yet"
                   description="Start applying to jobs to see them here."
                   action={<ButtonLink to="/jobs" variant="primary" size="sm">Browse Jobs</ButtonLink>}
@@ -199,8 +236,8 @@ export default function JobSeekerDashboard() {
           )}
 
           {activeTab === 'applications' && (
-            <div role="tabpanel" aria-labelledby="applications-heading">
-              <h3 id="applications-heading" className="dash-panel__title">My Applications</h3>
+            <div role="tabpanel" aria-labelledby="applications-heading" className="dashboard-tabpanel">
+              <h3 id="applications-heading" className="dash-panel__section-title">My Applications</h3>
               {applications.length > 0 ? (
                 <div className="applications-table">
                   <table>
@@ -210,6 +247,7 @@ export default function JobSeekerDashboard() {
                         <th>Employer</th>
                         <th>Applied</th>
                         <th>Status</th>
+                        <th>Interview</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -218,6 +256,7 @@ export default function JobSeekerDashboard() {
                         const job = applicationJobs.get(app.jobId)
                         const config = getStatusConfig(app.status)
                         const Icon = config.icon
+                        const hasInterview = applicationsWithInterviews.has(app.id)
                         return (
                           <tr key={app.id}>
                             <td>
@@ -234,9 +273,25 @@ export default function JobSeekerDashboard() {
                               </span>
                             </td>
                             <td>
-                              <Link to={`/jobs/${app.jobId}`} className="btn btn--ghost btn--sm">
+                              {hasInterview ? (
+                                <Badge variant="brand" size="sm">
+                                  <Video size={12} /> Scheduled
+                                </Badge>
+                              ) : (
+                                <ButtonLink
+                                  to={`/jobs/${app.jobId}/applicants/${app.id}/interview/schedule`
+                                  }
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  Schedule
+                                </ButtonLink>
+                              )}
+                            </td>
+                            <td>
+                              <ButtonLink to={`/jobs/${app.jobId}`} variant="ghost" size="sm">
                                 View
-                              </Link>
+                              </ButtonLink>
                             </td>
                           </tr>
                         )
@@ -246,7 +301,8 @@ export default function JobSeekerDashboard() {
                 </div>
               ) : (
                 <EmptyState
-                  icon={<FileText size={28} />}
+                  className="dash-empty-state"
+                  icon={<FileText size={24} />}
                   title="No applications yet"
                   description="Your job applications will appear here once you start applying."
                   action={<ButtonLink to="/jobs" variant="primary" size="sm">Browse Jobs</ButtonLink>}
@@ -256,8 +312,8 @@ export default function JobSeekerDashboard() {
           )}
 
           {activeTab === 'saved' && (
-            <div role="tabpanel" aria-labelledby="saved-heading">
-              <h3 id="saved-heading" className="dash-panel__title">Saved Jobs</h3>
+            <div role="tabpanel" aria-labelledby="saved-heading" className="dashboard-tabpanel">
+              <h3 id="saved-heading" className="dash-panel__section-title">Saved Jobs</h3>
               {savedJobs.length > 0 ? (
                 <div className="saved-jobs-grid">
                   {savedJobs.map((job) => (
@@ -284,7 +340,7 @@ export default function JobSeekerDashboard() {
                         <span className="saved-job-type">{getEmploymentTypeLabel(job.employmentType)}</span>
                         <span className="saved-job-salary">{job.salary ? formatSalary(job.salary) : 'Negotiable'}</span>
                       </div>
-                      <div className="saved-job-actions">
+                    <div className="saved-job-actions">
                         <Link to={`/jobs/${job.id}`} className="btn btn--outline btn--sm">
                           View Details
                         </Link>
@@ -297,7 +353,8 @@ export default function JobSeekerDashboard() {
                 </div>
               ) : (
                 <EmptyState
-                  icon={<Heart size={28} />}
+                  className="dash-empty-state"
+                  icon={<Heart size={24} />}
                   title="No saved jobs"
                   description="Save jobs you're interested in to compare and apply later."
                   action={<ButtonLink to="/jobs" variant="primary" size="sm">Browse Jobs</ButtonLink>}
@@ -307,8 +364,8 @@ export default function JobSeekerDashboard() {
           )}
 
           {activeTab === 'profile' && (
-            <div role="tabpanel" aria-labelledby="profile-heading">
-              <h3 id="profile-heading" className="dash-panel__title">My Profile</h3>
+            <div role="tabpanel" aria-labelledby="profile-heading" className="dashboard-tabpanel">
+              <h3 id="profile-heading" className="dash-panel__section-title">My Profile</h3>
               <div className="profile-editor">
                 <div className="profile-editor__avatar">
                   {user.avatar ? (
@@ -365,9 +422,9 @@ export default function JobSeekerDashboard() {
                       </div>
                     </>
                   )}
-                  <Link to="/profile" className="btn btn--primary">
+                  <ButtonLink to="/profile" variant="primary">
                     <Settings size={18} /> Edit Profile
-                  </Link>
+                  </ButtonLink>
                 </div>
               </div>
             </div>

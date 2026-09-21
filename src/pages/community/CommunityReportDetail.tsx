@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import { ButtonLink } from '../../components/ui/Button'
+import { BackButton } from '../../components/ui/BackButton'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { SkeletonCard } from '../../components/ui/Skeleton'
 import { CommunityReportDetails } from '../../components/community/CommunityReportDetails'
@@ -83,9 +84,7 @@ export function CommunityReportDetail() {
     return (
       <main className="page community-report-detail">
         <div className="container">
-          <ButtonLink to="/community" variant="ghost" className="page-back-link">
-            <ArrowLeft size={18} />
-          </ButtonLink>
+          <BackButton fallback="/community" variant="ghost" size="sm" className="page-back-link" showLabel={false} />
           <div className="skeleton-grid">
             {Array.from({ length: 3 }).map((_, i) => (
               <SkeletonCard key={i} />
@@ -99,9 +98,7 @@ export function CommunityReportDetail() {
   if (error || !report) {
     return (
       <main className="page community-report-detail container">
-        <ButtonLink to="/community" variant="ghost" className="page-back-link">
-          <ArrowLeft size={18} />
-        </ButtonLink>
+        <BackButton fallback="/community" variant="ghost" size="sm" className="page-back-link" showLabel={false} />
         <EmptyState
           icon={<MapPin size={48} />}
           title={error || 'Report not found'}
@@ -123,9 +120,7 @@ export function CommunityReportDetail() {
   return (
     <main className="page community-report-detail">
       <div className="container">
-        <ButtonLink to="/community" variant="ghost" className="page-back-link">
-          <ArrowLeft size={18} />
-        </ButtonLink>
+        <BackButton fallback="/community" variant="ghost" size="sm" className="page-back-link" showLabel={false} />
 
         <CommunityReportDetails
           report={report}

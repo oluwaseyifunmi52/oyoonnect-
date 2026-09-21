@@ -1,3 +1,9 @@
+/**
+ * DEVELOPMENT-ONLY data layer for Help/Support Requests.
+ *
+ * All arrays are empty. This file is used by helpService.ts during
+ * local development. In production this will be replaced by API calls.
+ */
 import type { SupportRequest, HelpCategoryType } from '../types/help'
 
 export const helpRequests: SupportRequest[] = []

@@ -1,3 +1,10 @@
+/**
+ * DEVELOPMENT-ONLY affiliate service.
+ *
+ * Uses localStorage for local dev state. In production this will be
+ * replaced by API calls through apiClient. Do not treat any earnings
+ * or withdrawal data here as real.
+ */
 import type {
   Affiliate,
   Referral,
@@ -29,7 +36,9 @@ function getStoredWithdrawals(): Withdrawal[] {
 function saveWithdrawals(withdrawals: Withdrawal[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(withdrawals))
-  } catch {}
+  } catch {
+    // ignore storage errors
+  }
 }
 
 export { defaultAffiliate, defaultReferrals, defaultCommissions, defaultWithdrawals }

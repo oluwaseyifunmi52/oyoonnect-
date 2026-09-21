@@ -22,12 +22,14 @@ const About = lazy(() => import('./pages/About'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const SavedBusinesses = lazy(() => import('./pages/SavedBusinesses'))
-const Profile = lazy(() => import('./pages/Profile'))
+const ProfileSettings = lazy(() => import('./pages/ProfileSettings'))
 const Settings = lazy(() => import('./pages/Settings'))
 const SettingsNotifications = lazy(() => import('./pages/SettingsNotifications'))
 const SettingsAppearance = lazy(() => import('./pages/SettingsAppearance'))
 const SettingsPrivacy = lazy(() => import('./pages/SettingsPrivacy'))
 const SettingsSecurity = lazy(() => import('./pages/SettingsSecurity'))
+const Terms = lazy(() => import('./pages/Terms'))
+const Privacy = lazy(() => import('./pages/Privacy'))
 const Notifications = lazy(() => import('./pages/Notifications'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const PendingListings = lazy(() => import('./pages/admin/PendingListings'))
@@ -43,6 +45,14 @@ const AdminCommunity = lazy(() => import('./pages/admin/AdminCommunity'))
 const AdminHelp = lazy(() => import('./pages/admin/AdminHelp'))
 const AdminReports = lazy(() => import('./pages/admin/AdminReports'))
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
+const AdminProviders = lazy(() => import('./pages/admin/AdminProviders'))
+const AdminServices = lazy(() => import('./pages/admin/AdminServices'))
+const AdminServiceRequests = lazy(() => import('./pages/admin/AdminServiceRequests'))
+const AdminNotifications = lazy(() => import('./pages/admin/AdminNotifications'))
+const AdminAuditLogs = lazy(() => import('./pages/admin/AdminAuditLogs'))
+const AdminPayouts = lazy(() => import('./pages/admin/AdminPayouts'))
+const AdminJobApplications = lazy(() => import('./pages/admin/AdminJobApplications'))
+const AdminCommunityModeration = lazy(() => import('./pages/admin/AdminCommunityModeration'))
 const Categories = lazy(() => import('./pages/Categories'))
 
 const BusinessPortal = lazy(() => import('./pages/BusinessPortal'))
@@ -69,6 +79,7 @@ const Unauthorized = lazy(() => import('./pages/Unauthorized'))
 const JobsListing = lazy(() => import('./pages/jobs/JobsListing'))
 const JobDetail = lazy(() => import('./pages/jobs/JobDetail'))
 const PostJob = lazy(() => import('./pages/jobs/PostJob'))
+const InterviewSchedule = lazy(() => import('./pages/jobs/InterviewSchedule'))
 
 const JobSeekerDashboard = lazy(() => import('./pages/job-seeker/JobSeekerDashboard'))
 const JobSeekerLayout = lazy(() => import('./pages/job-seeker/JobSeekerLayout'))
@@ -189,11 +200,12 @@ function App() {
             </Route>
 
             {/* JOBS LAYOUT - Jobs discovery and posting */}
-            <Route element={<JobsLayout />}>
-              <Route path="/jobs" element={<JobsListing />} />
-              <Route path="/jobs/:id" element={<JobDetail />} />
-              <Route path="/jobs/post" element={<PostJob />} />
-            </Route>
+<Route element={<JobsLayout />}>
+  <Route path="/jobs" element={<JobsListing />} />
+  <Route path="/jobs/:id" element={<JobDetail />} />
+  <Route path="/jobs/post" element={<PostJob />} />
+  <Route path="/jobs/:jobId/applicants/:applicationId/interview/schedule" element={<ProtectedRoute><InterviewSchedule /></ProtectedRoute>} />
+</Route>
 
             {/* COMMUNITY LAYOUT - Community features */}
             <Route element={<CommunityLayout />}>
@@ -246,7 +258,7 @@ function App() {
                 <Route path="/services/wallet" element={<ComingSoon feature="Wallet" description="Manage your funds and transactions." />} />
                 <Route path="/services/wallet/fund" element={<ComingSoon feature="Wallet Funding" description="Add funds to your wallet." />} />
                 <Route path="/services/transactions" element={<ComingSoon feature="Transactions" description="View your transaction history." />} />
-                <Route path="/services/profile" element={<Profile />} />
+                <Route path="/services/profile" element={<ProfileSettings />} />
               </Route>
             </Route>
 
@@ -268,8 +280,8 @@ function App() {
             <Route element={<ProtectedRoute><UserLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<UserDashboard />} />
               <Route path="/user/dashboard" element={<UserDashboard />} />
-              <Route path="/user/profile" element={<Profile />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/user/profile" element={<ProfileSettings />} />
+              <Route path="/profile" element={<ProfileSettings />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/settings/notifications" element={<SettingsNotifications />} />
               <Route path="/settings/appearance" element={<SettingsAppearance />} />
@@ -329,11 +341,19 @@ function App() {
             <Route path="/admin/categories" element={<AdminLayout><AdminCategories /></AdminLayout>} />
             <Route path="/admin/verification" element={<AdminLayout><AdminVerification /></AdminLayout>} />
             <Route path="/admin/jobs" element={<AdminLayout><AdminJobs /></AdminLayout>} />
+            <Route path="/admin/job-applications" element={<AdminLayout><AdminJobApplications /></AdminLayout>} />
             <Route path="/admin/job-categories" element={<AdminLayout><AdminJobCategories /></AdminLayout>} />
             <Route path="/admin/community" element={<AdminLayout><AdminCommunity /></AdminLayout>} />
+            <Route path="/admin/community/moderation" element={<AdminLayout><AdminCommunityModeration /></AdminLayout>} />
             <Route path="/admin/help" element={<AdminLayout><AdminHelp /></AdminLayout>} />
+            <Route path="/admin/payouts" element={<AdminLayout><AdminPayouts /></AdminLayout>} />
             <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
             <Route path="/admin/reports" element={<AdminLayout><AdminReports /></AdminLayout>} />
+            <Route path="/admin/providers" element={<AdminLayout><AdminProviders /></AdminLayout>} />
+            <Route path="/admin/services" element={<AdminLayout><AdminServices /></AdminLayout>} />
+            <Route path="/admin/service-requests" element={<AdminLayout><AdminServiceRequests /></AdminLayout>} />
+            <Route path="/admin/notifications" element={<AdminLayout><AdminNotifications /></AdminLayout>} />
+            <Route path="/admin/audit-logs" element={<AdminLayout><AdminAuditLogs /></AdminLayout>} />
             <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
 
             {/* Legacy owner / business-office dashboards consolidated */}
@@ -348,6 +368,8 @@ function App() {
 
             {/* Legal pages */}
             <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </ErrorBoundary>

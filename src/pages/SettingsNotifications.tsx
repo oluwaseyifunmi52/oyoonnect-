@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Bell, Mail, Store, Heart, TrendingUp, AlertTriangle } from 'lucide-react'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { useAuth } from '../context/AuthContext'
+import { BackButton } from '../components/ui/BackButton'
 
 type NotificationKey = 
   | 'serviceUpdates'
@@ -99,6 +100,7 @@ export function SettingsNotifications() {
   return (
     <main className="page">
       <div className="container container--narrow">
+        <BackButton fallback="/settings" label="Back to settings" variant="ghost" size="sm" className="page-back-link" />
         <header className="settings-page-header">
           <h1>Notifications</h1>
           <p>Choose which updates you want to receive and how you want to receive them.</p>

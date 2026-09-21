@@ -5,7 +5,9 @@ import type {
   JobFormData,
   JobFilters,
   JobStatus,
+  Interview,
 } from '../types/jobs'
+import { notificationService } from './notificationService'
 import {
   jobs,
   jobById,
@@ -23,6 +25,7 @@ import {
   savedJobs,
   getSavedJobIds,
   getSavedJobs,
+  interviews,
 } from '../data/jobs'
 
 const STORAGE_SAVED_KEY = 'saved_jobs'
@@ -185,6 +188,13 @@ export const applicationService = {
     applicantMessage?: string
     cvUrl?: string
   }): Promise<JobApplication> {
+    const existing = applications.find(
+      (a) => a.jobId === application.jobId && a.applicantId === application.applicantId
+    )
+    if (existing) {
+      throw new Error('You have already applied to this job')
+    }
+
     const newApplication: JobApplication = {
       id: `app-${Date.now()}`,
       jobId: application.jobId,
@@ -223,6 +233,191 @@ export const applicationService = {
         application.reviewedAt = new Date().toISOString()
       }
     }
+  },
+}
+
+export const interviewService = {
+  async getById(id: string): Promise<Interview | undefined> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(interviews.find((interview) => interview.id === id))
+      }, 100)
+    })
+  },
+
+  async getByApplication(
+    jobId: string,
+    applicationId: string
+  ): Promise<Interview[]> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(interviews.filter((interview) => interview.jobId === jobId && interview.applicationId === applicationId))
+      }, 100)
+    })
+  },
+
+  async getByCandidate(candidateId: string): Promise<Interview[]> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(interviews.filter((interview) => interview.candidateId === candidateId))
+      }, 100)
+    })
+  },
+
+  async getByEmployer(employerId: string): Promise<Interview[]> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(interviews.filter((interview) => interview.employerId === employerId))
+      }, 100)
+    })
+  },
+
+  async scheduleInterview(
+    interviewData: Omit<Interview, 'id' | 'createdAt' | 'updatedAt'> & {
+      jobId: string
+      applicationId: string
+    }
+  ): Promise<Interview> {
+    // Verify application exists and belongs to this job
+    const application = applications.find(
+      (a) => a.id === interviewData.applicationId && a.jobId === interviewData.jobId
+    )
+    if (!application) {
+      throw new Error('Application not found for this job')
+    }
+
+    // Verify employer owns this job
+    const job = jobs.find((j) => j.id === interviewData.jobId)
+    if (!job || job.employerId !== interviewData.employerId) {
+      throw new Error('Unauthorized: You do not own this job')
+    }
+
+    const newInterview: Interview = {
+      id: `int-${Date.now()}`,
+      jobId: interviewData.jobId,
+      applicationId: interviewData.applicationId,
+      candidateId: application.applicantId,
+      employerId: interviewData.employerId,
+      type: interviewData.type,
+      title: interviewData.title,
+      scheduledStart: interviewData.scheduledStart,
+      scheduledEnd: interviewData.scheduledEnd,
+      timezone: interviewData.timezone,
+      meetingUrl: interviewData.meetingUrl,
+      location: interviewData.location,
+      notes: interviewData.notes,
+      status: 'SCHEDULED' as const,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    interviews.push(newInterview)
+
+    // Notify candidate
+    notificationService.addNotification({
+      category: 'job',
+      title: 'Interview Scheduled',
+      message: `You have been scheduled for an interview for the position at ${job.employerName}. Date: ${new Date(interviewData.scheduledStart).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' })}. Time: ${new Date(interviewData.scheduledStart).toLocaleTimeString('en-NG')}.`,
+      read: false,
+      createdAt: new Date().toISOString(),
+      href: `/jobs/${interviewData.jobId}`,
+    })
+
+    // Notify employer
+    notificationService.addNotification({
+      category: 'job',
+      title: 'Interview Scheduled',
+      message: `You have scheduled an interview for applicant ${application.applicantName} for your job "${job.title}".`,
+      read: false,
+      createdAt: new Date().toISOString(),
+      href: `/jobs/${interviewData.jobId}`,
+    })
+
+    return newInterview
+  },
+
+  async updateInterviewStatus(
+    interviewId: string,
+    status: Interview['status']
+  ): Promise<Interview> {
+    const interview = interviews.find((i) => i.id === interviewId)
+    if (!interview) {
+      throw new Error('Interview not found')
+    }
+
+    interview.status = status
+    interview.updatedAt = new Date().toISOString()
+
+    // Notify relevant parties based on status
+    if (status === 'ACCEPTED') {
+      notificationService.addNotification({
+        category: 'job',
+        title: 'Interview Accepted',
+        message: 'The candidate has accepted the interview.',
+        read: false,
+        createdAt: new Date().toISOString(),
+      })
+    } else if (status === 'DECLINED') {
+      notificationService.addNotification({
+        category: 'job',
+        title: 'Interview Declined',
+        message: 'The candidate has declined the interview.',
+        read: false,
+        createdAt: new Date().toISOString(),
+      })
+    } else if (status === 'CANCELLED') {
+      notificationService.addNotification({
+        category: 'job',
+        title: 'Interview Cancelled',
+        message: 'The interview has been cancelled.',
+        read: false,
+        createdAt: new Date().toISOString(),
+      })
+    }
+
+    return interview
+  },
+
+  async updateInterview(
+    interviewId: string,
+    data: Partial<Interview>
+  ): Promise<Interview> {
+    const interview = interviews.find((i) => i.id === interviewId)
+    if (!interview) {
+      throw new Error('Interview not found')
+    }
+
+    // Validate: if switching from video to in-person, meetingUrl should be cleared
+    // and location should be provided, etc.
+    if (data.type && data.type !== interview.type) {
+      // Type changed - could validate meetingUrl/location accordingly
+    }
+
+    Object.assign(interview, data, { updatedAt: new Date().toISOString() })
+    return interview
+  },
+
+  async cancelInterview(
+    interviewId: string,
+    reason: string
+  ): Promise<Interview> {
+    const interview = interviews.find((i) => i.id === interviewId)
+    if (!interview) {
+      throw new Error('Interview not found')
+    }
+
+    interview.status = 'CANCELLED'
+    interview.notes = reason
+    interview.updatedAt = new Date().toISOString()
+
+    notificationService.addNotification({
+      category: 'job',
+      title: 'Interview Cancelled',
+      message: 'The interview has been cancelled.',
+      read: false,
+      createdAt: new Date().toISOString(),
+    })
+
+    return interview
   },
 }
 

@@ -1,0 +1,118 @@
+/* ==========================================================================
+    PROFILE SETTINGS PAGE — Page wrapper for profile cards
+    ========================================================================== */
+
+.profile-settings-page {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-6);
+}
+
+@media (max-width: 480px) {
+  .profile-settings-page {
+    padding: var(--space-6) var(--space-4);
+  }
+}
+
+.profile-settings__header {
+  margin-bottom: var(--space-8);
+}
+
+.profile-settings__title {
+  margin: 0 0 var(--space-1);
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.profile-settings__subtitle {
+  margin: 0;
+  font-size: var(--fs-base);
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 640px;
+}
+
+.profile-settings__sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+@media (max-width: 720px) {
+  .profile-settings__sections {
+    gap: var(--space-5);
+  }
+}
+
+/* Success/Error Messages */
+
+.profile-message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-6);
+}
+
+.profile-message--success {
+  background: var(--success-soft);
+  border: 1px solid var(--success-line);
+  color: var(--success);
+}
+
+.profile-message--error {
+  background: var(--error-soft);
+  border: 1px solid var(--error-line);
+  color: var(--error);
+}
+
+.profile-message__icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.profile-message__content {
+  flex: 1;
+}
+
+.profile-message__text {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+/* Auth fallback */
+
+.profile-auth-fallback {
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.profile-auth-fallback .btn {
+  min-width: 120px;
+}
+
+/* Skeletons */
+
+.profile-settings__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.profile-card-skeleton {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  height: 200px;
+  box-shadow: var(--shadow-xs);
+}
+
+@media (max-width: 480px) {
+  .profile-message {
+    padding: var(--space-3) var(--space-4);
+  }
+}

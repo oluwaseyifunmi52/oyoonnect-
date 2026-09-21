@@ -1,9 +1,10 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { HeartHandshake, ListFilter, PlusCircle } from 'lucide-react'
+import { ListFilter, PlusCircle } from 'lucide-react'
 import { Logo } from '../../components/layout/Logo'
+import { PLATFORM_NAV } from '../../components/navigation/PlatformNav'
 
-const HELP_NAV: { to: string; label: string; icon: typeof HeartHandshake; end?: boolean }[] = [
-  { to: '/help', label: 'Home', icon: HeartHandshake, end: true },
+const HELP_NAV = [
+  ...PLATFORM_NAV,
   { to: '/help/requests', label: 'Browse Requests', icon: ListFilter },
   { to: '/help/request', label: 'Request Help', icon: PlusCircle },
 ]
@@ -13,7 +14,7 @@ export function HelpLayout() {
     <div className="help-layout functional-layout">
       <header className="help-layout__bar functional-layout__header">
         <div className="help-layout__bar-inner container">
-          <NavLink to="/help" end className="help-layout__brand" aria-label="OyoConnect Help home">
+          <NavLink to="/" end className="help-layout__brand" aria-label="OyoConnect home">
             <Logo subtitle link={false} />
           </NavLink>
           <nav className="help-layout__nav" aria-label="Help section">

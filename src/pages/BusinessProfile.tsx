@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, SearchX, Star, MessageCircle, CheckCircle2 } from 'lucide-react'
+import { SearchX, Star, MessageCircle, CheckCircle2 } from 'lucide-react'
 import { BusinessHeader } from '../components/business/BusinessHeader'
 import { BusinessGallery } from '../components/business/BusinessGallery'
 import { BusinessInfo } from '../components/business/BusinessInfo'
@@ -9,10 +9,11 @@ import { BusinessGrid } from '../components/business/BusinessGrid'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Button, ButtonLink } from '../components/ui/Button'
+import { BackButton } from '../components/ui/BackButton'
 import { Rating } from '../components/ui/Rating'
 import { businessService } from '../services/businessService'
 import { reviewService } from '../services/businessService'
-import { formatReviewDate, sortReviews, filterReviewsByRating } from '../data/reviews'
+import { formatReviewDate, sortReviews, filterReviewsByRating } from '../utils/date'
 import { BusinessLocationMap } from '../components/maps/BusinessLocationMap'
 import type { Review, Business } from '../types/business'
 import { useAuth } from '../context/AuthContext'
@@ -201,9 +202,7 @@ function BusinessProfile() {
   return (
     <main className="page">
       <div className="container">
-        <Link to="/search" className="back-link">
-          <ArrowLeft size={16} /> Back to search
-        </Link>
+        <BackButton fallback="/search" label="Back to search" variant="ghost" size="sm" className="page-back-link" />
 
         <BusinessHeader business={business} />
         <BusinessGallery business={business} />

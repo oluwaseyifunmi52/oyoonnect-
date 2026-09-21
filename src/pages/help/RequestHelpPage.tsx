@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button'
 import { Input, Select, Textarea } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
-import { ProgressBar, HelpIcon } from '../../components/help'
+import { HelpIcon } from '../../components/help'
 import { helpService } from '../../services/helpService'
 import { notificationService } from '../../services/notificationService'
 

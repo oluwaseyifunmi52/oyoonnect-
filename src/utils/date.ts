@@ -31,3 +31,36 @@ export function daysUntil(deadlineString: string): number {
   const diffMs = deadline.getTime() - now.getTime()
   return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
 }
+
+export function formatReviewDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-NG', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+export function sortReviews<T extends { createdAt: string; rating: number }>(
+  reviews: T[],
+  sortBy: 'newest' | 'highest' | 'lowest'
+): T[] {
+  const sorted = [...reviews]
+  switch (sortBy) {
+    case 'newest':
+      return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    case 'highest':
+      return sorted.sort((a, b) => b.rating - a.rating)
+    case 'lowest':
+      return sorted.sort((a, b) => a.rating - b.rating)
+    default:
+      return sorted
+  }
+}
+
+export function filterReviewsByRating<T extends { rating: number }>(
+  reviews: T[],
+  rating: number | 'all'
+): T[] {
+  if (rating === 'all') return reviews
+  return reviews.filter((review) => review.rating === rating)
+}

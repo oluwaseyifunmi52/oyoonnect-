@@ -1,56 +1,75 @@
 import { useState, type ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import {
-  Shield, LayoutDashboard, Building2, FolderOpen, BadgeCheck, Briefcase,
-  Tags, Users, LifeBuoy, FileText, Settings, LogOut, Menu, X, Crown,
+  LayoutDashboard, Building2, FolderOpen, Briefcase,
+  Users, LifeBuoy, FileText, Settings, LogOut, Menu, X, Crown,
+  Bell, Activity, ClipboardList, Truck, ShieldCheck, Server,
 } from 'lucide-react'
 
 interface AdminNavItem {
   label: string
   to: string
-  icon: typeof Building2
+  icon: React.ComponentType<{ size?: number; className?: string }>
   end?: boolean
 }
 
 const NAV_GROUPS: { title: string | null; items: AdminNavItem[] }[] = [
   {
-    title: null,
+    title: 'Overview',
     items: [{ label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, end: true }],
-  },
-  {
-    title: 'Business',
-    items: [
-      { label: 'Businesses', to: '/admin/businesses', icon: Building2 },
-      { label: 'Business Categories', to: '/admin/categories', icon: FolderOpen },
-      { label: 'Business Verification', to: '/admin/verification', icon: BadgeCheck },
-    ],
-  },
-  {
-    title: 'Jobs',
-    items: [
-      { label: 'Jobs', to: '/admin/jobs', icon: Briefcase },
-      { label: 'Job Categories', to: '/admin/job-categories', icon: Tags },
-    ],
-  },
-  {
-    title: 'Community',
-    items: [
-      { label: 'Community', to: '/admin/community', icon: Users },
-      { label: 'Help Requests', to: '/admin/help', icon: LifeBuoy },
-    ],
   },
   {
     title: 'Management',
     items: [
       { label: 'Users', to: '/admin/users', icon: Users },
-      { label: 'Reports', to: '/admin/reports', icon: FileText },
+      { label: 'Businesses', to: '/admin/businesses', icon: Building2 },
+      { label: 'Business Categories', to: '/admin/categories', icon: FolderOpen },
+      { label: 'Jobs', to: '/admin/jobs', icon: Briefcase },
+      { label: 'Job Applications', to: '/admin/job-applications', icon: ClipboardList },
+    ],
+  },
+  {
+    title: 'Community',
+    items: [
+      { label: 'Community Reports', to: '/admin/community', icon: Users },
+      { label: 'Comments / Moderation', to: '/admin/community/moderation', icon: FileText },
+    ],
+  },
+  {
+    title: 'Support',
+    items: [
+      { label: 'Help Requests', to: '/admin/help', icon: LifeBuoy },
+      { label: 'Contributions / Payout Review', to: '/admin/payouts', icon: ShieldCheck },
+    ],
+  },
+  {
+    title: 'Marketplace',
+    items: [
+      { label: 'Service Providers', to: '/admin/providers', icon: Truck },
+      { label: 'Services', to: '/admin/services', icon: Briefcase },
+      { label: 'Service Requests', to: '/admin/service-requests', icon: ClipboardList },
+    ],
+  },
+  {
+    title: 'System',
+    items: [
+      { label: 'Notifications', to: '/admin/notifications', icon: Bell },
       { label: 'Settings', to: '/admin/settings', icon: Settings },
+      { label: 'Audit Logs', to: '/admin/audit-logs', icon: Activity },
     ],
   },
 ]
 
 export function AdminLayout({ children }: { children: ReactNode }) {
+  const { user, logout } = useAuth()
+  const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const handleLogout = () => {
+    logout()
+    setSidebarOpen(false)
+  }
 
   return (
     <main className="page admin-dashboard">
@@ -63,7 +82,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               </div>
               <div>
                 <div className="admin-sidebar__name">OyoConnect Admin</div>
-                <div className="admin-sidebar__subtitle">Frontend preview</div>
+                <div className="admin-sidebar__subtitle">Administration Workspace</div>
               </div>
             </div>
 
@@ -88,8 +107,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                       to={item.to}
                       end={item.end}
                       className={({ isActive }) =>
-                        `admin-nav__item ${isActive ? 'admin-nav__item--active' : ''}`
-                      }
+                        `admin-nav__item ${isActive ? 'admin-nav__item--active' : ''}`}
                       onClick={() => setSidebarOpen(false)}
                     >
                       <item.icon className="admin-nav__icon" aria-hidden="true" />
@@ -98,15 +116,25 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                   ))}
                 </div>
               ))}
-              <div className="admin-nav__group-wrap">
-                <div className="admin-nav__group">Account</div>
-                <NavLink
-                  to="/admin/login"
-                  className={({ isActive }) => `admin-nav__item ${isActive ? 'admin-nav__item--active' : ''}`}
+              <div className="admin-nav__group-wrap admin-nav__user-section">
+                <div className="admin-nav__user">
+                  <div className="admin-nav__user-avatar" aria-hidden="true">
+                    {user?.name?.charAt(0).toUpperCase() ?? 'A'}
+                  </div>
+                  <div className="admin-nav__user-info">
+                    <span className="admin-nav__user-name">{user?.name ?? 'Administrator'}</span>
+                    <span className="admin-nav__user-role">Admin</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="admin-nav__logout"
+                  onClick={handleLogout}
+                  aria-label="Sign out"
                 >
                   <LogOut className="admin-nav__icon" aria-hidden="true" />
                   <span>Sign Out</span>
-                </NavLink>
+                </button>
               </div>
             </nav>
           </aside>

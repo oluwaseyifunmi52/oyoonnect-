@@ -64,6 +64,7 @@ function removeStored(key: string): void {
   try {
     localStorage.removeItem(key)
   } catch {
+    // ignore removeStorage errors
   }
 }
 
@@ -80,6 +81,7 @@ async function hashPassword(password: string): Promise<string> {
       return `sha256$${hex}`
     }
   } catch {
+    // ignore crypto errors
   }
   let hash = 0
   for (const byte of data) {

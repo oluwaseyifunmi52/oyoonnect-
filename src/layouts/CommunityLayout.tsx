@@ -1,9 +1,10 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { MessageSquare, AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { Logo } from '../components/layout/Logo'
+import { PLATFORM_NAV } from '../components/navigation/PlatformNav'
 
 const COMMUNITY_NAV = [
-  { to: '/community', label: 'Community', icon: MessageSquare, end: true },
+  ...PLATFORM_NAV,
   { to: '/community/report', label: 'Report Issue', icon: AlertTriangle },
 ]
 
@@ -12,7 +13,7 @@ export function CommunityLayout() {
     <div className="community-layout functional-layout">
       <header className="community-layout__header functional-layout__header">
         <div className="community-layout__header-inner container">
-          <NavLink to="/community" end className="community-layout__brand" aria-label="OyoConnect Community home">
+          <NavLink to="/" end className="community-layout__brand" aria-label="OyoConnect home">
             <Logo subtitle link={false} />
           </NavLink>
           <nav className="community-layout__nav" aria-label="Community navigation">

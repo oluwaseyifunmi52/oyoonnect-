@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Shield, Lock, Key, UserCheck, AlertTriangle, Smartphone, Mail, CheckCircle2 } from 'lucide-react'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { useAuth } from '../context/AuthContext'
+import { BackButton } from '../components/ui/BackButton'
 
 interface SecurityState {
   twoFactorEnabled: boolean
@@ -56,6 +57,7 @@ export function SettingsSecurity() {
   return (
     <main className="page">
       <div className="container container--narrow">
+        <BackButton fallback="/dashboard" label="Back to settings" variant="ghost" size="sm" className="page-back-link" />
         <header className="settings-page-header">
           <h1>Security</h1>
           <p>Manage your password and account security settings.</p>

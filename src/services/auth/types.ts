@@ -1,16 +1,6 @@
-export type Capability =
-  | 'user'
-  | 'customer'
-  | 'service_provider'
-  | 'business_owner'
-  | 'job_seeker'
-  | 'employer'
-  | 'community_contributor'
-  | 'help_requester'
+import type { Capability, UserRole, AccountType } from '@app-types/common'
 
-export type AccountType = 'customer' | 'service_provider' | 'business_owner'
-
-export type UserRole = 'user' | 'customer' | 'service_provider' | 'business_owner' | 'admin'
+export type { Capability, UserRole, AccountType }
 
 export interface AuthUser {
   id: string

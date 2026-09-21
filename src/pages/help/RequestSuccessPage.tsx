@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { CheckCircle, Shield } from 'lucide-react'
 import { ButtonLink } from '../../components/ui/Button'
 

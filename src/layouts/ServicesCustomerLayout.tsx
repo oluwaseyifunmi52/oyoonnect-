@@ -1,20 +1,26 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { CreditCard, Smartphone, Zap, Tv, GraduationCap, Key, Box, Gamepad2, MessageSquare, Wallet, User } from 'lucide-react'
+import { Smartphone, Zap, Tv, GraduationCap, Key, Box, Gamepad2, MessageSquare, Wallet, User } from 'lucide-react'
 import { Logo } from '../components/layout/Logo'
+import { PLATFORM_NAV } from '../components/navigation/PlatformNav'
+import { FEATURES } from '../config/features'
 
 const SERVICES_CUSTOMER_NAV = [
-  { to: '/services', label: 'Services', icon: CreditCard, end: true },
-  { to: '/services/data', label: 'Data Bundles', icon: Smartphone },
-  { to: '/services/airtime', label: 'Airtime', icon: Smartphone },
-  { to: '/services/electricity', label: 'Electricity', icon: Zap },
-  { to: '/services/tv', label: 'TV Subscriptions', icon: Tv },
-  { to: '/services/education', label: 'Education', icon: GraduationCap },
-  { to: '/services/recharge-pin', label: 'Recharge PIN', icon: Key },
-  { to: '/services/digital-products', label: 'Digital Products', icon: Box },
-  { to: '/services/games', label: 'Games', icon: Gamepad2 },
-  { to: '/services/social-media', label: 'Social Media', icon: MessageSquare },
-  { to: '/services/wallet', label: 'Wallet', icon: Wallet },
-  { to: '/services/profile', label: 'Profile', icon: User },
+  ...PLATFORM_NAV,
+  ...(FEATURES.VTU_SERVICES_ENABLED
+    ? [
+        { to: '/services/data', label: 'Data Bundles', icon: Smartphone },
+        { to: '/services/airtime', label: 'Airtime', icon: Smartphone },
+        { to: '/services/electricity', label: 'Electricity', icon: Zap },
+        { to: '/services/tv', label: 'TV Subscriptions', icon: Tv },
+        { to: '/services/education', label: 'Education', icon: GraduationCap },
+        { to: '/services/recharge-pin', label: 'Recharge PIN', icon: Key },
+        { to: '/services/digital-products', label: 'Digital Products', icon: Box },
+        { to: '/services/games', label: 'Games', icon: Gamepad2 },
+        { to: '/services/social-media', label: 'Social Media', icon: MessageSquare },
+        { to: '/services/wallet', label: 'Wallet', icon: Wallet },
+        { to: '/services/profile', label: 'Profile', icon: User },
+      ]
+    : []),
 ]
 
 export function ServicesCustomerLayout() {

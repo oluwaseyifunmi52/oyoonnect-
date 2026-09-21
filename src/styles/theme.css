@@ -73,6 +73,15 @@
   --text-sm: 0.875rem;   /* 14px — secondary */
   --text-xs: 0.75rem;    /* 12px — caption */
 
+  /* Aliases for shorthand usage (kept in sync with --text-* above) */
+  --fs-xs: var(--text-xs);
+  --fs-sm: var(--text-sm);
+  --fs-base: var(--text-base);
+  --fs-lg: var(--text-lg);
+  --fs-xl: 1.25rem;
+  --fs-2xl: 1.5rem;
+  --fs-3xl: 1.75rem;
+
   --lh-tight: 1.15;
   --lh-normal: 1.5;
   --lh-relaxed: 1.65;

@@ -22,6 +22,7 @@ export type SupportRequestStatus =
   | 'pending_review'
   | 'rejected'
   | 'active'
+  | 'resolved'
   | 'goal_reached_processing'
   | 'payout_pending'
   | 'payout_processing'
@@ -313,6 +314,7 @@ export const STATUS_LABELS: Record<SupportRequestStatus, string> = {
   pending_review: 'Pending Review',
   rejected: 'Rejected',
   active: 'Active',
+  resolved: 'Resolved',
   goal_reached_processing: 'Goal Reached — Processing Payout',
   payout_pending: 'Payout Pending',
   payout_processing: 'Payout Processing',

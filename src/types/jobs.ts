@@ -255,6 +255,8 @@ export function getApplicationMethodLabel(method: Job['applicationMethod']): str
   return APPLICATION_METHODS.find(m => m.value === method)?.label || method
 }
 
+export type { Interview } from './notifications'
+
 export function formatSalary(salary: {
   min?: number
   max?: number
@@ -272,5 +274,5 @@ export function formatSalary(salary: {
   } else if (max) {
     return `Up to ₦${formatter.format(max)}/${period.charAt(0).toUpperCase() + period.slice(1)}${negotiable ? ' (Negotiable)' : ''}`
   }
-  return `Negotiable${negotiable ? ' (Negotiable)' : ''}`
+  return 'Negotiable'
 }

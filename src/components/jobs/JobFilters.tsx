@@ -2,9 +2,8 @@ import { Filter, X, ChevronDown } from 'lucide-react'
 import { Select } from '../ui/Input'
 import { jobCategories } from '../../data/jobCategories'
 import { getAllLocationNames } from '../../data/locations'
-import { EMPLOYMENT_TYPES, EXPERIENCE_LEVELS } from '../../types/jobs'
-import { JOB_SORT_OPTIONS } from '../../types/jobs'
-import type { JobFilters } from '../../types/jobs'
+import { EMPLOYMENT_TYPES, EXPERIENCE_LEVELS, JOB_SORT_OPTIONS } from '../../types/jobs'
+import type { EmploymentType, ExperienceLevel, JobFilters } from '../../types/jobs'
 
 interface JobFiltersProps {
   filters: JobFilters
@@ -83,7 +82,7 @@ export function JobFilters({
           label="Employment Type"
           id="filter-employment-type"
           value={employmentType}
-          onChange={(value) => onChange({ employmentType: value as any || undefined })}
+          onChange={(value) => onChange({ employmentType: (value || undefined) as EmploymentType | undefined })}
           options={EMPLOYMENT_TYPES.map((t) => ({ value: t.value, label: t.label }))}
           placeholder="Any type"
         />
@@ -97,7 +96,7 @@ export function JobFilters({
           label="Experience Level"
           id="filter-experience-level"
           value={experienceLevel}
-          onChange={(value) => onChange({ experienceLevel: value as any || undefined })}
+          onChange={(value) => onChange({ experienceLevel: (value || undefined) as ExperienceLevel | undefined })}
           options={EXPERIENCE_LEVELS.map((l) => ({ value: l.value, label: l.label }))}
           placeholder="Any level"
         />

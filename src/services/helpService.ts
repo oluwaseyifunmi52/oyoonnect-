@@ -2,9 +2,7 @@ import type {
   SupportRequest,
   BankVerificationRequest,
   BankVerificationResponse,
-  RequestHelpFormData,
   HelpCategoryType,
-  BankAccount,
 } from '../types/help'
 import { HELP_CATEGORIES } from '../types/help'
 import { helpRequests } from '../data/helpRequests'

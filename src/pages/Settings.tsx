@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { User, Shield, Bell, Monitor, Eye, Lock, Key, AlertTriangle, LogOut, Building2, ChevronRight, HelpCircle } from 'lucide-react'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { useAuth } from '../context/AuthContext'
+import { BackButton } from '../components/ui/BackButton'
 
 const settingsCategories = [
   {
@@ -87,6 +88,7 @@ export function Settings() {
   return (
     <main className="page">
       <div className="container container--narrow">
+        <BackButton fallback="/dashboard" label="Back to dashboard" variant="ghost" size="sm" className="page-back-link" />
         <header className="settings-page-header">
           <h1>Settings</h1>
           <p>Manage your account preferences and customize your OyoConnect experience.</p>

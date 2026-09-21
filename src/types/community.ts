@@ -1,120 +1,206 @@
+export type HelpCategory = {
+  value: string;
+  label: string;
+  icon: string;
+};
+
+export type CommunityUpdateStatus =
+  | 'reported'
+  | 'investigating'
+  | 'ongoing'
+  | 'resolved'
+  | 'information';
+
 export interface CommunityLocation {
-  state: string
-  lga: string
-  town: string
-  area?: string
-  busStop?: string
-  address: string
-  latitude?: number
-  longitude?: number
-  placeId?: string
-  formattedAddress?: string
+  state: string;
+  city?: string;
+  town: string;
+  lga: string;
+  area?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
-export type CommunityCategory =
-  | 'roads'
-  | 'floods'
-  | 'traffic'
-  | 'power'
-  | 'water'
-  | 'waste'
-  | 'construction'
-  | 'security'
-  | 'transport'
-  | 'photos'
-
-export type ReportStatus = 'pending' | 'verified' | 'resolved' | 'dismissed' | 'urgent'
-
-export type RoadConditionStatus = 'good' | 'moderate' | 'bad' | 'blocked' | 'under_construction' | 'unknown'
-export type FloodRiskStatus = 'none' | 'low' | 'moderate' | 'high' | 'currently_flooded' | 'unknown'
-export type TrafficStatus = 'light' | 'moderate' | 'heavy' | 'severe' | 'unknown'
-export type PowerStatus = 'available' | 'intermittent' | 'outage' | 'unknown'
-export type TransportStatus = 'available' | 'limited' | 'difficult' | 'unavailable' | 'unknown'
-
-export type VerificationStatus = 'unverified' | 'community_confirmed' | 'admin_verified' | 'expired'
-
-export interface CommunityLocationStatus {
-  locationId: string
-  lga: string
-  town: string
-  area?: string
-  roadCondition: RoadConditionStatus
-  floodRisk: FloodRiskStatus
-  traffic: TrafficStatus
-  power: PowerStatus
-  transport: TransportStatus
-  lastUpdated: string
-  lastVerified?: string
-  verifiedBy?: string
-  notes?: string
+export interface CommunityUpdate {
+  id: string;
+  title: string;
+  description: string;
+  category: HelpCategory;
+  location: string;
+  status: CommunityUpdateStatus;
+  isImportant?: boolean;
+  upvotes: number;
+  followers: number;
+  createdAt: string;
+  updatedAt?: string;
 }
+
+export const COMMUNITY_CATEGORIES = [
+  {
+    value: 'road-traffic',
+    label: 'Road & Traffic',
+    icon: 'road'
+  },
+  {
+    value: 'electricity',
+    label: 'Electricity',
+    icon: 'zap'
+  },
+  {
+    value: 'water',
+    label: 'Water',
+    icon: 'droplets'
+  },
+  {
+    value: 'security',
+    label: 'Security',
+    icon: 'shield'
+  },
+  {
+    value: 'health',
+    label: 'Health',
+    icon: 'heart-pulse'
+  },
+  {
+    value: 'transport',
+    label: 'Transport',
+    icon: 'bus'
+  },
+  {
+    value: 'flooding-environment',
+    label: 'Flooding & Environment',
+    icon: 'cloud-rain'
+  },
+  {
+    value: 'government-projects',
+    label: 'Government & Community Projects',
+    icon: 'landmark'
+  },
+  {
+    value: 'events',
+    label: 'Events',
+    icon: 'calendar'
+  },
+  {
+    value: 'general',
+    label: 'General Updates',
+    icon: 'megaphone'
+  }
+] as const;
+
+export type CommunityCategoryValue = typeof COMMUNITY_CATEGORIES[number]['value'];
+
+export function getCommunityCategoryValue(value: string): CommunityCategoryValue | undefined {
+  return COMMUNITY_CATEGORIES.find((cat) => cat.value === value)?.value as CommunityCategoryValue | undefined;
+}
+
+export function getCommunityCategoryLabel(value: string): string | undefined {
+  return COMMUNITY_CATEGORIES.find((cat) => cat.value === value)?.label;
+}
+
+export function getCommunityCategoryIcon(value: string): string | undefined {
+  return COMMUNITY_CATEGORIES.find((cat) => cat.value === value)?.icon;
+}
+
+export type CommunityCategory = string;
+
+export type ReportStatus =
+  | 'urgent'
+  | 'pending'
+  | 'verified'
+  | 'resolved'
+  | 'dismissed';
 
 export interface CommunityReport {
-  id: string
-  title: string
-  description: string
-  excerpt: string
-  category: CommunityCategory
-  status: ReportStatus
-  urgent: boolean
-  authorId: string
-  authorName: string
-  authorAvatar?: string
-  location: CommunityLocation
-  image?: string
-  images?: string[]
-  verified: boolean
-  verifiedBy?: string
-  verifiedAt?: string
-  upvotes: number
-  downvotes: number
-  commentCount: number
-  createdAt: string
-  updatedAt: string
-}
-
-export interface CommunityReportFormData {
-  title: string
-  description: string
-  category: CommunityCategory
-  lga: string
-  town: string
-  area?: string
-  busStop?: string
-  address: string
-  latitude: number
-  longitude: number
-  placeId: string
-  formattedAddress: string
-  images: File[]
+  id: string;
+  title: string;
+  description: string;
+  excerpt?: string;
+  category: string;
+  location: CommunityLocation;
+  status: ReportStatus;
+  urgent: boolean;
+  verified: boolean;
+  upvotes: number;
+  downvotes: number;
+  commentCount: number;
+  createdAt: string;
+  updatedAt: string;
+  authorName?: string;
+  authorAvatar?: string;
+  image?: string;
+  images?: string[];
 }
 
 export interface CommunityComment {
-  id: string
-  reportId: string
-  authorId: string
-  authorName: string
-  authorAvatar?: string
-  content: string
-  createdAt: string
+  id: string;
+  reportId: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  content: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface CommunityReportStats {
+  totalReports: number;
+  reportsThisWeek: number;
+  verifiedReports: number;
+  resolvedReports: number;
+}
+
+export interface CommunityReportListResult {
+  reports: CommunityReport[];
+  total: number;
+  hasMore: boolean;
 }
 
 export interface CommunityFilters {
-  category?: CommunityCategory
-  location?: string
-  status?: ReportStatus
-  sort?: 'newest' | 'oldest' | 'most-upvoted' | 'most-commented'
-  verified?: boolean
-  limit?: number
-  page?: number
+  category?: string;
+  location?: string;
+  status?: string;
+  verified?: boolean;
+  sort?: string;
+  limit?: number;
+  page?: number;
 }
 
-export const COMMUNITY_SORT_OPTIONS: { value: string; label: string }[] = [
-  { value: 'newest', label: 'Newest First' },
-  { value: 'oldest', label: 'Oldest First' },
-  { value: 'most-upvoted', label: 'Most Upvoted' },
-  { value: 'most-commented', label: 'Most Commented' },
-]
+export interface CommunityReportFormData {
+  title: string;
+  description: string;
+  category: string;
+  lga: string;
+  town: string;
+  area?: string;
+  busStop?: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  placeId: string;
+  formattedAddress: string;
+  images: File[];
+}
+
+export type RoadConditionStatus = 'good' | 'moderate' | 'bad' | 'blocked' | 'under_construction' | 'unknown';
+export type FloodRiskStatus = 'none' | 'low' | 'moderate' | 'high' | 'currently_flooded' | 'unknown';
+export type TrafficStatus = 'light' | 'moderate' | 'heavy' | 'severe' | 'unknown';
+export type PowerStatus = 'available' | 'intermittent' | 'outage' | 'unknown';
+export type TransportStatus = 'available' | 'limited' | 'difficult' | 'unavailable' | 'unknown';
+
+export interface CommunityLocationStatus {
+  locationId: string;
+  lga: string;
+  town: string;
+  area?: string;
+  roadCondition: RoadConditionStatus;
+  floodRisk: FloodRiskStatus;
+  traffic: TrafficStatus;
+  power: PowerStatus;
+  transport: TransportStatus;
+  lastUpdated: string;
+}
 
 export const ROAD_CONDITION_LABELS: Record<RoadConditionStatus, string> = {
   good: 'Good',
@@ -123,34 +209,34 @@ export const ROAD_CONDITION_LABELS: Record<RoadConditionStatus, string> = {
   blocked: 'Blocked',
   under_construction: 'Under Construction',
   unknown: 'Unknown',
-}
+};
 
 export const ROAD_CONDITION_COLORS: Record<RoadConditionStatus, string> = {
-  good: '#16a34a',
+  good: '#22c55e',
   moderate: '#f59e0b',
-  bad: '#dc2626',
-  blocked: '#7f1d1d',
-  under_construction: '#2563eb',
-  unknown: '#64748b',
-}
+  bad: '#ef4444',
+  blocked: '#dc2626',
+  under_construction: '#6366f1',
+  unknown: '#9ca3af',
+};
 
 export const FLOOD_RISK_LABELS: Record<FloodRiskStatus, string> = {
-  none: 'No Known Flooding',
+  none: 'No Risk',
   low: 'Low Risk',
   moderate: 'Moderate Risk',
   high: 'High Risk',
   currently_flooded: 'Currently Flooded',
   unknown: 'Unknown',
-}
+};
 
 export const FLOOD_RISK_COLORS: Record<FloodRiskStatus, string> = {
-  none: '#16a34a',
-  low: '#84cc16',
+  none: '#22c55e',
+  low: '#fbbf24',
   moderate: '#f59e0b',
-  high: '#f97316',
-  currently_flooded: '#dc2626',
-  unknown: '#64748b',
-}
+  high: '#ea580c',
+  currently_flooded: '#2563eb',
+  unknown: '#9ca3af',
+};
 
 export const TRAFFIC_LABELS: Record<TrafficStatus, string> = {
   light: 'Light',
@@ -158,29 +244,29 @@ export const TRAFFIC_LABELS: Record<TrafficStatus, string> = {
   heavy: 'Heavy',
   severe: 'Severe',
   unknown: 'Unknown',
-}
+};
 
 export const TRAFFIC_COLORS: Record<TrafficStatus, string> = {
-  light: '#16a34a',
+  light: '#22c55e',
   moderate: '#f59e0b',
-  heavy: '#f97316',
+  heavy: '#ef4444',
   severe: '#dc2626',
-  unknown: '#64748b',
-}
+  unknown: '#9ca3af',
+};
 
 export const POWER_LABELS: Record<PowerStatus, string> = {
-  available: 'Residents Reported Power Available',
-  intermittent: 'Residents Reported Intermittent Power',
-  outage: 'Residents Reported Power Outage',
-  unknown: 'No Recent Information',
-}
+  available: 'Available',
+  intermittent: 'Intermittent',
+  outage: 'Outage',
+  unknown: 'Unknown',
+};
 
 export const POWER_COLORS: Record<PowerStatus, string> = {
-  available: '#16a34a',
+  available: '#22c55e',
   intermittent: '#f59e0b',
-  outage: '#dc2626',
-  unknown: '#64748b',
-}
+  outage: '#ef4444',
+  unknown: '#9ca3af',
+};
 
 export const TRANSPORT_LABELS: Record<TransportStatus, string> = {
   available: 'Available',
@@ -188,116 +274,19 @@ export const TRANSPORT_LABELS: Record<TransportStatus, string> = {
   difficult: 'Difficult',
   unavailable: 'Unavailable',
   unknown: 'Unknown',
-}
+};
 
 export const TRANSPORT_COLORS: Record<TransportStatus, string> = {
-  available: '#16a34a',
+  available: '#22c55e',
   limited: '#f59e0b',
-  difficult: '#f97316',
+  difficult: '#ef4444',
   unavailable: '#dc2626',
-  unknown: '#64748b',
-}
+  unknown: '#9ca3af',
+};
 
-export const VERIFICATION_LABELS: Record<VerificationStatus, string> = {
-  unverified: 'Community Report',
-  community_confirmed: 'Community Confirmed',
-  admin_verified: 'Verified by OyoConnect',
-  expired: 'Outdated',
-}
-
-export const VERIFICATION_COLORS: Record<VerificationStatus, string> = {
-  unverified: '#f59e0b',
-  community_confirmed: '#2563eb',
-  admin_verified: '#16a34a',
-  expired: '#64748b',
-}
-
-export function getCategoryLabel(category: CommunityCategory): string {
-  const labels: Record<CommunityCategory, string> = {
-    roads: 'Road Conditions',
-    floods: 'Flood Reports',
-    traffic: 'Traffic Updates',
-    power: 'Power Reports',
-    water: 'Water Availability',
-    waste: 'Waste Reports',
-    construction: 'Construction Updates',
-    security: 'Security Alerts',
-    transport: 'Transport Updates',
-    photos: 'Community Photos',
-  }
-  return labels[category] || category
-}
-
-export function getStatusLabel(status: ReportStatus): string {
-  const labels: Record<ReportStatus, string> = {
-   pending: 'Pending Verification',
-  verified: 'Verified',
-  resolved: 'Resolved',
-  dismissed: 'Dismissed',
-  urgent: 'Urgent',
-  }
-  return labels[status] || status
-}
-
-export function getRoadConditionLabel(status: RoadConditionStatus): string {
-  return ROAD_CONDITION_LABELS[status] || status
-}
-
-export function getFloodRiskLabel(status: FloodRiskStatus): string {
-  return FLOOD_RISK_LABELS[status] || status
-}
-
-export function getTrafficLabel(status: TrafficStatus): string {
-  return TRAFFIC_LABELS[status] || status
-}
-
-export function getPowerLabel(status: PowerStatus): string {
-  return POWER_LABELS[status] || status
-}
-
-export function getTransportLabel(status: TransportStatus): string {
-  return TRANSPORT_LABELS[status] || status
-}
-
-export function getVerificationLabel(status: VerificationStatus): string {
-  return VERIFICATION_LABELS[status] || status
-}
-
-export function getRoadConditionColor(status: RoadConditionStatus): string {
-  return ROAD_CONDITION_COLORS[status] || ROAD_CONDITION_COLORS.unknown
-}
-
-export function getFloodRiskColor(status: FloodRiskStatus): string {
-  return FLOOD_RISK_COLORS[status] || FLOOD_RISK_COLORS.unknown
-}
-
-export function getTrafficColor(status: TrafficStatus): string {
-  return TRAFFIC_COLORS[status] || TRAFFIC_COLORS.unknown
-}
-
-export function getPowerColor(status: PowerStatus): string {
-  return POWER_COLORS[status] || POWER_COLORS.unknown
-}
-
-export function getTransportColor(status: TransportStatus): string {
-  return TRANSPORT_COLORS[status] || TRANSPORT_COLORS.unknown
-}
-
-export function getVerificationColor(status: VerificationStatus): string {
-  return VERIFICATION_COLORS[status] || VERIFICATION_COLORS.unverified
-}
-
-export interface CommunityReportStats {
-  totalReports: number
-  reportsThisWeek: number
-  verifiedReports: number
-  resolvedReports: number
-}
-
-export interface CommunityReportListResult {
-  reports: CommunityReport[]
-  total: number
-  page: number
-  limit: number
-  hasMore: boolean
-}
+export const COMMUNITY_SORT_OPTIONS = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'most-helpful', label: 'Most Helpful' },
+  { value: 'trending', label: 'Trending' },
+];

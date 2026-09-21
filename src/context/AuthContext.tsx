@@ -7,7 +7,8 @@ import type { AuthUser, Capability, LoginCredentials, RegisterData } from '../se
 // Check if auth bypass is enabled (only for development).
 // Keep explicit and disabled by default — it only skips the login gate for
 // local testing and is never used by the real flows.
-const isAuthBypassed = import.meta.env.VITE_DISABLE_AUTH === 'true'
+// VITE_DISABLE_AUTH only works in development mode for safety.
+const isAuthBypassed = import.meta.env.DEV && import.meta.env.VITE_DISABLE_AUTH === 'true'
 
 type AccountType = 'customer' | 'service_provider' | 'business_owner'
 

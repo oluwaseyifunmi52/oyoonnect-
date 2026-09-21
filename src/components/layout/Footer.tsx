@@ -33,9 +33,6 @@ export function Footer() {
                 <Link to={item.to}>{item.label}</Link>
               </li>
             ))}
-            <li>
-              <Link to="/search">Search Businesses</Link>
-            </li>
           </ul>
         </div>
 
@@ -62,13 +59,21 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="footer__bottom">
+<div className="footer__bottom">
         <div className="container footer__bottom-inner">
           <p>
-            &copy; {new Date().getFullYear()} {siteConfig.name}. All rights
+            &copy {new Date().getFullYear()} {siteConfig.name}. All rights
             reserved.
           </p>
           <p>{siteConfig.tagline}.</p>
+          <div style={{ marginTop: 8, fontSize: '12px' }}>
+            <Link to="/terms" style={{ marginRight: 16 }}>
+              Terms of Service
+            </Link>
+            <Link to="/privacy">
+              Privacy Policy
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

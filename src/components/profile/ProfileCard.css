@@ -1,0 +1,54 @@
+/* ==========================================================================
+    PROFILE CARD — White surface card with border and subtle shadow
+    ========================================================================== */
+
+.profile-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+}
+
+.profile-card__header {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-card__title {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.profile-card__description {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.profile-card__body {
+  padding: var(--space-6);
+}
+
+@media (max-width: 720px) {
+  .profile-card__header {
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .profile-card__body {
+    padding: var(--space-5);
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-card__header {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .profile-card__body {
+    padding: var(--space-4);
+  }
+}

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Shield, Eye, UserCheck, Database, Trash2, AlertTriangle, Check } from 'lucide-react'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { useAuth } from '../context/AuthContext'
+import { BackButton } from '../components/ui/BackButton'
 
 type PrivacyKey = 
   | 'profileVisibility'
@@ -161,6 +162,7 @@ export function SettingsPrivacy() {
   return (
     <main className="page">
       <div className="container container--narrow">
+        <BackButton fallback="/settings" label="Back to settings" variant="ghost" size="sm" className="page-back-link" />
         <header className="settings-page-header">
           <h1>Privacy</h1>
           <p>Control how your information is displayed and managed.</p>

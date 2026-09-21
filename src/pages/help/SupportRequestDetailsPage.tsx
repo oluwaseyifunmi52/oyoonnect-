@@ -25,6 +25,7 @@ import {
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/common/Modal'
+import { BackButton } from '../../components/ui/BackButton'
 import { helpService } from '../../services/helpService'
 import { notificationService } from '../../services/notificationService'
 import { PLATFORM_FEE_PERCENTAGE, PAYMENT_GATEWAY_FEE_PERCENTAGE } from '../../types/help'
@@ -146,12 +147,13 @@ export function SupportRequestDetailsPage() {
   }
 
   const isExpired = new Date(request.deadline) < new Date()
-  const isCompleted = request.status === 'funded_and_paid_out'
+  const isCompleted = request.status === 'funded_and_paid_out' || request.status === 'resolved'
   const canSupport = request.status === 'active' && !isExpired && !isCompleted
 
   return (
     <div className="support-details-page">
       <div className="container">
+        <BackButton fallback="/help/requests" label="Back to requests" variant="ghost" size="sm" className="page-back-link" />
         <nav className="support-details__breadcrumb" aria-label="Breadcrumb">
           <Link to="/help" className="support-details__breadcrumb-link">
             Help
@@ -261,6 +263,15 @@ export function SupportRequestDetailsPage() {
                     </Card>
                   ))}
                 </div>
+              </section>
+            )}
+
+            {request.updates && request.updates.length === 0 && (
+              <section className="support-details__updates" aria-labelledby="updates-heading">
+                <h2 id="updates-heading" className="support-details__section-title">Updates</h2>
+                <Card variant="default" padding="md">
+                  <p className="support-details__no-updates">No updates yet. Updates from the requester will appear here.</p>
+                </Card>
               </section>
             )}
 
@@ -408,6 +419,10 @@ export function SupportRequestDetailsPage() {
                 <div className="support-details__info-row">
                   <dt>Created</dt>
                   <dd>{formatDate(request.createdAt)}</dd>
+                </div>
+                <div className="support-details__info-row">
+                  <dt>Last Updated</dt>
+                  <dd>{formatDate(request.updatedAt)}</dd>
                 </div>
                 <div className="support-details__info-row">
                   <dt>Deadline</dt>

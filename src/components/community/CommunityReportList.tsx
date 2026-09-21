@@ -58,8 +58,8 @@ export function CommunityReportList({ category, limit }: ReportListProps) {
         (r) =>
           r.title.toLowerCase().includes(q) ||
           r.description.toLowerCase().includes(q) ||
-          r.location.lga.toLowerCase().includes(q) ||
-          r.location.town.toLowerCase().includes(q),
+          r.location.lga?.toLowerCase().includes(q) ||
+          r.location.town?.toLowerCase().includes(q),
       )
     }
     return result

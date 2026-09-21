@@ -1,3 +1,10 @@
+/**
+ * DEVELOPMENT-ONLY bills service.
+ *
+ * Simulates purchases locally. In production this will be replaced by
+ * API calls to a real payment provider integration. Do not treat
+ * any transactions here as real.
+ */
 import type {
   Network,
   DataPlan,

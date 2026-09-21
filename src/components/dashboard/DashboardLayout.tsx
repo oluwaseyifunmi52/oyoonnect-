@@ -3,14 +3,17 @@ import { NavLink } from 'react-router-dom'
 import { Menu, LogOut, Bell, type LucideIcon } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { WorkspaceSwitcher } from '../WorkspaceSwitcher'
+import { Avatar } from '../profile/Avatar'
 import { notificationService } from '../../services/notificationService'
 import type { Notification } from '../../types/notifications'
+import { PLATFORM_NAV, type PlatformNavItem } from '../navigation/PlatformNav'
 
 export interface DashboardNavItem {
   to: string
   label: string
   icon: LucideIcon
   end?: boolean
+  secondary?: boolean
 }
 
 function getInitials(name?: string): string {
@@ -30,6 +33,28 @@ interface DashboardLayoutProps {
   workspaceLabel?: string
 }
 
+function renderSidebarLink(
+  item: DashboardNavItem | PlatformNavItem,
+  secondary: boolean,
+  onClose: () => void,
+) {
+  const { to, label, icon: Icon, end } = item
+  return (
+    <NavLink
+      key={to}
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        `dash-sidebar__link${secondary ? ' dash-sidebar__link--secondary' : ''}${isActive ? ' is-active' : ''}`
+      }
+      onClick={onClose}
+    >
+      <Icon size={17} aria-hidden="true" />
+      <span>{label}</span>
+    </NavLink>
+  )
+}
+
 export function DashboardLayout({ navItems, children, workspaceLabel }: DashboardLayoutProps) {
   const { user, logout } = useAuth()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -39,7 +64,6 @@ export function DashboardLayout({ navItems, children, workspaceLabel }: Dashboar
   const notificationPanelRef = useRef<HTMLDivElement>(null)
 
   const initials = getInitials(user?.name)
-  const avatar = user?.avatar
 
   const loadNotifications = async (force = false) => {
     if (force || notificationService.getNotifications().length === 0) {
@@ -63,13 +87,18 @@ export function DashboardLayout({ navItems, children, workspaceLabel }: Dashboar
     const handleClickOutside = (event: MouseEvent) => {
       if (notificationPanelOpen && notificationPanelRef.current && !notificationPanelRef.current.contains(event.target as Node)) {
         setNotificationPanelOpen(false)
-      }
+    }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [notificationPanelOpen])
 
   const unreadCount = notifications.filter(n => !n.read).length
+
+  const primary = navItems.filter((item) => !item.secondary)
+  const secondary = navItems.filter((item) => item.secondary)
+  const workspaceSectionLabel = workspaceLabel ?? 'My Account'
+  const closeDrawer = () => setDrawerOpen(false)
 
   const sidebar = (
     <div className="dash-sidebar">
@@ -81,19 +110,21 @@ export function DashboardLayout({ navItems, children, workspaceLabel }: Dashboar
         </div>
       </div>
 
-      <nav className="dash-sidebar__nav" aria-label="Dashboard navigation">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) => `dash-sidebar__link ${isActive ? 'is-active' : ''}`}
-            onClick={() => setDrawerOpen(false)}
-          >
-            <item.icon size={18} aria-hidden="true" />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+      <nav className="dash-sidebar__nav" aria-label="Platform and workspace navigation">
+        <div className="dash-sidebar__section-label" aria-hidden="true">OyoConnect</div>
+        {PLATFORM_NAV.map((item) => renderSidebarLink(item, false, closeDrawer))}
+
+        <div className="dash-sidebar__divider" aria-hidden="true" />
+
+        <div className="dash-sidebar__section-label" aria-hidden="true">{workspaceSectionLabel}</div>
+        {primary.map((item) => renderSidebarLink(item, false, closeDrawer))}
+
+        {secondary.length > 0 && (
+          <>
+            <div className="dash-sidebar__divider" aria-hidden="true" />
+            {secondary.map((item) => renderSidebarLink(item, true, closeDrawer))}
+          </>
+        )}
       </nav>
 
       <div className="dash-sidebar__footer">
@@ -224,11 +255,7 @@ export function DashboardLayout({ navItems, children, workspaceLabel }: Dashboar
           </div>
 
           <div className="dash-topbar__user" title={user?.name}>
-            {avatar ? (
-              <img className="dash-topbar__avatar" src={avatar} alt="" />
-            ) : (
-              <span className="dash-topbar__avatar" aria-hidden="true">{initials}</span>
-            )}
+            <Avatar src={user?.avatar} initials={initials} size="sm" variant={user?.avatar ? 'image' : 'gradient'} />
             <span className="dash-topbar__user-name">{user?.name ?? 'Account'}</span>
           </div>
         </header>

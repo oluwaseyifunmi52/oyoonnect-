@@ -32,7 +32,7 @@ export async function loadGoogleMaps(options: { apiKey: string }): Promise<void>
   }
 
   return new Promise((resolve, reject) => {
-    if ((window as any).google?.maps) {
+    if (window.google?.maps) {
       _mapsLoaded = true
       resolve()
       return
@@ -55,11 +55,11 @@ export async function loadGoogleMaps(options: { apiKey: string }): Promise<void>
 
 export async function reverseGeocode(latitude: number, longitude: number): Promise<string | null> {
   try {
-    if (!(window as any).google?.maps?.Geocoder) {
+    if (!window.google?.maps?.Geocoder) {
       return mockReverseGeocode(latitude, longitude)
     }
 
-    const geocoder = new (window as any).google.maps.Geocoder()
+    const geocoder = new window.google.maps.Geocoder()
     const response = await geocoder.geocode({ location: { lat: latitude, lng: longitude } })
 
     if (response.results && response.results.length > 0) {

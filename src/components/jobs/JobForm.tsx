@@ -142,7 +142,7 @@ export function JobForm({ initialData, onSubmit, onCancel, isEditing = false }: 
           name="employmentType"
           required
           value={form.employmentType}
-          onChange={(value) => updateForm('employmentType', value as any)}
+          onChange={(value) => updateForm('employmentType', value)}
           options={EMPLOYMENT_TYPES.map((t) => ({ value: t.value, label: t.label }))}
           placeholder="Select type"
         />
@@ -151,7 +151,7 @@ export function JobForm({ initialData, onSubmit, onCancel, isEditing = false }: 
           name="experienceLevel"
           required
           value={form.experienceLevel}
-          onChange={(value) => updateForm('experienceLevel', value as any)}
+          onChange={(value) => updateForm('experienceLevel', value)}
           options={EXPERIENCE_LEVELS.map((l) => ({ value: l.value, label: `${l.label} (${l.years})` }))}
           placeholder="Select level"
         />
@@ -258,7 +258,7 @@ export function JobForm({ initialData, onSubmit, onCancel, isEditing = false }: 
             label="Salary Period"
             name="salaryPeriod"
             value={form.salaryPeriod}
-            onChange={(value) => updateForm('salaryPeriod', value as any)}
+            onChange={(value) => updateForm('salaryPeriod', value)}
             options={SALARY_PERIODS.map((p) => ({ value: p.value, label: p.label }))}
             placeholder="Period"
           />
@@ -388,7 +388,7 @@ export function JobForm({ initialData, onSubmit, onCancel, isEditing = false }: 
         name="applicationMethod"
         required
         value={form.applicationMethod}
-        onChange={(value) => updateForm('applicationMethod', value as any)}
+        onChange={(value) => updateForm('applicationMethod', value)}
         options={APPLICATION_METHODS.map((m) => ({ value: m.value, label: `${m.label} - ${m.description}` }))}
         placeholder="How should candidates apply?"
       />

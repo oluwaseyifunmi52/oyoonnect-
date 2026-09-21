@@ -13,6 +13,7 @@ const STATUS_CONFIG: Record<SupportRequestStatus, { tone: 'neutral' | 'brand' | 
   pending_review: { tone: 'brand', icon: 'shield-alert' },
   rejected: { tone: 'error', icon: 'shield-x' },
   active: { tone: 'success', icon: 'shield-check' },
+  resolved: { tone: 'success', icon: 'check-circle2' },
   goal_reached_processing: { tone: 'warning', icon: 'clock' },
   payout_pending: { tone: 'warning', icon: 'clock' },
   payout_processing: { tone: 'brand', icon: 'loader2' },

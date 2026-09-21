@@ -1,17 +1,84 @@
-import { useState, useEffect, useMemo } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, MapPin, Briefcase, Clock, DollarSign, MessageCircle, Phone, Share2, Heart, CheckCircle2, AlertCircle, Calendar, User, Building2, Star, ExternalLink, MessageSquare, Loader2, X } from 'lucide-react'
-import { SectionHeading } from '../../components/ui/SectionHeading'
+import { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import {
+  MapPin,
+  Briefcase,
+  Clock,
+  DollarSign,
+  MessageCircle,
+  Phone,
+  Share2,
+  Heart,
+  CheckCircle2,
+  AlertCircle,
+  Calendar,
+  User,
+  Building2,
+  Star,
+  MessageSquare,
+  Loader2,
+  X,
+  ExternalLink,
+} from 'lucide-react'
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Button,
+  ButtonLink,
+  Badge,
+} from '../../components/ui'
+import { BackButton } from '../../components/ui/BackButton'
 import { EmptyState } from '../../components/ui/EmptyState'
-import { Button, ButtonLink } from '../../components/ui/Button'
-import { Rating } from '../../components/ui/Rating'
+import { Avatar } from '../../components/profile/Avatar'
+import { JobDetailSkeleton } from '../../components/jobs/JobDetailSkeleton'
 import { jobService } from '../../services/jobService'
 import { applicationService } from '../../services/jobService'
 import { savedJobsService } from '../../services/jobService'
 import { formatSalary, getEmploymentTypeLabel, getExperienceLevelLabel, getApplicationMethodLabel } from '../../types/jobs'
-import type { Job, JobApplication } from '../../types/jobs'
+import type { Job } from '../../types/jobs'
 import { useAuth } from '../../context/AuthContext'
 import { AuthRequiredModal } from '../../components/common/AuthRequiredModal'
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`
+  return date.toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function getCompanyInitials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+}
+
+function statusVariant(status: Job['status']): 'success' | 'warning' | 'error' | 'neutral' {
+  switch (status) {
+    case 'active':
+      return 'success'
+    case 'closed':
+    case 'expired':
+      return 'error'
+    case 'draft':
+    case 'pending':
+      return 'warning'
+    case 'rejected':
+      return 'error'
+    default:
+      return 'neutral'
+  }
+}
 
 function JobDetail() {
   const { id } = useParams<{ id: string }>()
@@ -54,7 +121,7 @@ function JobDetail() {
 
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         name: user.name || '',
         email: user.email || '',
@@ -112,33 +179,34 @@ function JobDetail() {
     setIsSaved(newSaved)
   }
 
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: job?.title,
+        text: job?.description,
+        url: window.location.href,
+      }).catch(() => {})
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+    }
+  }
+
   const handleContactClick = (method: Job['applicationMethod'], contact?: string) => {
-    if (method === 'whatsapp' && contact) {
-      const message = encodeURIComponent(`Hello, I'm interested in the ${job?.title} position at ${job?.employerName}.`)
+    if (!job || !contact) return
+    if (method === 'whatsapp') {
+      const message = encodeURIComponent(`Hello, I'm interested in the ${job.title} position at ${job.employerName}.`)
       window.open(`https://wa.me/${contact.replace(/\D/g, '')}?text=${message}`, '_blank')
-    } else if (method === 'email' && contact) {
-      window.location.href = `mailto:${contact}?subject=${encodeURIComponent(`Application: ${job?.title}`)}`
-    } else if (method === 'phone' && contact) {
+    } else if (method === 'email') {
+      window.location.href = `mailto:${contact}?subject=${encodeURIComponent(`Application: ${job.title}`)}`
+    } else if (method === 'phone') {
       window.location.href = `tel:${contact}`
+    } else if (method === 'external') {
+      window.open(contact, '_blank')
     }
   }
 
   if (loading) {
-    return (
-      <main className="page">
-        <div className="container">
-          <div className="page-skeleton">
-            <div className="skeleton skeleton--text skeleton--wide" style={{ maxWidth: '400px', marginBottom: '16px' }} />
-            <div className="skeleton skeleton--text" style={{ width: '60%', marginBottom: '24px' }} />
-            <div className="skeleton-row" style={{ marginBottom: '24px' }}>
-              <div className="skeleton skeleton--text" style={{ width: '120px', height: '16px' }} />
-              <div className="skeleton skeleton--text" style={{ width: '100px', height: '16px' }} />
-              <div className="skeleton skeleton--text" style={{ width: '100px', height: '16px' }} />
-            </div>
-          </div>
-        </div>
-      </main>
-    )
+    return <JobDetailSkeleton />
   }
 
   if (!job) {
@@ -167,13 +235,15 @@ function JobDetail() {
               <CheckCircle2 size={64} />
             </div>
             <h1>Application Submitted!</h1>
-            <p>Your application for <strong>{job.title}</strong> at <strong>{job.employerName}</strong> has been received.</p>
+            <p>
+              Your application for <strong>{job.title}</strong> at <strong>{job.employerName}</strong> has been received.
+            </p>
             <p className="success-note">The employer will review your application and contact you if shortlisted.</p>
             <div className="success-actions">
               <ButtonLink to="/jobs" variant="outline">
                 Browse more jobs
               </ButtonLink>
-              <ButtonLink to="/job-seeker/applications" variant="primary">
+              <ButtonLink to="/job-seeker" variant="primary">
                 View my applications
               </ButtonLink>
             </div>
@@ -184,225 +254,306 @@ function JobDetail() {
   }
 
   const salaryDisplay = job.salary ? formatSalary(job.salary) : 'Negotiable'
-  const deadlineDisplay = job.applicationDeadline ? formatDate(job.applicationDeadline) : 'Not specified'
+  const deadlineDisplay = job.applicationDeadline
+    ? formatDate(job.applicationDeadline)
+    : 'Not specified'
+
+  const descriptionParagraphs = job.description
+    .split('\n')
+    .map((p) => p.trim())
+    .filter(Boolean)
 
   return (
     <main className="page job-detail-page">
-      <div className="container">
-        <Link to="/jobs" className="back-link">
-          <ArrowLeft size={16} /> Back to jobs
-        </Link>
+      <div className="container container--narrow">
+        <BackButton fallback="/jobs" label="Back to Jobs" variant="ghost" size="sm" className="page-back-link" />
 
-        <header className="job-detail__header">
-          <div className="job-detail__header-main">
-            <div className="job-detail__employer">
-              {job.employerLogo && (
-                <img src={job.employerLogo} alt={job.employerName} className="job-detail__employer-logo" />
-              )}
-              <div>
-                <p className="job-detail__employer-name">{job.employerName}</p>
-                <p className="job-detail__posted">
-                  Posted {formatDate(job.createdAt)} · {job.views} views · {job.applicationCount} applications
+        <article className="job-detail-card">
+          <Card variant="elevated">
+            <CardBody>
+              <header className="job-detail-card__header">
+                <div className="job-detail-card__top">
+                  <Avatar
+                    src={job.employerLogo || undefined}
+                    alt={job.employerName}
+                    initials={getCompanyInitials(job.employerName)}
+                    size="md"
+                    variant={job.employerLogo ? 'image' : 'gradient'}
+                  />
+                  <div className="job-detail-card__title-wrap">
+                    <h1 className="job-detail-card__title">{job.title}</h1>
+                    <p className="job-detail-card__employer">{job.employerName}</p>
+                  </div>
+                  <div className="job-detail-card__badges">
+                    {job.featured && (
+                      <Badge variant="brand" size="sm">
+                        <Star size={14} aria-hidden="true" />
+                        Featured
+                      </Badge>
+                    )}
+                    <Badge variant={statusVariant(job.status)} size="sm">
+                      {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="job-detail-card__meta">
+                  <span className="job-detail-card__meta-item">
+                    <MapPin size={16} aria-hidden="true" />
+                    {job.location.town}, {job.location.lga}
+                  </span>
+                  <span className="job-detail-card__meta-item">
+                    <Briefcase size={16} aria-hidden="true" />
+                    {job.category}
+                  </span>
+                  <span className="job-detail-card__meta-item">
+                    <Clock size={16} aria-hidden="true" />
+                    {getEmploymentTypeLabel(job.employmentType)}
+                  </span>
+                  <span className="job-detail-card__meta-item">
+                    <User size={16} aria-hidden="true" />
+                    {getExperienceLevelLabel(job.experienceLevel)}
+                  </span>
+                  {job.salary && (
+                    <span className="job-detail-card__meta-item">
+                      <DollarSign size={16} aria-hidden="true" />
+                      {salaryDisplay}
+                    </span>
+                  )}
+                </div>
+
+                <p className="job-detail-card__posted">
+                  Posted {formatDate(job.createdAt)}
+                  {' · '}
+                  {job.views} views
+                  {' · '}
+                  {job.applicationCount} applications
                 </p>
-              </div>
-            </div>
-            <div className="job-detail__badges">
-              {job.featured && (
-                <span className="badge badge--featured">
-                  <Star size={14} aria-hidden="true" />
-                  Featured
-                </span>
-              )}
-              <span className={`badge badge--${job.employmentType}`}>
-                {getEmploymentTypeLabel(job.employmentType)}
-              </span>
-              <span className={`badge badge--status badge--${job.status}`}>
-                {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-              </span>
-            </div>
-          </div>
 
-          <h1 className="job-detail__title">{job.title}</h1>
+                <div className="job-detail-card__actions">
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        setPendingAction('apply')
+                        setShowAuthModal(true)
+                        return
+                      }
+                      setShowApplyForm(true)
+                    }}
+                    disabled={job.status !== 'active'}
+                  >
+                    <MessageSquare size={18} aria-hidden="true" />
+                    {job.status === 'active' ? 'Apply Now' : 'Applications Closed'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={isSaved ? 'secondary' : 'outline'}
+                    onClick={handleSaveToggle}
+                    aria-label={isSaved ? 'Remove from saved' : 'Save job'}
+                  >
+                    <Heart size={20} aria-hidden="true" />
+                    {isSaved ? 'Saved' : 'Save'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleShare}
+                    aria-label="Share this job"
+                  >
+                    <Share2 size={20} aria-hidden="true" />
+                    Share
+                  </Button>
+                </div>
+              </header>
+            </CardBody>
+          </Card>
+        </article>
 
-          <div className="job-detail__meta">
-            <span className="job-detail__meta-item">
-              <MapPin size={16} aria-hidden="true" />
-              {job.location.town}, {job.location.lga}, {job.location.state}
-            </span>
-            <span className="job-detail__meta-item">
-              <Briefcase size={16} aria-hidden="true" />
-              {job.category}
-            </span>
-            <span className="job-detail__meta-item">
-              <Clock size={16} aria-hidden="true" />
-              {getEmploymentTypeLabel(job.employmentType)}
-            </span>
-            <span className="job-detail__meta-item">
-              <User size={16} aria-hidden="true" />
-              {getExperienceLevelLabel(job.experienceLevel)}
-            </span>
-            {job.salary && (
-              <span className="job-detail__meta-item job-detail__meta-item--salary">
-                <DollarSign size={16} aria-hidden="true" />
-                {salaryDisplay}
-              </span>
-            )}
-          </div>
-
-          <div className="job-detail__actions">
-            <button
-              type="button"
-              className={`job-detail__save-btn ${isSaved ? 'saved' : ''}`}
-              onClick={handleSaveToggle}
-              aria-label={isSaved ? 'Remove from saved' : 'Save job'}
-            >
-              <Heart size={20} aria-hidden="true" />
-              {isSaved ? 'Saved' : 'Save'}
-            </button>
-            <button
-              type="button"
-              className="job-detail__share-btn"
-              onClick={() => navigator.share?.({ title: job.title, text: job.description, url: window.location.href })}
-            >
-              <Share2 size={20} aria-hidden="true" />
-              Share
-            </button>
-            <Button
-              className="job-detail__apply-btn"
-              onClick={() => {
-                if (!isAuthenticated) {
-                  setPendingAction('apply')
-                  setShowAuthModal(true)
-                  return
-                }
-                setShowApplyForm(true)
-              }}
-              disabled={job.status !== 'active'}
-            >
-              <MessageSquare size={18} aria-hidden="true" />
-              {job.status === 'active' ? 'Apply Now' : 'Applications Closed'}
-            </Button>
-          </div>
-        </header>
-
-        <div className="job-detail__content">
-          <section className="job-detail__section" aria-labelledby="description-heading">
-            <h2 id="description-heading" className="job-detail__section-title">Job Description</h2>
-            <div className="job-detail__description">
-              {job.description.split('\n').map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
-              ))}
-            </div>
+        <div className="job-detail-content">
+          <section aria-labelledby="description-heading">
+            <Card variant="default">
+              <CardHeader>
+                <h2 id="description-heading" className="job-detail__section-title">
+                  Job Description
+                </h2>
+              </CardHeader>
+              <CardBody>
+                <div className="job-detail__description">
+                  {descriptionParagraphs.map((paragraph, i) => (
+                    <p key={i}>{paragraph}</p>
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
           </section>
 
           {job.responsibilities && (
-            <section className="job-detail__section" aria-labelledby="responsibilities-heading">
-              <h2 id="responsibilities-heading" className="job-detail__section-title">Key Responsibilities</h2>
-              <ul className="job-detail__list">
-                {job.responsibilities.split('\n').filter(Boolean).map((item, i) => (
-                  <li key={i}>
-                    <CheckCircle2 size={18} className="job-detail__list-icon" aria-hidden="true" />
-                    {item.trim()}
-                  </li>
-                ))}
-              </ul>
+            <section aria-labelledby="responsibilities-heading">
+              <Card variant="default">
+                <CardHeader>
+                  <h2 id="responsibilities-heading" className="job-detail__section-title">
+                    Key Responsibilities
+                  </h2>
+                </CardHeader>
+                <CardBody>
+                  <ul className="job-detail__list">
+                    {job.responsibilities
+                      .split('\n')
+                      .map((item) => item.trim())
+                      .filter(Boolean)
+                      .map((item, i) => (
+                        <li key={i}>
+                          <CheckCircle2 size={18} className="job-detail__list-icon" aria-hidden="true" />
+                          {item}
+                        </li>
+                      ))}
+                  </ul>
+                </CardBody>
+              </Card>
             </section>
           )}
 
           {job.requirements && (
-            <section className="job-detail__section" aria-labelledby="requirements-heading">
-              <h2 id="requirements-heading" className="job-detail__section-title">Requirements</h2>
-              <ul className="job-detail__list">
-                {job.requirements.split('\n').filter(Boolean).map((item, i) => (
-                  <li key={i}>
-                    <CheckCircle2 size={18} className="job-detail__list-icon" aria-hidden="true" />
-                    {item.trim()}
-                  </li>
-                ))}
-              </ul>
+            <section aria-labelledby="requirements-heading">
+              <Card variant="default">
+                <CardHeader>
+                  <h2 id="requirements-heading" className="job-detail__section-title">
+                    Requirements
+                  </h2>
+                </CardHeader>
+                <CardBody>
+                  <ul className="job-detail__list">
+                    {job.requirements
+                      .split('\n')
+                      .map((item) => item.trim())
+                      .filter(Boolean)
+                      .map((item, i) => (
+                        <li key={i}>
+                          <CheckCircle2 size={18} className="job-detail__list-icon" aria-hidden="true" />
+                          {item}
+                        </li>
+                      ))}
+                  </ul>
+                </CardBody>
+              </Card>
             </section>
           )}
 
           {job.skills.length > 0 && (
-            <section className="job-detail__section" aria-labelledby="skills-heading">
-              <h2 id="skills-heading" className="job-detail__section-title">Required Skills</h2>
-              <div className="job-detail__skills">
-                {job.skills.map((skill) => (
-                  <span key={skill} className="job-detail__skill-tag">{skill}</span>
-                ))}
-              </div>
+            <section aria-labelledby="skills-heading">
+              <Card variant="default">
+                <CardHeader>
+                  <h2 id="skills-heading" className="job-detail__section-title">
+                    Required Skills
+                  </h2>
+                </CardHeader>
+                <CardBody>
+                  <div className="job-detail__skills">
+                    {job.skills.map((skill) => (
+                      <Badge key={skill} variant="neutral" size="sm">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardBody>
+              </Card>
             </section>
           )}
 
-          <section className="job-detail__section" aria-labelledby="details-heading">
-            <h2 id="details-heading" className="job-detail__section-title">Job Details</h2>
-            <dl className="job-detail__details">
-              <div className="job-detail__detail-row">
-                <dt>Employment Type</dt>
-                <dd>{getEmploymentTypeLabel(job.employmentType)}</dd>
-              </div>
-              <div className="job-detail__detail-row">
-                <dt>Experience Level</dt>
-                <dd>{getExperienceLevelLabel(job.experienceLevel)}</dd>
-              </div>
-              <div className="job-detail__detail-row">
-                <dt>Salary</dt>
-                <dd>{salaryDisplay}{job.salary?.negotiable ? ' (Negotiable)' : ''}</dd>
-              </div>
-              <div className="job-detail__detail-row">
-                <dt>Application Method</dt>
-                <dd>{getApplicationMethodLabel(job.applicationMethod)}</dd>
-              </div>
-              <div className="job-detail__detail-row">
-                <dt>Application Deadline</dt>
-                <dd>{deadlineDisplay}</dd>
-              </div>
-              <div className="job-detail__detail-row">
-                <dt>Location</dt>
-                <dd>{job.location.address}, {job.location.town}, {job.location.lga}, {job.location.state}</dd>
-              </div>
-            </dl>
+          <section aria-labelledby="details-heading">
+            <Card variant="default">
+              <CardHeader>
+                <h2 id="details-heading" className="job-detail__section-title">
+                  Job Details
+                </h2>
+              </CardHeader>
+              <CardBody>
+                <dl className="job-detail__details">
+                  <div className="job-detail__detail-row">
+                    <dt>Employment Type</dt>
+                    <dd>{getEmploymentTypeLabel(job.employmentType)}</dd>
+                  </div>
+                  <div className="job-detail__detail-row">
+                    <dt>Experience Level</dt>
+                    <dd>{getExperienceLevelLabel(job.experienceLevel)}</dd>
+                  </div>
+                  <div className="job-detail__detail-row">
+                    <dt>Salary</dt>
+                    <dd>{salaryDisplay}</dd>
+                  </div>
+                  <div className="job-detail__detail-row">
+                    <dt>Application Method</dt>
+                    <dd>{getApplicationMethodLabel(job.applicationMethod)}</dd>
+                  </div>
+                  <div className="job-detail__detail-row">
+                    <dt>
+                      <Calendar size={16} aria-hidden="true" />
+                      Application Deadline
+                    </dt>
+                    <dd>{deadlineDisplay}</dd>
+                  </div>
+                  <div className="job-detail__detail-row">
+                    <dt>Location</dt>
+                    <dd>
+                      {job.location.address
+                        ? `${job.location.address}, ${job.location.town}, ${job.location.lga}, ${job.location.state}`
+                        : `${job.location.town}, ${job.location.lga}, ${job.location.state}`}
+                    </dd>
+                  </div>
+                </dl>
+              </CardBody>
+            </Card>
           </section>
 
           {job.applicationMethod !== 'platform' && job.applicationContact && (
-            <section className="job-detail__section job-detail__section--apply" aria-labelledby="contact-heading">
-              <h2 id="contact-heading" className="job-detail__section-title">Apply Directly</h2>
-              <p className="job-detail__apply-note">This employer accepts applications via {getApplicationMethodLabel(job.applicationMethod)}.</p>
-              <Button
-                className="job-detail__direct-apply-btn"
-                onClick={() => handleContactClick(job.applicationMethod, job.applicationContact)}
-              >
-                {job.applicationMethod === 'whatsapp' && (
-                  <MessageCircle size={18} aria-hidden="true" />
-                )}
-                {job.applicationMethod === 'email' && (
-                  <MessageSquare size={18} aria-hidden="true" />
-                )}
-                {job.applicationMethod === 'phone' && (
-                  <Phone size={18} aria-hidden="true" />
-                )}
-                Apply via {getApplicationMethodLabel(job.applicationMethod)}
-              </Button>
+            <section aria-labelledby="contact-heading">
+              <Card variant="default">
+                <CardBody>
+                  <p className="job-detail__apply-note">
+                    This employer accepts applications via {getApplicationMethodLabel(job.applicationMethod)}.
+                  </p>
+                  <Button
+                    variant="whatsapp"
+                    onClick={() => handleContactClick(job.applicationMethod, job.applicationContact)}
+                  >
+                    {job.applicationMethod === 'whatsapp' && <MessageCircle size={18} aria-hidden="true" />}
+                    {job.applicationMethod === 'email' && <MessageSquare size={18} aria-hidden="true" />}
+                    {job.applicationMethod === 'phone' && <Phone size={18} aria-hidden="true" />}
+                    {job.applicationMethod === 'external' && <ExternalLink size={18} aria-hidden="true" />}
+                    Apply via {getApplicationMethodLabel(job.applicationMethod)}
+                  </Button>
+                </CardBody>
+              </Card>
             </section>
           )}
 
-          <section className="job-detail__section" aria-labelledby="employer-heading">
-            <h2 id="employer-heading" className="job-detail__section-title">About {job.employerName}</h2>
-            <div className="job-detail__employer-info">
-              {job.employerLogo && (
-                <img src={job.employerLogo} alt={job.employerName} className="job-detail__employer-logo-lg" />
-              )}
-              <div>
-                <h3>{job.employerName}</h3>
-                <p>{job.description.split('\n')[0]}...</p>
-                <div className="job-detail__employer-meta">
-                  <span>
-                    <Building2 size={14} aria-hidden="true" />
-                    {job.location.town}, {job.location.lga}
-                  </span>
+          <section aria-labelledby="employer-heading">
+            <Card variant="default">
+              <CardHeader>
+                <h2 id="employer-heading" className="job-detail__section-title">
+                  About {job.employerName}
+                </h2>
+              </CardHeader>
+              <CardBody>
+                <div className="job-detail__company">
+                  <Avatar
+                    src={job.employerLogo || undefined}
+                    alt={job.employerName}
+                    initials={getCompanyInitials(job.employerName)}
+                    size="lg"
+                    variant={job.employerLogo ? 'image' : 'gradient'}
+                  />
+                  <div>
+                    <h3 className="job-detail__company-name">{job.employerName}</h3>
+                    <p className="job-detail__company-location">
+                      <Building2 size={14} aria-hidden="true" />
+                      {job.location.town}, {job.location.lga}, {job.location.state}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </section>
         </div>
 
@@ -430,66 +581,69 @@ function JobDetail() {
               <form onSubmit={handleSubmit} className="job-apply-form" noValidate>
                 <div className="form-row">
                   <div className="field">
-                    <label htmlFor="apply-name">Full Name <span className="required">*</span></label>
+                    <label htmlFor="apply-name">
+                      Full Name <span className="required">*</span>
+                    </label>
                     <input
                       id="apply-name"
                       type="text"
                       className={`input ${formErrors.name ? 'input--error' : ''}`}
                       placeholder="Your full name"
                       value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                       required
                     />
                     {formErrors.name && <span className="field__error">{formErrors.name}</span>}
                   </div>
                   <div className="field">
-                    <label htmlFor="apply-phone">Phone Number <span className="required">*</span></label>
+                    <label htmlFor="apply-phone">
+                      Phone Number <span className="required">*</span>
+                    </label>
                     <input
                       id="apply-phone"
                       type="tel"
                       className={`input ${formErrors.phone ? 'input--error' : ''}`}
                       placeholder="+234 XXX XXX XXXX"
                       value={formData.phone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
                       required
                     />
                     {formErrors.phone && <span className="field__error">{formErrors.phone}</span>}
                   </div>
                 </div>
                 <div className="field">
-                  <label htmlFor="apply-email">Email Address <span className="required">*</span></label>
+                  <label htmlFor="apply-email">
+                    Email Address <span className="required">*</span>
+                  </label>
                   <input
                     id="apply-email"
                     type="email"
                     className={`input ${formErrors.email ? 'input--error' : ''}`}
                     placeholder="your@email.com"
                     value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                     required
                   />
                   {formErrors.email && <span className="field__error">{formErrors.email}</span>}
                 </div>
                 <div className="field">
-                  <label htmlFor="apply-message">Cover Message <span className="required">*</span></label>
+                  <label htmlFor="apply-message">
+                    Cover Message <span className="required">*</span>
+                  </label>
                   <textarea
                     id="apply-message"
                     className={`input textarea ${formErrors.message ? 'input--error' : ''}`}
                     rows={4}
                     placeholder="Briefly explain why you're a great fit for this role..."
                     value={formData.message}
-                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
                     required
                   />
                   {formErrors.message && <span className="field__error">{formErrors.message}</span>}
                 </div>
                 <div className="field">
                   <label htmlFor="apply-cv">CV/Resume (Optional)</label>
-                  <input
-                    id="apply-cv"
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    className="input"
-                  />
+                  <input id="apply-cv" type="file" accept=".pdf,.doc,.docx" className="input" />
                   <span className="field__hint">PDF, DOC, or DOCX format. Max 5MB.</span>
                 </div>
                 <div className="job-apply-form__actions">
@@ -514,11 +668,6 @@ function JobDetail() {
       </div>
     </main>
   )
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 export default JobDetail

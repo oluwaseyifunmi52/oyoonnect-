@@ -12,7 +12,7 @@ import {
 import { communityCategories } from '../../data/communityCategories'
 import { communityReportsService } from '../../services/communityReportsService'
 import type { CommunityReportStats, CommunityReport } from '../../types/community'
-import { Button, ButtonLink, Card, Badge, Skeleton, SearchInput } from '../../components/ui'
+import { ButtonLink, Card, Badge, SearchInput } from '../../components/ui'
 import { SectionHeading } from '../../components/ui/SectionHeading'
 
 const STAT_CARDS = [
@@ -64,8 +64,8 @@ export function CommunityHome() {
       (r) =>
         r.title.toLowerCase().includes(q) ||
         r.description.toLowerCase().includes(q) ||
-        r.location.lga.toLowerCase().includes(q) ||
-        r.location.town.toLowerCase().includes(q)
+        r.location.lga?.toLowerCase().includes(q) ||
+        r.location.town?.toLowerCase().includes(q)
     )
   }, [reports, searchQuery])
 
@@ -249,7 +249,7 @@ export function CommunityHome() {
                     <div className="community-report-card__meta">
                       <span className="community-report-card__location">
                         <MapPin size={14} aria-hidden="true" />
-                        {report.location.town}, {report.location.lga}
+                        {report.location.town || report.location.area || ''}{report.location.town && report.location.lga ? ', ' : ''}{report.location.lga || ''}
                       </span>
                       {report.upvotes > 0 && (
                         <span className="community-report-card__upvotes">

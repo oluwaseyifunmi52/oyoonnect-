@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Menu, X, ArrowRight, ChevronDown, User, LogOut, Building2, Shield, Heart, Briefcase, Bell, Sun, Moon } from 'lucide-react'
+import { Menu, X, ArrowRight, ChevronDown, User, LogOut, Building2, Shield, Heart, Bell, Sun, Moon, LayoutDashboard } from 'lucide-react'
 import { siteConfig, type NavItem } from '../../config/site'
 import { ButtonLink, Button } from '../ui/Button'
 import { Logo } from './Logo'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth, getDefaultDashboard } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import { notificationService } from '../../services/notificationService'
 import type { Notification } from '../../types/notifications'
@@ -22,7 +23,11 @@ export function Navbar() {
   const toggleRef = useRef<HTMLButtonElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const notificationPanelRef = useRef<HTMLDivElement>(null)
+  const notificationTriggerRef = useRef<HTMLButtonElement>(null)
+  const userTriggerRef = useRef<HTMLButtonElement>(null)
   const previousActiveElement = useRef<HTMLElement | null>(null)
+  const [notificationPosition, setNotificationPosition] = useState<{ top: number; right: number } | null>(null)
+  const [userMenuPosition, setUserMenuPosition] = useState<{ top: number; right: number } | null>(null)
   const { user, isAuthenticated, isBusinessOwner, isAdmin, logout } = useAuth()
   const { resolved, setTheme } = useTheme()
   const navigate = useNavigate()
@@ -86,6 +91,54 @@ export function Navbar() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [userMenuOpen, notificationPanelOpen])
+
+  const updateNotificationPosition = useCallback(() => {
+    if (notificationTriggerRef.current) {
+      const rect = notificationTriggerRef.current.getBoundingClientRect()
+      setNotificationPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right
+      })
+    }
+  }, [])
+
+  const updateUserMenuPosition = useCallback(() => {
+    if (userTriggerRef.current) {
+      const rect = userTriggerRef.current.getBoundingClientRect()
+      setUserMenuPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (notificationPanelOpen) {
+      updateNotificationPosition()
+      const handleResize = () => updateNotificationPosition()
+      const handleScroll = () => updateNotificationPosition()
+      window.addEventListener('resize', handleResize)
+      window.addEventListener('scroll', handleScroll, true)
+      return () => {
+        window.removeEventListener('resize', handleResize)
+        window.removeEventListener('scroll', handleScroll, true)
+      }
+    }
+  }, [notificationPanelOpen, updateNotificationPosition])
+
+  useEffect(() => {
+    if (userMenuOpen) {
+      updateUserMenuPosition()
+      const handleResize = () => updateUserMenuPosition()
+      const handleScroll = () => updateUserMenuPosition()
+      window.addEventListener('resize', handleResize)
+      window.addEventListener('scroll', handleScroll, true)
+      return () => {
+        window.removeEventListener('resize', handleResize)
+        window.removeEventListener('scroll', handleScroll, true)
+      }
+    }
+  }, [userMenuOpen, updateUserMenuPosition])
 
   const focusableElementsSelector = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
@@ -211,6 +264,7 @@ export function Navbar() {
                 <button
                   type="button"
                   className="navbar__notification-trigger"
+                  ref={notificationTriggerRef}
                   aria-label={`Notifications${notifications.filter(n => !n.read).length > 0 ? `, ${notifications.filter(n => !n.read).length} unread` : ''}`}
                   aria-expanded={notificationPanelOpen}
                   onClick={() => {
@@ -228,8 +282,21 @@ export function Navbar() {
                     </span>
                   )}
                 </button>
-                {notificationPanelOpen && (
-                  <div className="navbar__notification-panel" role="region" aria-label="Notifications">
+                {notificationPanelOpen && notificationPosition && (
+                  createPortal(
+                    <div
+                      className="navbar__notification-panel"
+                      role="region"
+                      aria-label="Notifications"
+                      style={{
+                        position: 'fixed',
+                        top: notificationPosition.top,
+                        right: notificationPosition.right,
+                        width: 380,
+                        maxWidth: 'calc(100vw - 32px)',
+                        maxHeight: 520,
+                        zIndex: 1000,
+                      }}>
                     <div className="navbar__notification-panel-header">
                       <h2 className="navbar__notification-panel-title">Notifications</h2>
                       <div className="navbar__notification-panel-actions">
@@ -299,13 +366,16 @@ export function Navbar() {
                         </NavLink>
                       </div>
                     )}
-                  </div>
+                  </div>,
+                  document.body
+                  )
                 )}
               </div>
               <div className="navbar__user-menu" ref={userMenuRef}>
               <button
                 type="button"
                 className="navbar__user-trigger"
+                ref={userTriggerRef}
                 aria-label="User menu"
                 aria-expanded={userMenuOpen}
                 aria-haspopup="true"
@@ -322,8 +392,18 @@ export function Navbar() {
                 <ChevronDown size={16} className={`navbar__chevron ${userMenuOpen ? 'navbar__chevron--open' : ''}`} aria-hidden="true" />
               </button>
 
-              {userMenuOpen && (
-                <div className="navbar__user-dropdown" role="menu">
+              {userMenuOpen && userMenuPosition && (
+                  createPortal(
+                    <div
+                      className="navbar__user-dropdown"
+                      role="menu"
+                      style={{
+                        position: 'fixed',
+                        top: userMenuPosition.top,
+                        right: userMenuPosition.right,
+                        zIndex: 1000,
+                        minWidth: 220,
+                      }}>
                   <div className="navbar__user-dropdown-header">
                     <div className="navbar__user-dropdown-avatar">
                       {user?.avatar ? (
@@ -339,12 +419,21 @@ export function Navbar() {
                     </div>
                   </div>
                   <hr className="navbar__user-dropdown-divider" />
-                  <NavLink
-                    to="/profile"
-                    className="navbar__user-dropdown-item"
-                    role="menuitem"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
+                   <NavLink
+                     to={getDefaultDashboard(user?.role)}
+                     className="navbar__user-dropdown-item"
+                     role="menuitem"
+                     onClick={() => setUserMenuOpen(false)}
+                   >
+                     <LayoutDashboard size={18} aria-hidden="true" />
+                     Dashboard
+                   </NavLink>
+                   <NavLink
+                     to="/profile"
+                     className="navbar__user-dropdown-item"
+                     role="menuitem"
+                     onClick={() => setUserMenuOpen(false)}
+                   >
                     <User size={18} aria-hidden="true" />
                     My Profile
                   </NavLink>
@@ -422,10 +511,12 @@ export function Navbar() {
                     <LogOut size={18} aria-hidden="true" />
                     Sign Out
                   </Button>
-                </div>
-              )}
-            </div>
-            </>
+                </div>,
+                  document.body
+                  )
+                )}
+              </div>
+              </>
           ) : (
             <div style={{display:'flex', gap:'8px', alignItems:'center'}}>
               <button

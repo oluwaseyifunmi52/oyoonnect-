@@ -1,10 +1,10 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { Briefcase, Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Logo } from '../components/layout/Logo'
+import { PLATFORM_NAV } from '../components/navigation/PlatformNav'
 
 const JOBS_NAV = [
-  { to: '/jobs', label: 'Find Jobs', icon: Briefcase, end: true },
-  { to: '/jobs', label: 'Search', icon: Search },
+  ...PLATFORM_NAV,
   { to: '/jobs/post', label: 'Post a Job', icon: Plus },
 ]
 
@@ -13,7 +13,7 @@ export function JobsLayout() {
     <div className="jobs-layout functional-layout">
       <header className="jobs-layout__header functional-layout__header">
         <div className="jobs-layout__header-inner container">
-          <NavLink to="/jobs" end className="jobs-layout__brand" aria-label="OyoConnect Jobs home">
+          <NavLink to="/" end className="jobs-layout__brand" aria-label="OyoConnect home">
             <Logo subtitle link={false} />
           </NavLink>
           <nav className="jobs-layout__nav" aria-label="Jobs navigation">

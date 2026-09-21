@@ -233,7 +233,9 @@ export interface Review {
 }
 
 /** Optional capabilities a single OyoConnect account may have (one account, many capabilities). */
-export type Capability = 'user' | 'customer' | 'service_provider' | 'job_seeker' | 'employer' | 'business_owner' | 'community_contributor' | 'help_requester'
+import type { Capability } from '@app-types/common'
+
+export type { Capability }
 
 export interface User {
   id: string

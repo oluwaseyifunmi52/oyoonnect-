@@ -6,25 +6,10 @@ import type {
   CommunityReportStats,
   CommunityReportListResult,
 } from '../types/community'
-
-const API_BASE = '/api/community'
+import { apiClient } from './apiClient'
 
 let cachedStats: CommunityReportStats | null = null
 let cachedStatsTime = 0
-
-async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  })
-
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status}`)
-  }
-
-  const text = await response.text()
-  return text ? JSON.parse(text) : ({} as T)
-}
 
 export const communityReportsService = {
   async search(filters: CommunityFilters): Promise<CommunityReport[]> {
@@ -35,7 +20,8 @@ export const communityReportsService = {
     if (filters.verified !== undefined) params.set('verified', String(filters.verified))
     if (filters.sort) params.set('sort', filters.sort)
 
-    return fetchApi<CommunityReport[]>(`/reports?${params.toString()}`)
+    const response = await apiClient.get<CommunityReport[]>(`/community/reports?${params.toString()}`)
+    return response.data
   },
 
   async searchPaginated(
@@ -52,15 +38,18 @@ export const communityReportsService = {
     params.set('page', String(page))
     params.set('limit', String(limit))
 
-    return fetchApi<CommunityReportListResult>(`/reports/paginated?${params.toString()}`)
+    const response = await apiClient.get<CommunityReportListResult>(`/community/reports/paginated?${params.toString()}`)
+    return response.data
   },
 
   async getRecent(limit: number = 10): Promise<CommunityReport[]> {
-    return fetchApi<CommunityReport[]>(`/reports/recent?limit=${limit}`)
+    const response = await apiClient.get<CommunityReport[]>(`/community/reports/recent?limit=${limit}`)
+    return response.data
   },
 
   async getById(id: string): Promise<CommunityReport | undefined> {
-    return fetchApi<CommunityReport | undefined>(`/reports/${id}`)
+    const response = await apiClient.get<CommunityReport | undefined>(`/community/reports/${id}`)
+    return response.data
   },
 
   async getStats(): Promise<CommunityReportStats> {
@@ -69,10 +58,10 @@ export const communityReportsService = {
       return cachedStats
     }
 
-    const stats = await fetchApi<CommunityReportStats>('/reports/stats')
-    cachedStats = stats
+    const response = await apiClient.get<CommunityReportStats>('/community/reports/stats')
+    cachedStats = response.data
     cachedStatsTime = now
-    return stats
+    return response.data
   },
 
   async getCategoryReportCount(categorySlug: string): Promise<number> {
@@ -81,46 +70,43 @@ export const communityReportsService = {
   },
 
   async upvote(id: string): Promise<void> {
-    await fetchApi<void>(`/reports/${id}/upvote`, { method: 'POST' })
+    await apiClient.post<void>(`/community/reports/${id}/upvote`, {})
   },
 
   async downvote(id: string): Promise<void> {
-    await fetchApi<void>(`/reports/${id}/downvote`, { method: 'POST' })
+    await apiClient.post<void>(`/community/reports/${id}/downvote`, {})
   },
 
   async create(data: CommunityReportFormData & { authorId?: string; authorName?: string; authorAvatar?: string }): Promise<CommunityReport> {
-    return fetchApi<CommunityReport>('/reports', {
-      method: 'POST',
-      body: JSON.stringify({
-        title: data.title,
-        description: data.description,
-        category: data.category,
-        lga: data.lga,
-        town: data.town,
-        area: data.area,
-        busStop: data.busStop,
-        address: data.address,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        placeId: data.placeId,
-        formattedAddress: data.formattedAddress,
-        authorId: data.authorId,
-        authorName: data.authorName,
-        authorAvatar: data.authorAvatar,
-      }),
+    const response = await apiClient.post<CommunityReport>('/community/reports', {
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      lga: data.lga,
+      town: data.town,
+      area: data.area,
+      busStop: data.busStop,
+      address: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      placeId: data.placeId,
+      formattedAddress: data.formattedAddress,
+      authorId: data.authorId,
+      authorName: data.authorName,
+      authorAvatar: data.authorAvatar,
     })
+    return response.data
   },
 }
 
 export const communityCommentsService = {
   async getByReport(reportId: string): Promise<CommunityComment[]> {
-    return fetchApi<CommunityComment[]>(`/reports/${reportId}/comments`)
+    const response = await apiClient.get<CommunityComment[]>(`/community/reports/${reportId}/comments`)
+    return response.data
   },
 
   async create(reportId: string, authorId: string, content: string): Promise<CommunityComment> {
-    return fetchApi<CommunityComment>(`/reports/${reportId}/comments`, {
-      method: 'POST',
-      body: JSON.stringify({ authorId, content }),
-    })
+    const response = await apiClient.post<CommunityComment>(`/community/reports/${reportId}/comments`, { authorId, content })
+    return response.data
   },
 }

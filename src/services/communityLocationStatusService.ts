@@ -42,7 +42,9 @@ function getStored(): CommunityLocationStatus[] {
 function save(statuses: CommunityLocationStatus[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(statuses))
-  } catch {}
+  } catch {
+    // ignore storage errors
+  }
 }
 
 export const communityLocationStatusService = {

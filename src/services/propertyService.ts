@@ -235,12 +235,16 @@ export const propertyDraftService = {
   saveDraft<T>(key: string, data: T): void {
     try {
       localStorage.setItem(key, JSON.stringify(data))
-    } catch {}
+    } catch {
+      // ignore storage errors
+    }
   },
 
   clearDraft(key: string): void {
     try {
       localStorage.removeItem(key)
-    } catch {}
+    } catch {
+      // ignore storage errors
+    }
   },
 }

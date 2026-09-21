@@ -11,6 +11,12 @@ interface BankAccountVerification {
   accountName: string
 }
 
+interface StoredBankAccount extends BankAccountVerification {
+  id: string
+  verified: boolean
+  verifiedAt?: string
+}
+
 export const payoutService = {
   getPayoutDetails(userId: string): PayoutDetails | null {
     try {
@@ -57,7 +63,7 @@ export const payoutService = {
     }
   },
 
-  getBankAccounts(userId: string): BankAccountVerification[] {
+  getBankAccounts(userId: string): StoredBankAccount[] {
     try {
       const stored = localStorage.getItem(`${BANK_ACCOUNTS_KEY}_${userId}`)
       return stored ? JSON.parse(stored) : []
@@ -66,10 +72,10 @@ export const payoutService = {
     }
   },
 
-  saveBankAccount(userId: string, account: BankAccountVerification & { id: string; verified: boolean; verifiedAt?: string }): void {
+  saveBankAccount(userId: string, account: StoredBankAccount): void {
     try {
       const accounts = this.getBankAccounts(userId)
-      const idx = accounts.findIndex((a: any) => a.id === account.id)
+      const idx = accounts.findIndex((a) => a.id === account.id)
       if (idx !== -1) {
         accounts[idx] = account
       } else {

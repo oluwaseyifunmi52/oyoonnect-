@@ -13,10 +13,15 @@ export const siteConfig = {
   email: 'oyoconnect5@gmail.com',
   phone: '+234 816 670 9577',
   url: 'https://oyoconnect.ng',
+  // Core platform modules — kept in sync with PLATFORM_NAV in
+  // src/components/navigation/PlatformNav.tsx. Home is excluded here because
+  // the Logo already links to the home route.
   nav: [
-    { label: 'Manage Business', to: '/business' },
-    { label: 'Find Jobs', to: '/jobs' },
+    { label: 'Businesses', to: '/business' },
+    { label: 'Search', to: '/search' },
+    { label: 'Jobs', to: '/jobs' },
     { label: 'Community', to: '/community' },
     { label: 'Help', to: '/help' },
+    { label: 'Services', to: '/services' },
   ] as const satisfies readonly NavItem[],
 } as const

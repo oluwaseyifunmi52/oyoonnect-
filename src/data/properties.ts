@@ -1,3 +1,10 @@
+/**
+ * DEVELOPMENT-ONLY data layer for Properties.
+ *
+ * All arrays are empty. This file provides in-memory utility functions
+ * used by propertyService.ts during local development. In production these
+ * functions will be replaced by API calls through apiClient.
+ */
 import type { Property, PropertyFilters, PropertyType, PropertyStatus } from '../types/rental'
 
 function createProperty(overrides: Partial<Property>): Property {

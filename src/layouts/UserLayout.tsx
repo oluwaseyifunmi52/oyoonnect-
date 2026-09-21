@@ -10,8 +10,8 @@ const USER_NAV: DashboardNavItem[] = [
   { to: '/saved', label: 'Saved Businesses', icon: Heart },
   { to: '/settings', label: 'Settings', icon: Settings },
   { to: '/account', label: 'Account', icon: User },
-  { to: '/my-requests', label: 'My Requests', icon: FileText },
-  { to: '/help/requests', label: 'Support Requests', icon: HelpCircle },
+  { to: '/my-requests', label: 'My Requests', icon: FileText, secondary: true },
+  { to: '/help/requests', label: 'Support Requests', icon: HelpCircle, secondary: true },
 ]
 
 export function UserLayout() {

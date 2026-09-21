@@ -1,0 +1,118 @@
+/* ==========================================================================
+   BACK BUTTON — Unified back navigation component
+   ========================================================================== */
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--fw-medium);
+  transition: all var(--transition-fast);
+}
+
+.back-btn__label {
+  display: inline-block;
+}
+
+/* Size variations for back button */
+.back-btn.btn--sm {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  min-height: 40px;
+}
+
+.back-btn.btn--md {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
+  min-height: 44px;
+}
+
+/* Ghost variant - matches existing auth-back-link style for consistency */
+.back-btn.btn--ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  min-height: 40px;
+}
+
+.back-btn.btn--ghost:hover:not(:disabled) {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  border-color: transparent;
+}
+
+/* Outline variant */
+.back-btn.btn--outline {
+  background: var(--card);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.back-btn.btn--outline:hover:not(:disabled) {
+  border-color: var(--brand);
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+}
+
+/* Secondary variant */
+.back-btn.btn--secondary {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  border-color: var(--brand-line);
+}
+
+.back-btn.btn--secondary:hover:not(:disabled) {
+  background: #d9f8ef;
+}
+
+/* Disabled state */
+.back-btn:disabled,
+.back-btn.btn--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Focus visible */
+.back-btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Active state */
+.back-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .back-btn.btn--sm {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    min-height: 44px;
+  }
+
+  .back-btn.btn--md {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-base);
+    min-height: 48px;
+  }
+}
+
+/* Dark mode */
+[data-theme="dark"] .back-btn.btn--outline {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+[data-theme="dark"] .back-btn.btn--outline:hover:not(:disabled) {
+  background: var(--brand-soft);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .back-btn {
+    transition-duration: 0.01ms !important;
+  }
+}

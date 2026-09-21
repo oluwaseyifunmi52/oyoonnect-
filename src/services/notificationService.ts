@@ -1,3 +1,9 @@
+/**
+ * DEVELOPMENT-ONLY notification service.
+ *
+ * Uses localStorage for local dev state. In production this will be
+ * replaced by API calls through apiClient.
+ */
 import type { Notification } from '../types/notifications'
 
 const STORAGE_KEY = 'notifications'

@@ -1,0 +1,84 @@
+/* ==========================================================================
+    PHOTO SECTION — Avatar upload area with change/remove buttons
+    ========================================================================== */
+
+.photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.photo-section__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+}
+
+.photo-section__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.photo-section__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+  border: 1px solid transparent;
+  padding: var(--space-2) var(--space-4);
+  min-height: 40px;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.photo-section__btn--primary {
+  background: var(--brand);
+  color: var(--on-primary);
+}
+
+.photo-section__btn--primary:hover:not(.photo-section__btn--disabled) {
+  background: var(--brand-dark);
+}
+
+.photo-section__btn--secondary {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.photo-section__btn--secondary:hover:not(:disabled) {
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
+  color: var(--brand-dark);
+}
+
+.photo-section__btn--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.photo-section__input {
+  display: none;
+}
+
+.photo-section__hint {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  line-height: 1.5;
+}

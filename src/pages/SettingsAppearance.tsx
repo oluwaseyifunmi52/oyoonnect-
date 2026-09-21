@@ -1,6 +1,7 @@
 import { Monitor, Sun, Moon, Check } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { BackButton } from '../components/ui/BackButton'
 
 export function SettingsAppearance() {
   const { isAuthenticated } = useAuth()
@@ -16,6 +17,7 @@ export function SettingsAppearance() {
   return (
     <main className="page">
       <div className="container container--narrow">
+        <BackButton fallback="/settings" label="Back to settings" variant="ghost" size="sm" className="page-back-link" />
         <header className="settings-page-header"><h1>Appearance</h1><p>Customize how OyoConnect looks and feels.</p></header>
         <section className="settings-card-group">
           <header className="card-group-header"><h2>Theme</h2><p>Choose your preferred color scheme.</p></header>

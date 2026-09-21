@@ -1,17 +1,12 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, HeartHandshake, Flag, ShieldCheck, Users, AlertCircle } from 'lucide-react'
-import { formatCurrency } from '../../utils/currency'
+import { ArrowRight, HeartHandshake, Flag, ShieldCheck } from 'lucide-react'
 import type { SupportRequest, HelpCategoryType } from '../../types/help'
-import { HELP_CATEGORIES, SUGGESTED_SUPPORT_AMOUNTS } from '../../types/help'
+import { HELP_CATEGORIES } from '../../types/help'
 import {
-  Button,
   ButtonLink,
   Card,
-  Badge,
-  Skeleton,
   SearchInput,
-  SectionHeading,
 } from '../../components/ui'
 import {
   HelpIcon,
@@ -85,7 +80,7 @@ export function HelpLandingPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<string>('recent')
 
-  const loadRequests = async () => {
+  const loadRequests = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
@@ -96,11 +91,11 @@ export function HelpLandingPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     loadRequests()
-  }, [])
+  }, [loadRequests])
 
   const filteredRequests = useMemo(() => {
     let result = [...requests]

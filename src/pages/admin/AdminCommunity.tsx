@@ -1,4 +1,4 @@
-import { Users, Search, Filter } from 'lucide-react'
+import { Users, Search } from 'lucide-react'
 import { AdminPageHeader } from '../../components/admin/AdminPageHeader'
 import { EmptyState } from '../../components/ui/EmptyState'
 
@@ -16,7 +16,7 @@ export function AdminCommunity() {
           <input className="input" style={{ width: '100%' }} type="text" placeholder="Search community reports..." aria-label="Search community reports" disabled />
         </div>
         <button className="btn btn--outline" type="button" disabled>
-          <Filter size={16} /> Filter
+          Filter
         </button>
       </div>
 

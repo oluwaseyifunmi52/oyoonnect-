@@ -6,27 +6,23 @@ interface StatCardProps {
   value: string | number | null
   icon: LucideIcon
   loading?: boolean
-  /** Shown instead of the value when there is no data. Defaults to "—". */
-  emptyValue?: string
-  /** Secondary line under the value. */
   hint?: string
 }
 
-export function StatCard({ label, value, icon: Icon, loading, emptyValue = '—', hint }: StatCardProps) {
+export function StatCard({ label, value, icon: Icon, loading, hint }: StatCardProps) {
   if (loading) {
     return (
-      <div className="stat-card">
+      <div className="stat-card stat-card--loading">
         <div className="stat-card__header">
           <span className="stat-card-title">{label}</span>
           <span className="stat-card-icon"><Icon size={18} aria-hidden="true" /></span>
         </div>
-        <Skeleton className="skeleton--text skeleton--mid" />
+        <Skeleton className="skeleton--text" style={{ width: 60, height: 24 }} />
       </div>
     )
   }
 
   const hasValue = value !== null && value !== '' && value !== undefined
-  const display = hasValue ? value : emptyValue
 
   return (
     <div className="stat-card">
@@ -34,8 +30,10 @@ export function StatCard({ label, value, icon: Icon, loading, emptyValue = '—'
         <span className="stat-card-title">{label}</span>
         <span className="stat-card-icon"><Icon size={18} aria-hidden="true" /></span>
       </div>
-      <div className={`stat-card-value ${hasValue ? '' : 'is-empty'}`}>{display}</div>
-      {hint ? <div className="stat-card-trend">{hint}</div> : null}
+      <div className="stat-card-value">
+        {hasValue ? value : <span className="stat-card-value--empty">—</span>}
+      </div>
+      {hint ? <div className="stat-card-hint">{hint}</div> : null}
     </div>
   )
 }
