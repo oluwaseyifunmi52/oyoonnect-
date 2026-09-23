@@ -267,8 +267,167 @@
 :root.dark .navbar__notification-icon--community { background: #20564A; color: #D1FAE5; }
 :root.dark .navbar__notification-icon--system { background: var(--surface-2); color: var(--muted); }
 
-:root.dark .notification-item {
-  border-color: var(--line);
+/* Bell SVG size within navbar notification - cap at 22px */
+.navbar__notification-trigger svg {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+/* Notification badge */
+.navbar__notification-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  min-width: 7px;
+  height: 7px;
+  padding: 0;
+  border-radius: 999px;
+  background: #dc2626;
+  border: 2px solid #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1;
+}
+
+/* Light mode navbar notification trigger */
+.notification-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #334155;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.notification-trigger:hover {
+  background: #f1f5f9;
+  color: #0f7a5c;
+}
+
+.notification-trigger:focus-visible {
+  outline: 2px solid rgba(15, 122, 92, 0.35);
+  outline-offset: 2px;
+}
+
+.notification-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #334155;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.notification-trigger:hover {
+  background: #f1f5f9;
+  color: #0f7a5c;
+}
+
+.notification-trigger:focus-visible {
+  outline: 2px solid rgba(15, 122, 92, 0.35);
+  outline-offset: 2px;
+}
+
+.notification-trigger svg {
+  width: 22px !important;
+  height: 22px !important;
+  flex: 0 0 22px !important;
+  stroke-width: 1.8 !important;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  min-width: 7px;
+  height: 7px;
+  padding: 0;
+  border-radius: 999px;
+  background: #dc2626;
+  border: 2px solid #ffffff;
+}
+
+.notification-panel {
+  /* panel already has styles in index.css */
+}
+
+.notification-panel-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.notification-panel-action {
+  font-size: 13px;
+  color: #0f7a5c;
+  margin-right: 12px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.notification-item.unread {
+  background: #f0fdf4;
+  color: #0f7a5c;
+}
+
+.notification-item .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.notification-empty {
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.notification-empty .bell-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-empty .bell-icon svg {
+  width: 22px;
+  height: 22px;
+  color: #64748b;
+}
+
+.notification-empty-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.notification-empty-text {
+  font-size: 13px;
+  color: #64748b;
 }
 
 :root.dark .notification-item:hover {
@@ -1699,6 +1858,113 @@ textarea {
   border: 1px solid var(--warning-line);
 }
 
+/* ==========================================================================
+   MOBILE DRAWER
+   ========================================================================== */
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  z-index: 100;
+  background: var(--bg);
+  box-shadow: -4px 0 12px rgb(0 0 0 / 0.15);
+  overflow-y: auto;
+}
+
+/* hamburger & X button */
+.mobile-drawer__hamburger {
+  background: none;
+  border: none;
+  padding: var(--space-1);
+  cursor: pointer;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+/* nav container */
+.mobile-drawer__nav {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* section buttons (top-level items) */
+.mobile-drawer__section {
+  width: 100%;
+}
+
+.mobile-drawer__section-toggle {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: none;
+  background: none;
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.mobile-drawer__section-toggle:hover {
+  background: var(--surface);
+}
+
+.mobile-drawer__section-toggle.expanded {
+  color: var(--brand);
+}
+
+.mobile-drawer__section-icon {
+  flex-shrink: 0;
+  color: var(--subtle);
+  font-size: 1.25rem;
+}
+
+.mobile-drawer__section-label {
+  flex: 1;
+  font-size: var(--fs-base);
+}
+
+/* submenu */
+.mobile-drawer__submenu {
+  margin-top: var(--space-2);
+  padding-left: var(--space-4);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.mobile-drawer__submenu-link {
+  display: block;
+  padding: var(--space-1) 0;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.mobile-drawer__submenu-link:hover {
+  color: var(--ink);
+}
+
+.mobile-drawer__submenu-link--active {
+  color: var(--brand);
+}
+
+/* backdrop when drawer is open */
+.mobile-drawer__backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 99;
+}
+
 .navbar__user-dropdown-divider {
   margin: 0;
   border-color: var(--line);
@@ -1783,18 +2049,29 @@ textarea {
   justify-content: center;
   width: 40px;
   height: 40px;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: var(--radius-sm);
-  background: var(--card);
-  color: var(--muted);
+  background: transparent;
+  color: #334155;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .navbar__notification-trigger:hover {
-  border-color: var(--brand-line);
-  background: var(--brand-soft);
-  color: var(--brand);
+  background: #f1f5f9;
+  color: #0f7a5c;
+}
+
+.navbar__notification-trigger:focus-visible {
+  outline: 2px solid rgba(15, 122, 92, 0.35);
+  outline-offset: 2px;
+}
+
+.navbar__notification-trigger svg {
+  width: 22px !important;
+  height: 22px !important;
 }
 
 .navbar__theme-toggle {
@@ -2545,6 +2822,18 @@ textarea {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .business-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 769px) {
+  .business-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .card {
@@ -12977,7 +13266,7 @@ textarea {
 
 @media (max-width: 768px) {
   .help-trust-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
