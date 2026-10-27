@@ -1,47 +1,7 @@
-import { NavLink, Outlet } from 'react-router-dom'
-import { Plus } from 'lucide-react'
-import { Logo } from '../components/layout/Logo'
-import { PLATFORM_NAV } from '../components/navigation/PlatformNav'
-
-const JOBS_NAV = [
-  ...PLATFORM_NAV,
-  { to: '/jobs/post', label: 'Post a Job', icon: Plus },
-]
+import { DashboardLayout } from '../components/layout/DashboardLayout'
 
 export function JobsLayout() {
-  return (
-    <div className="jobs-layout functional-layout">
-      <header className="jobs-layout__header functional-layout__header">
-        <div className="jobs-layout__header-inner container">
-          <NavLink to="/" end className="jobs-layout__brand" aria-label="OyoConnect home">
-            <Logo subtitle link={false} />
-          </NavLink>
-          <nav className="jobs-layout__nav" aria-label="Jobs navigation">
-            {JOBS_NAV.map((item) => {
-              const Icon = item.icon
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  className={({ isActive }) =>
-                    `jobs-layout__nav-link ${isActive ? 'jobs-layout__nav-link--active' : ''}`}
-                >
-                  <Icon size={16} aria-hidden="true" />
-                  <span>{item.label}</span>
-                </NavLink>
-              )
-            })}
-          </nav>
-        </div>
-      </header>
-      <main className="functional-layout__main">
-        <div className="container">
-          <Outlet />
-        </div>
-      </main>
-    </div>
-  )
+  return <DashboardLayout navigationMode="platform" />
 }
 
 export default JobsLayout

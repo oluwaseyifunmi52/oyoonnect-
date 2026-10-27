@@ -1,401 +1,265 @@
-import { useState, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { FormEvent } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Building2,
-  Briefcase,
-  MessageSquare,
-  HeartHandshake,
-  Search,
-  ShieldCheck,
-  MapPin,
-  ArrowRight,
-  Wrench,
-  Utensils,
-  Sparkles,
-  GraduationCap,
-  Hammer,
-  Shirt,
-  Pill,
-  Camera,
-  Car,
-  Home as HomeIcon,
-  Stethoscope,
-  Laptop,
-  Truck,
-  Scissors,
-  Leaf,
-  type LucideIcon,
+  ArrowRight, ArrowUpRight, Bell, BriefcaseBusiness, Building2,
+  ChevronDown, ChevronRight, Compass, FileWarning, HeartHandshake, Home as HomeIcon,
+  LogOut, MapPin, Menu, MessageCircle, Search, Share2, ShoppingBag, Sparkles, Users, Wallet,
+  X, Gamepad2, type LucideIcon,
 } from 'lucide-react'
-import { siteConfig } from '../config/site'
-import { categories } from '../data/categories'
-import { businessService } from '../services/businessService'
-import { Button, ButtonLink, Card, Badge, Skeleton, SearchInput } from '../components/ui'
-import type { Business } from '../types/business'
+import { Button } from '../components/ui/Button'
+import { PublicLayout } from '../components/Layout'
+import { AppLayout } from '../components/layout/AppShell'
+import { useAuth } from '../context/AuthContext'
+import {
+  homeMockSearchItems, homeMockUser,
+  loadHomeEvents, loadHomeNotifications, loadHomeUpdates, loadHomeUser, relativeTime,
+} from '../data/homeDashboard'
+import type { HomeEvent, HomeNotification, HomeUpdate, HomeUser } from '../data/homeDashboard'
+import './HomeDashboard.css'
 
-const QUICK_ACTIONS = [
-  { id: 'jobs', label: 'Find Jobs', description: 'Browse opportunities', icon: Briefcase, href: '/jobs' },
-  { id: 'report', label: 'Report Issue', description: 'Community reports', icon: MessageSquare, href: '/community/report' },
-  { id: 'community', label: 'Community', description: 'Local updates', icon: MessageSquare, href: '/community' },
-  { id: 'help', label: 'Request Help', description: 'Get support', icon: HeartHandshake, href: '/help/request' },
-  { id: 'businesses', label: 'Businesses', description: 'Local services', icon: Building2, href: '/categories' },
-  { id: 'marketplace', label: 'Marketplace', description: 'Buy & sell', icon: Truck, href: '/search' },
-  { id: 'services', label: 'Post a Job', description: 'Hire talent', icon: Briefcase, href: '/jobs/post' },
-  { id: 'services2', label: 'Find Services', description: 'Local experts', icon: Wrench, href: '/search' },
+const locationKey = 'oyoconnect-home-location'
+const loggedOutKey = 'oyoconnect-home-logged-out'
+
+const primaryLinks: { label: string; to: string; icon: LucideIcon }[] = [
+  { label: 'Home', to: '/', icon: HomeIcon },
+  { label: 'Jobs', to: '/jobs', icon: BriefcaseBusiness },
+  { label: 'Businesses', to: '/business', icon: Building2 },
+  { label: 'Community', to: '/community', icon: Users },
+  { label: 'Messages', to: '/messages', icon: MessageCircle },
+  { label: 'Wallet', to: '/community/wallet', icon: Wallet },
 ]
 
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  plumbing: Wrench,
-  electrical: Sparkles,
-  catering: Utensils,
-  barbing: Scissors,
-  makeup: Sparkles,
-  'auto-wash': Car,
-  carpentry: Hammer,
-  'home-repair': HomeIcon,
-  healthcare: Stethoscope,
-  education: GraduationCap,
-  tech: Laptop,
-  logistics: Truck,
-  cleaning: Leaf,
+const features: { title: string; description: string; to: string; icon: LucideIcon; color: string }[] = [
+  { title: 'Nearby places', description: 'Find services and places close to you.', to: '/nearby', icon: MapPin, color: 'green' },
+  { title: 'Jobs and careers', description: 'Find a new role or your next great hire.', to: '/jobs', icon: BriefcaseBusiness, color: 'teal' },
+  { title: 'Local marketplace', description: 'Buy and sell with people in your area.', to: '/marketplace', icon: ShoppingBag, color: 'orange' },
+  { title: 'Community reports', description: 'See local updates and raise an issue.', to: '/community', icon: FileWarning, color: 'red' },
+  { title: 'Get help', description: 'Find support and helpful local resources.', to: '/community/help', icon: HeartHandshake, color: 'blue' },
+  { title: 'Games and community', description: 'Play, share and connect with neighbors.', to: '/services/games', icon: Gamepad2, color: 'purple' },
+]
+
+const quickActions: { label: string; to: string; icon: LucideIcon; protected?: boolean }[] = [
+  { label: 'Post a Job', to: '/jobs/post', icon: BriefcaseBusiness, protected: true },
+  { label: 'List a Business', to: '/business/register', icon: Building2, protected: true },
+  { label: 'Report an Issue', to: '/community/report', icon: FileWarning, protected: true },
+]
+
+function formatEventDate(value: string) {
+  const date = new Date(value)
+  return { month: date.toLocaleDateString('en-NG', { month: 'short' }).toUpperCase(), day: date.toLocaleDateString('en-NG', { day: '2-digit' }) }
 }
 
-const POPULAR_CATEGORY_SLUGS = [
-  'plumbing',
-  'electrical',
-  'catering',
-  'barbing',
-  'makeup',
-  'auto-wash',
-  'carpentry',
-  'home-repair',
-]
+function formatEventTime(start: string, end: string) {
+  const format = (value: string) => new Date(value).toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit' })
+  return `${format(start)} – ${format(end)}`
+}
 
-export function Home() {
-  const [featured, setFeatured] = useState<Business[]>([])
-  const [loading, setLoading] = useState(true)
-  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({})
-  const [searchQuery, setSearchQuery] = useState('')
+function Home() {
+  const { isAuthenticated, user: authUser } = useAuth()
+  const navigationMode = authUser?.role === 'business_owner'
+    ? 'business'
+    : authUser?.role === 'service_provider'
+      ? 'provider'
+      : 'platform'
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [selectedLocation, setSelectedLocation] = useState(() => localStorage.getItem(locationKey) || 'Ibadan')
+  const [query, setQuery] = useState('')
+  const [suggestionQuery, setSuggestionQuery] = useState('')
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [inviteOpen, setInviteOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [user, setUser] = useState<HomeUser | null>(() => localStorage.getItem(loggedOutKey) === 'true' ? null : homeMockUser)
+  const [notifications, setNotifications] = useState<HomeNotification[]>([])
+  const [updates, setUpdates] = useState<HomeUpdate[]>([])
+  const [events, setEvents] = useState<HomeEvent[]>([])
+  const [loading, setLoading] = useState({ user: true, notifications: true, updates: true, events: true })
+  const [errors, setErrors] = useState<Record<string, boolean>>({})
+  const [, setClock] = useState(Date.now())
+  const searchRef = useRef<HTMLFormElement>(null)
+  const bellRef = useRef<HTMLDivElement>(null)
+  const userRef = useRef<HTMLDivElement>(null)
+  const unreadCount = notifications.filter((item) => !item.read).length
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [featuredData, counts] = await Promise.all([
-          businessService.getFeatured(),
-          businessService.getCategoryCounts(),
-        ])
-        setFeatured(featuredData)
-        setCategoryCounts(counts)
-      } catch {
-        setFeatured([])
-        setCategoryCounts({})
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
-  }, [])
-
-  const popularCategories = useMemo(() => {
-    return POPULAR_CATEGORY_SLUGS
-      .map((slug) => categories.find((c) => c.slug === slug))
-      .filter((c): c is typeof categories[0] => c !== undefined)
-  }, [])
-
-  const handleSearch = (value: string) => {
-    if (value.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(value.trim())}`
+  const loadSection = async (section: 'user' | 'notifications' | 'updates' | 'events') => {
+    const loader = { user: loadHomeUser, notifications: loadHomeNotifications, updates: loadHomeUpdates, events: loadHomeEvents }[section]
+    setLoading((state) => ({ ...state, [section]: true }))
+    setErrors((state) => ({ ...state, [section]: false }))
+    try {
+      const result = await loader()
+      if (section === 'user' && localStorage.getItem(loggedOutKey) !== 'true') setUser(result as HomeUser)
+      if (section === 'notifications') setNotifications(result as HomeNotification[])
+      if (section === 'updates') setUpdates(result as HomeUpdate[])
+      if (section === 'events') setEvents((result as HomeEvent[]).filter((event) => new Date(event.startsAt).getTime() >= Date.now()).sort((a, b) => a.startsAt.localeCompare(b.startsAt)).slice(0, 3))
+    } catch {
+      setErrors((state) => ({ ...state, [section]: true }))
+    } finally {
+      setLoading((state) => ({ ...state, [section]: false }))
     }
   }
 
-  return (
-    <>
-      {/* Hero Section */}
-      <section className="home-hero">
-        <div className="home-hero__content">
-          <div className="home-hero__badge">
-            <ShieldCheck size={16} aria-hidden="true" />
-            <span>Trusted local directory for {siteConfig.state}</span>
-          </div>
+  useEffect(() => {
+    void Promise.all(['user', 'notifications', 'updates', 'events'].map((item) => loadSection(item as 'user' | 'notifications' | 'updates' | 'events')))
+  }, [])
 
-          <h1 className="home-hero__title">
-            OyoConnect
-          </h1>
-          <p className="home-hero__subtitle">
-            Oyo State, Nigeria
-          </p>
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSuggestionQuery(query.trim()), 300)
+    return () => window.clearTimeout(timer)
+  }, [query])
 
-          <p className="home-hero__description">
-            Find trusted businesses, jobs, community updates, and support across all 33 LGAs in Oyo State.
-          </p>
+  useEffect(() => {
+    const timer = window.setInterval(() => setClock(Date.now()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
-          <div className="home-hero__search">
-            <SearchInput
-              value={searchQuery}
-              onChange={setSearchQuery}
-              onSearch={handleSearch}
-              placeholder="Search businesses, jobs, services..."
-              ariaLabel="Search OyoConnect"
-              autoFocus
-            />
-          </div>
+  useEffect(() => {
+    const closeOnOutside = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (!bellRef.current?.contains(target)) setNotificationsOpen(false)
+      if (!userRef.current?.contains(target)) setUserMenuOpen(false)
+      if (!searchRef.current?.contains(target)) setSuggestionsOpen(false)
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setNotificationsOpen(false); setUserMenuOpen(false); setSuggestionsOpen(false); setInviteOpen(false); setMobileMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', closeOnOutside)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => { document.removeEventListener('mousedown', closeOnOutside); document.removeEventListener('keydown', closeOnEscape) }
+  }, [])
 
-          <div className="home-hero__quick-actions" role="list" aria-label="Quick actions">
-            {QUICK_ACTIONS.map((action) => (
-              <Link
-                key={action.id}
-                to={action.href}
-                className="home-action-card"
-                role="listitem"
-              >
-                <span className="home-action-card__icon" aria-hidden="true">
-                  <action.icon size={24} />
-                </span>
-                <div className="home-action-card__content">
-                  <span className="home-action-card__title">{action.label}</span>
-                  <span className="home-action-card__desc">{action.description}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+  const filteredEvents = useMemo(() => events.filter((event) => selectedLocation === 'Oyo State' || event.location.toLowerCase().includes(selectedLocation.toLowerCase()) || (selectedLocation.toLowerCase().startsWith('ibadan') && event.location === 'Ibadan')), [events, selectedLocation])
+  const filteredUpdates = useMemo(() => updates.filter((item) => selectedLocation === 'Oyo State' || item.location.toLowerCase() === selectedLocation.toLowerCase() || (selectedLocation.toLowerCase().startsWith('ibadan') && item.location === 'Ibadan')), [updates, selectedLocation])
+  const suggestions = useMemo(() => {
+    if (!suggestionQuery) return []
+    return homeMockSearchItems.filter((item) => `${item.title} ${item.description} ${item.location}`.toLowerCase().includes(suggestionQuery.toLowerCase())).slice(0, 6)
+  }, [suggestionQuery])
 
-      {/* Popular Categories */}
-      <section className="home-section">
-        <div className="container">
-          <header className="home-section__header">
-            <div>
-              <span className="home-section__eyebrow">Browse by category</span>
-              <h2 className="home-section__title">Popular categories</h2>
-            </div>
-            <Link to="/categories" className="home-section__link">
-              View all <ArrowRight size={16} aria-hidden="true" />
+  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setSuggestionsOpen(false)
+    const params = new URLSearchParams()
+    if (query.trim()) params.set('q', query.trim())
+    if (selectedLocation) params.set('location', selectedLocation)
+    navigate(`/search?${params.toString()}`)
+  }
+
+  const goTo = (to: string, protectedAction = false) => {
+    if (protectedAction && !user) {
+      navigate(`/login?redirect=${encodeURIComponent(to)}`)
+      return
+    }
+    navigate(to)
+  }
+
+  const markAllRead = () => setNotifications((items) => items.map((item) => ({ ...item, read: true })))
+  const logout = () => { setUser(null); localStorage.setItem(loggedOutKey, 'true'); setUserMenuOpen(false); navigate('/login') }
+  const copyReferral = async () => {
+    const link = `${window.location.origin}/signup?ref=oyoconnect`
+    try { await navigator.clipboard.writeText(link); setCopied(true); window.setTimeout(() => setCopied(false), 1800) } catch { setCopied(false) }
+  }
+
+  const renderSkeletons = (count: number, className: string) => <div className={className}>{Array.from({ length: count }, (_, index) => <div className="home-skeleton" key={index} aria-hidden="true" />)}</div>
+
+  const homeContent = (
+    <div className={`home-app ${isAuthenticated ? 'home-app--authenticated' : 'home-app--public'}`}>
+      <aside className={`home-sidebar ${mobileMenuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
+        <Link to="/" className="home-brand" aria-label="OyoConnect home">
+          <span className="home-brand-mark"><span>O</span></span>
+          <span>Oyo<span>Connect</span></span>
+        </Link>
+        <nav className="home-primary-nav" aria-label="Primary">
+          {primaryLinks.map(({ label, to, icon: Icon }) => (
+            <Link key={label} to={to} onClick={() => setMobileMenuOpen(false)} className={`home-nav-link ${location.pathname === to || (to !== '/' && location.pathname.startsWith(to)) ? 'is-active' : ''}`}>
+              <Icon size={18} aria-hidden="true" /><span>{label}</span>{label === 'Messages' && <span className="home-nav-bubble">2</span>}{label === 'Wallet' && <span className="home-nav-balance">₦</span>}
             </Link>
-          </header>
+          ))}
+        </nav>
+        <div className="home-sidebar-divider" />
+        <p className="home-nav-heading">QUICK ACCESS</p>
+        <nav className="home-quick-nav" aria-label="Quick access">
+          {quickActions.map(({ label, to, icon: Icon, protected: protectedAction }) => <button key={label} className="home-quick-link" onClick={() => goTo(to, protectedAction)}><span className="home-quick-icon"><Icon size={14} /></span>{label}</button>)}
+          <button className="home-quick-link" onClick={() => setInviteOpen(true)}><span className="home-quick-icon"><Share2 size={14} /></span>Invite Friends</button>
+        </nav>
+        <div className="home-sidebar-spacer" />
+        <div className="home-proud-card"><span className="home-map-icon" aria-hidden="true">🇳🇬</span><span><strong>Proudly Oyo.</strong><small>Built for our people.</small></span></div>
+        <div className="home-sidebar-bottom"><Link to="/about">About OyoConnect</Link><span>v1.0 · Oyo State, Nigeria</span></div>
+      </aside>
 
-          <div className="home-category-grid" role="list" aria-label="Popular categories">
-            {loading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <Card key={i} variant="skeleton" className="home-category-skeleton">
-                  <div />
-                </Card>
-              ))
-            ) : popularCategories.map((category) => {
-              const Icon = CATEGORY_ICONS[category.icon] ?? Sparkles
-              const count = categoryCounts[category.name] ?? 0
-              return (
-                <Link
-                  key={category.id}
-                  to={`/search?category=${category.slug}`}
-                  className="home-category-card"
-                  role="listitem"
-                >
-                  <span className="home-category-card__icon" aria-hidden="true">
-                    <Icon size={24} />
-                  </span>
-                  <div className="home-category-card__content">
-                    <span className="home-category-card__name">{category.name}</span>
-                    {count > 0 && (
-                      <span className="home-category-card__meta">
-                        {count} {count === 1 ? 'business' : 'businesses'}
-                      </span>
-                    )}
-                  </div>
-                  <ArrowRight size={18} className="home-category-card__arrow" aria-hidden="true" />
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-      </section>
+      {mobileMenuOpen && <button className="home-mobile-scrim" onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation" />}
 
-      {/* Featured Businesses */}
-      <section className="home-section home-section--tinted">
-        <div className="container">
-          <header className="home-section__header">
-            <div>
-              <span className="home-section__eyebrow">Hand-picked</span>
-              <h2 className="home-section__title">Featured businesses</h2>
-              <p className="home-section__subtitle">Trusted, top-rated providers our community keeps coming back to.</p>
+      <div className="home-workspace">
+        <header className="home-topbar">
+          <button className="home-mobile-menu" aria-label="Open navigation" onClick={() => setMobileMenuOpen(true)}><Menu size={22} /></button>
+          <form className="home-top-search" ref={searchRef} onSubmit={submitSearch} role="search">
+            <Search size={18} aria-hidden="true" />
+            <input aria-label="Search jobs, businesses and community" value={query} onChange={(event) => { setQuery(event.target.value); setSuggestionsOpen(true) }} onFocus={() => setSuggestionsOpen(true)} placeholder="Search anything in Oyo State..." />
+            {query && <button type="button" className="home-clear-search" onClick={() => { setQuery(''); setSuggestionsOpen(false) }} aria-label="Clear search"><X size={15} /></button>}
+            {suggestionsOpen && suggestions.length > 0 && <div className="home-suggestions" role="listbox" aria-label="Search suggestions">{(['Jobs', 'Businesses', 'Community'] as const).map((category) => {
+              const group = suggestions.filter((item) => item.category === category)
+              return group.length ? <div className="home-suggestion-group" key={category}><span className="home-suggestion-label">{category}</span>{group.map((item) => <button type="button" key={item.id} role="option" className="home-suggestion" onClick={() => navigate(item.href)}><span>{item.title}</span><small>{item.location}</small></button>)}</div> : null
+            })}</div>}
+          </form>
+          <div className="home-top-actions">
+            <div className="home-popover-anchor" ref={bellRef}>
+              <button className="home-icon-button home-notification-button" aria-label={`Notifications, ${unreadCount} unread`} aria-live="polite" aria-expanded={notificationsOpen} onClick={() => { setNotificationsOpen((value) => !value); setUserMenuOpen(false) }}><Bell size={19} />{unreadCount > 0 && <span className="home-notification-count">{unreadCount}</span>}</button>
+              {notificationsOpen && <div className="home-popover home-notification-popover"><div className="home-popover-heading"><strong>Notifications</strong><button onClick={markAllRead}>Mark all as read</button></div>{notifications.slice(0, 3).map((item) => <Link className={`home-notification-item ${item.read ? '' : 'is-unread'}`} key={item.id} to={item.href} onClick={() => setNotifications((rows) => rows.map((row) => row.id === item.id ? { ...row, read: true } : row))}><span className="home-notification-dot" /><span><strong>{item.title}</strong><small>{item.body}</small><em>{relativeTime(item.createdAt)}</em></span></Link>)}<Link className="home-popover-footer" to="/notifications">View all notifications <ChevronRight size={15} /></Link></div>}
             </div>
-          </header>
-
-          {loading ? (
-            <div className="home-business-skeleton-grid" role="status" aria-label="Loading featured businesses">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} variant="skeleton" className="home-business-skeleton">
-                  <div />
-                </Card>
-              ))}
-            </div>
-          ) : featured.length === 0 ? (
-            <Card variant="elevated" padding="lg" className="home-empty-state">
-              <div className="home-empty-state__icon" aria-hidden="true">
-                <Building2 size={48} />
-              </div>
-              <h3 className="home-empty-state__title">Be one of our first featured businesses</h3>
-              <p className="home-empty-state__description">
-                Get your business in front of thousands of customers across Oyo State.
-                List your business today and unlock the featured spotlight.
-              </p>
-              <ButtonLink to="/business/register" variant="primary" size="lg" className="home-empty-state__btn">
-                List your business
-              </ButtonLink>
-            </Card>
-          ) : (
-            <>
-              <div className="home-business-grid" role="list" aria-label="Featured businesses">
-                {featured.slice(0, 3).map((business) => (
-                  <article key={business.id} className="home-business-card" role="listitem">
-                    <div className="home-business-card__media">
-                      {business.image ? (
-                        <img
-                          src={business.image}
-                          alt=""
-                          loading="lazy"
-                          className="home-business-card__image"
-                        />
-                      ) : (
-                        <div className="home-business-card__placeholder" aria-hidden="true">
-                          <Building2 size={32} />
-                        </div>
-                      )}
-                      {business.verified && (
-                        <Badge variant="success" size="sm" className="home-business-card__badge">
-                          Verified
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="home-business-card__content">
-                      <div className="home-business-card__header">
-                        <h3 className="home-business-card__name">{business.name}</h3>
-                        {business.rating && (
-                          <div className="home-business-card__rating" aria-label={`Rated ${business.rating} out of 5`}>
-                            <span aria-hidden="true">★</span>
-                            <span>{business.rating.toFixed(1)}</span>
-                            <span className="home-business-card__reviews">({business.reviewCount ?? 0})</span>
-                          </div>
-                        )}
-                      </div>
-                      <p className="home-business-card__category">{business.category}</p>
-                      <p className="home-business-card__location">
-                        <MapPin size={14} aria-hidden="true" />
-                        {business.location}, {business.state}
-                      </p>
-                      <div className="home-business-card__actions">
-                        <ButtonLink
-                          to={`/business/${business.id}`}
-                          variant="primary"
-                          size="sm"
-                          className="home-business-card__btn"
-                        >
-                          View Business
-                        </ButtonLink>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-              <div className="home-section__action">
-                <ButtonLink to="/search" variant="outline" size="md">
-                  Explore all businesses <ArrowRight size={16} aria-hidden="true" />
-                </ButtonLink>
-              </div>
-            </>
-          )}
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="home-section">
-        <div className="container">
-          <header className="home-section__header">
-            <span className="home-section__eyebrow">Simple by design</span>
-            <h2 className="home-section__title">How OyoConnect works</h2>
-            <p className="home-section__subtitle">Three easy steps from search to service.</p>
-          </header>
-
-          <div className="home-steps" role="list">
-            {[
-              {
-                icon: Search,
-                title: 'Search',
-                description: 'Search by service or category and narrow results by location across Oyo State.',
-              },
-              {
-                icon: ShieldCheck,
-                title: 'Compare',
-                description: 'Review ratings, verified badges, services and opening hours side by side.',
-              },
-              {
-                icon: MessageSquare,
-                title: 'Contact',
-                description: 'Reach providers instantly by call or WhatsApp.',
-              },
-            ].map((step, index) => (
-              <Card key={step.title} variant="default" padding="md" className="home-step" role="listitem">
-                <div className="home-step__icon" aria-hidden="true">
-                  <step.icon size={26} />
-                </div>
-                <h3 className="home-step__title">{step.title}</h3>
-                <p className="home-step__description">{step.description}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="home-section home-section--tinted">
-        <div className="container">
-          <div className="home-stats" role="list" aria-label="Platform statistics">
-            <div className="home-stat" role="listitem">
-              <Building2 size={28} className="home-stat__icon" aria-hidden="true" />
-              <div className="home-stat__value">10,000+</div>
-              <div className="home-stat__label">Businesses & services</div>
-            </div>
-            <div className="home-stat" role="listitem">
-              <ShieldCheck size={28} className="home-stat__icon" aria-hidden="true" />
-              <div className="home-stat__value">Verified</div>
-              <div className="home-stat__label">Business discovery</div>
-            </div>
-            <div className="home-stat" role="listitem">
-              <MapPin size={28} className="home-stat__icon" aria-hidden="true" />
-              <div className="home-stat__value">33</div>
-              <div className="home-stat__label">LGAs across Oyo State</div>
-            </div>
-            <div className="home-stat" role="listitem">
-              <HeartHandshake size={28} className="home-stat__icon" aria-hidden="true" />
-              <div className="home-stat__value">Active</div>
-              <div className="home-stat__label">Community support</div>
+            <span className="home-top-divider" />
+            <div className="home-popover-anchor" ref={userRef}>
+              <button className="home-user-trigger" aria-expanded={userMenuOpen} onClick={() => { setUserMenuOpen((value) => !value); setNotificationsOpen(false) }}><img src={user?.avatar ?? homeMockUser.avatar} alt="" /><span><strong>{user?.name ?? 'Welcome'}</strong><small>{user?.role ?? 'Guest'}</small></span><ChevronDown size={15} /></button>
+              {userMenuOpen && <div className="home-popover home-user-popover">{user ? <><Link to="/profile" onClick={() => setUserMenuOpen(false)}>View Profile</Link><Link to="/settings" onClick={() => setUserMenuOpen(false)}>Settings</Link><Link to="/community/wallet" onClick={() => setUserMenuOpen(false)}>Wallet</Link><Button variant="ghost" size="sm" onClick={logout} className="home-user-popover__signout" fullWidth><LogOut size={17} aria-hidden="true" /><span>Sign out</span></Button></> : <Link to="/login" onClick={() => setUserMenuOpen(false)}>Sign in</Link>}</div>}
             </div>
           </div>
-        </div>
-      </section>
+        </header>
 
-      {/* CTA Section */}
-      <section className="home-section home-section--tinted">
-        <div className="container">
-          <Card variant="elevated" padding="lg" className="home-cta-card">
-            <div className="home-cta-card__content">
-              <h2 className="home-cta-card__title">Ready to get started?</h2>
-              <p className="home-cta-card__description">
-                Join thousands of users finding trusted businesses, jobs, and community support across Oyo State.
-              </p>
-            </div>
-            <div className="home-cta-card__actions">
-              <ButtonLink to="/business/register" variant="primary" size="lg">
-                List Your Business <ArrowRight size={18} aria-hidden="true" />
-              </ButtonLink>
-              <ButtonLink to="/jobs/post" variant="outline" size="lg">
-                Post a Job
-              </ButtonLink>
-            </div>
-          </Card>
-        </div>
-      </section>
-    </>
+        <main className="home-main" id="main-content">
+          <div className="home-center-column">
+            <section className="home-hero" aria-label="Oyo State hero banner">
+              <img className="home-hero-image" src="/images/oyo-hero.jpg" alt="Oyo State monument and green landscape" />
+              <div className="home-hero-overlay" />
+            </section>
+
+            <section className="home-features" aria-label="Explore OyoConnect">
+              {features.map(({ title, description, to, icon: Icon, color }) => <Link to={to} key={title} className="home-feature-card"><span className={`home-feature-icon ${color}`}><Icon size={20} /></span><span className="home-feature-copy"><strong>{title}</strong><small>{description}</small></span><span className="home-feature-arrow"><ArrowUpRight size={15} /></span></Link>)}
+            </section>
+
+            <section className="home-lower-grid" aria-label="Community highlights">
+              <article className="home-promo-card"><img src="/images/oyo-hero.jpg" alt="Oyo State monument" loading="lazy" /><div className="home-promo-wash" /><div className="home-promo-content"><span className="home-promo-label"><Sparkles size={12} /> STRONGER TOGETHER</span><h2>A better Oyo<br />is possible.</h2><p>Local people. Shared progress. A brighter future for everyone.</p><button onClick={() => goTo(user ? '/profile' : '/signup', !user)}>Be part of OyoConnect <ArrowRight size={15} /></button></div></article>
+              <section className="home-panel home-updates-panel"><header className="home-panel-heading"><div><span className="home-section-kicker">AROUND OYO</span><h2>Latest updates</h2></div><Link to="/community">View all <ArrowRight size={14} /></Link></header>{loading.updates ? renderSkeletons(3, 'home-update-list') : errors.updates ? <div className="home-error-state">Updates couldn’t load. <button onClick={() => void loadSection('updates')}>Retry</button></div> : filteredUpdates.length ? <div className="home-update-list">{filteredUpdates.slice(0, 3).map((item) => <Link className="home-update-row" to={item.href} key={item.id}><img src={item.image} alt="" loading="lazy" /><span className="home-update-info"><span className={`home-category-tag ${item.category.toLowerCase()}`}>{item.category}</span><strong>{item.title}</strong><small>{item.description} · {item.location}</small></span><time>{relativeTime(item.createdAt)}</time></Link>)}</div> : <p className="home-empty">No local updates in {selectedLocation} yet.</p>}</section>
+              <section className="home-panel home-events-panel"><header className="home-panel-heading"><div><span className="home-section-kicker">SAVE THE DATE</span><h2>Upcoming events</h2></div><Link to="/community/events">View all <ArrowRight size={14} /></Link></header>{loading.events ? renderSkeletons(3, 'home-event-list') : errors.events ? <div className="home-error-state">Events couldn’t load. <button onClick={() => void loadSection('events')}>Retry</button></div> : filteredEvents.length ? <div className="home-event-list">{filteredEvents.map((event) => { const date = formatEventDate(event.startsAt); return <Link className="home-event-row" to={event.href} key={event.id}><span className="home-event-date"><small>{date.month}</small><strong>{date.day}</strong></span><span className="home-event-info"><strong>{event.title}</strong><small><MapPin size={12} /> {event.venue} · {event.location}</small><em>{formatEventTime(event.startsAt, event.endsAt)}</em></span><ChevronRight size={16} /></Link> })}</div> : <p className="home-empty">No upcoming events yet.</p>}</section>
+            </section>
+          </div>
+
+          <aside className="home-right-rail" aria-label="Your account and activity">
+            <section className="home-profile-card"><span className="home-section-kicker">YOUR PROFILE</span>{loading.user ? <div className="home-profile-loading home-skeleton" /> : errors.user ? <div className="home-error-state">Profile couldn’t load. <button onClick={() => void loadSection('user')}>Retry</button></div> : user ? <><div className="home-profile-person"><img src={user.avatar} alt={`${user.name} avatar`} /><span><strong>{user.name}</strong><small>{user.role}</small></span><span className="home-profile-check">✓</span></div><div className="home-profile-progress"><span><span /></span><small>Profile completeness <strong>75%</strong></small></div><Link to="/profile" className="home-profile-button">View Profile <ArrowRight size={15} /></Link></> : <><div className="home-profile-person"><img src={homeMockUser.avatar} alt="" /><span><strong>Welcome to OyoConnect</strong><small>Sign in to manage your profile</small></span></div><Link to="/login" className="home-profile-button">Sign in <ArrowRight size={15} /></Link></>}</section>
+
+            <section className="home-panel home-actions-panel"><header className="home-panel-heading"><div><span className="home-section-kicker">MAKE IT HAPPEN</span><h2>Quick actions</h2></div></header><div className="home-actions-list">{quickActions.map(({ label, to, icon: Icon, protected: protectedAction }) => <button key={label} onClick={() => goTo(to, protectedAction)}><span className="home-action-icon"><Icon size={17} /></span><span>{label}</span><ChevronRight size={16} /></button>)}<button onClick={() => setInviteOpen(true)}><span className="home-action-icon"><Share2 size={17} /></span><span>Invite Friends</span><ChevronRight size={16} /></button></div></section>
+
+            <section className="home-panel home-activity-panel"><header className="home-panel-heading"><div><span className="home-section-kicker">STAY IN THE LOOP</span><h2>Recent activity</h2></div></header>{loading.notifications ? renderSkeletons(3, 'home-activity-list') : errors.notifications ? <div className="home-error-state">Activity couldn’t load. <button onClick={() => void loadSection('notifications')}>Retry</button></div> : <><div className="home-activity-list">{notifications.slice(0, 3).map((item, index) => <Link to={item.href} className="home-activity-item" key={item.id}><span className={`home-activity-icon activity-${index}`}><Bell size={14} /></span><span><strong>{item.title}</strong><small>{relativeTime(item.createdAt)}</small></span></Link>)}</div><Link to="/notifications" className="home-activity-all">View all notifications <ChevronRight size={15} /></Link></>}</section>
+
+            <section className="home-community-note"><div className="home-note-icon"><HeartHandshake size={19} /></div><strong>Good things grow together.</strong><p>Small actions make a stronger community.</p><button onClick={() => goTo(user ? '/community' : '/signup', !user)}>Explore community <ArrowRight size={14} /></button></section>
+            <div className="home-location-note"><MapPin size={13} /> Showing nearby activity in <strong>{selectedLocation}</strong></div>
+          </aside>
+        </main>
+
+        <footer className="home-footer"><Link to="/" className="home-footer-brand">OyoConnect</Link><nav aria-label="Footer">{[['Home', '/'], ['Explore', '/categories'], ['Jobs', '/jobs'], ['Businesses', '/business'], ['Community', '/community'], ['Reports', '/community']].map(([label, to]) => <Link key={label} to={to}>{label}</Link>)}</nav><span className="home-footer-location"><MapPin size={13} /> Oyo State, Nigeria</span><span className="home-footer-copy">© 2026 OyoConnect</span></footer>
+      </div>
+
+      <nav className="home-mobile-tabs" aria-label="Mobile navigation">{[{ label: 'Home', to: '/', icon: HomeIcon }, { label: 'Jobs', to: '/jobs', icon: BriefcaseBusiness }, { label: 'Explore', to: '/categories', icon: Compass }, { label: 'Messages', to: '/messages', icon: MessageCircle }, { label: 'Wallet', to: '/community/wallet', icon: Wallet }].map(({ label, to, icon: Icon }) => <Link key={label} to={to} className={location.pathname === to ? 'is-active' : ''}><Icon size={19} /><span>{label}</span></Link>)}</nav>
+
+      {inviteOpen && <div className="home-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setInviteOpen(false) }}><section className="home-invite-modal" role="dialog" aria-modal="true" aria-labelledby="home-invite-title"><button className="home-modal-close" aria-label="Close invite dialog" onClick={() => setInviteOpen(false)}><X size={19} /></button><span className="home-invite-icon"><Share2 size={22} /></span><h2 id="home-invite-title">Invite your people</h2><p>Good things happen when we build Oyo together. Share your link with friends.</p><div className="home-referral-link"><span>oyoconnect.com/signup?ref=oyoconnect</span><button onClick={() => void copyReferral()}>{copied ? 'Copied!' : 'Copy link'}</button></div><div className="home-share-buttons"><a href={`https://wa.me/?text=${encodeURIComponent(`${window.location.origin}/signup?ref=oyoconnect`)}`} target="_blank" rel="noreferrer">WhatsApp</a><a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(`${window.location.origin}/signup?ref=oyoconnect`)}`} target="_blank" rel="noreferrer">Share on X</a></div></section></div>}
+    </div>
   )
+
+  return isAuthenticated
+    ? <AppLayout navigationMode={navigationMode}>{homeContent}</AppLayout>
+    : <PublicLayout>{homeContent}</PublicLayout>
 }
 
 export default Home

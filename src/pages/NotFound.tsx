@@ -1,8 +1,10 @@
 import { Compass } from 'lucide-react'
 import { ButtonLink } from '../components/ui/Button'
+import { DashboardLayout } from '../components/layout/DashboardLayout'
 
 function NotFound() {
   return (
+    <DashboardLayout>
     <main className="page">
       <div className="container">
         <div className="not-found">
@@ -25,6 +27,7 @@ function NotFound() {
         </div>
       </div>
     </main>
+    </DashboardLayout>
   )
 }
 

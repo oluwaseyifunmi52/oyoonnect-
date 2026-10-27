@@ -1,17 +1,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom'
-import { Eye, EyeOff, AlertCircle, Loader2, ArrowLeft, Building2, Briefcase, HeartHandshake, Megaphone, ShieldCheck, User, Lock } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, Loader2, Building2, Briefcase, ChevronRight, User, Lock } from 'lucide-react'
 import { Logo } from '../components/layout/Logo'
-import { Input, Button } from '../components/ui'
+import { Input } from '../components/ui/Input'
+import { Button, ButtonLink } from '../components/ui/Button'
 import { useAuth } from '../context/AuthContext'
-
-const LOGIN_BENEFITS = [
-  { icon: Briefcase, label: 'Discover local businesses' },
-  { icon: Megaphone, label: 'Find opportunities' },
-  { icon: HeartHandshake, label: 'Support your community' },
-  { icon: ShieldCheck, label: 'Stay informed & secure' },
-]
+import './Login.css'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -62,100 +57,136 @@ export default function Login() {
   }
 
   return (
-    <main className="auth-page">
-      <div className="auth-card">
-        <div className="auth-header">
-          <Logo to="/" subtitle />
-          <h1 className="section-heading__title">Welcome back</h1>
-          <p className="section-heading__subtitle">Sign in to your OyoConnect account to continue.</p>
+    <main className="login-page login-page--signin">
+      <div className="login-page__hero" aria-hidden="true">
+        <div className="login-page__hero-gradient" />
+        <img
+          src="/images/oyo-hero.jpg"
+          alt=""
+          className="login-page__hero-image"
+          loading="eager"
+        />
+        <div className="login-page__hero-content">
+          <Logo subtitle />
+          <p className="login-page__eyebrow">OYO STATE, NIGERIA</p>
+          <h1 className="login-page__hero-title">Together for a better Oyo</h1>
+          <p className="login-page__hero-description">
+            One platform to find services, hire talent, grow your business,
+            and connect with your community across all 33 LGAs.
+          </p>
         </div>
+      </div>
 
-        {error && (
-          <div className="auth-error" role="alert">
-            <AlertCircle size={18} aria-hidden="true" />
-            <span>{error}</span>
+      <div className="login-page__form-wrapper">
+        <div className="login-page__form-card">
+          <div className="login-page__form-header">
+            <Logo subtitle link={false} />
+            <h1 className="login-page__heading">Welcome back</h1>
+            <p className="login-page__subheading">Sign in to your OyoConnect account to continue.</p>
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="auth-form" noValidate>
-          <Input
-            label="Email or Phone Number"
-            id="identifier"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="Enter email or phone number"
-            autoComplete="username"
-            required
-            icon={<User size={18} />}
-          />
+          {error && (
+            <div className="auth-error" role="alert">
+              <AlertCircle size={18} aria-hidden="true" />
+              <span>{error}</span>
+            </div>
+          )}
 
-          <Input
-            label="Password"
-            id="login-password"
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-            autoComplete="current-password"
-            required
-            icon={<Lock size={18} />}
-            rightIcon={
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                aria-pressed={showPassword}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            }
-          />
+          <form onSubmit={handleSubmit} className="auth-form" noValidate>
+            <Input
+              label="Email or Phone Number"
+              id="identifier"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="Enter email or phone number"
+              autoComplete="username"
+              required
+              icon={<User size={18} />}
+            />
 
-          <div className="auth-form-row">
-            <label className="auth-checkbox">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              <span className="auth-checkbox__custom" aria-hidden="true" />
-              <span>Remember me</span>
-            </label>
-            <Link to="/forgot-password" className="auth-link">
-              Forgot password?
+            <Input
+              label="Password"
+              id="login-password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              autoComplete="current-password"
+              required
+              icon={<Lock size={18} />}
+              rightIcon={
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              }
+            />
+
+            <div className="auth-form-row">
+              <label className="auth-checkbox">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <span className="auth-checkbox__custom" aria-hidden="true" />
+                <span>Remember me</span>
+              </label>
+              <Link to="/forgot-password" className="auth-link">
+                Forgot password?
+              </Link>
+            </div>
+
+            <Button type="submit" size="lg" className="auth-submit" disabled={loading} fullWidth>
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="btn__spinner" aria-hidden="true" /> Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </form>
+
+          <p className="auth-footer">
+            Don&apos;t have an account?{' '}
+            <Link to={`/signup${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} className="auth-link">
+              Create account
+            </Link>
+          </p>
+
+          <div className="auth-divider">
+            <span>or continue with</span>
+          </div>
+
+          <div className="auth-external-actions">
+            <Link
+              to="/business/register"
+              className="auth-external-btn"
+            >
+              <span className="auth-external-btn__icon">
+                <Building2 size={18} aria-hidden="true" />
+              </span>
+              <span className="auth-external-btn__text">List your business</span>
+              <ChevronRight size={16} aria-hidden="true" className="auth-external-btn__arrow" />
+            </Link>
+            <Link
+              to="/provider/onboarding"
+              className="auth-external-btn"
+            >
+              <span className="auth-external-btn__icon">
+                <Briefcase size={18} aria-hidden="true" />
+              </span>
+              <span className="auth-external-btn__text">Offer your skills</span>
+              <ChevronRight size={16} aria-hidden="true" className="auth-external-btn__arrow" />
             </Link>
           </div>
-
-          <Button type="submit" size="lg" className="auth-submit" disabled={loading} fullWidth>
-            {loading ? (
-              <>
-                <Loader2 size={18} className="btn__spinner" aria-hidden="true" /> Signing in...
-              </>
-            ) : (
-              'Sign In'
-            )}
-          </Button>
-        </form>
-
-        <p className="auth-footer">
-          Don&apos;t have an account?{' '}
-          <Link to={`/signup${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`} className="auth-link">
-            Create account
-          </Link>
-        </p>
-
-        <p className="auth-footer auth-footer--bare">
-          <Link to="/business/register" className="auth-link">
-            <Building2 size={14} /> Want to list a business?
-          </Link>
-        </p>
-
-        <p className="auth-footer auth-footer--bare">
-          <Link to="/provider/onboarding" className="auth-link">
-            <Briefcase size={14} /> Want to offer your skills?
-          </Link>
-        </p>
+        </div>
       </div>
     </main>
   )

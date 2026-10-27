@@ -1,0 +1,17 @@
+.business-portal-page { padding-block: 36px 48px; }
+.business-portal-page > .container--narrow { width: min(100% - 32px, 672px); max-width: 672px; margin-inline: auto; }
+.business-portal__title { font-size: clamp(28px, 4vw, 36px); }
+.business-portal__subtitle { font-size: 16px; line-height: 1.6; }
+.business-portal-card { gap: 20px; padding: 24px; }
+.business-portal-card__title { font-size: 18px; line-height: 1.35; }
+.business-portal-card__desc { font-size: 15px; line-height: 1.55; }
+.business-portal-card--highlight { border-color: #064e3b; color: #fff; background: #064e3b; }
+.business-portal-card--highlight .business-portal-card__icon { color: #064e3b; background: #fff; }
+.business-portal-card--highlight .business-portal-card__title,
+.business-portal-card--highlight .business-portal-card__desc { color: #fff; }
+.business-portal-card--highlight .business-portal-card__cta.btn { border-color: #fff; color: #064e3b; background: #fff; }
+.business-portal-card--highlight .business-portal-card__cta.btn:hover { border-color: #e8f4ed; background: #e8f4ed; }
+
+@media (max-width: 640px) {
+  .business-portal-card { padding: 20px; }
+}

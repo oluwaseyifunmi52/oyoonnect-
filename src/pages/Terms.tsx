@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { siteConfig } from '../config/site'
+import { DashboardLayout } from '../components/layout/DashboardLayout'
 
 export function Terms() {
   return (
+    <DashboardLayout>
     <main className="page">
       <div className="container container--narrow">
         <SectionHeading
@@ -102,6 +104,7 @@ export function Terms() {
         </div>
       </div>
     </main>
+    </DashboardLayout>
   )
 }
 

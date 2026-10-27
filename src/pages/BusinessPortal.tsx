@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Building2, LogIn, UserPlus, ArrowLeft } from 'lucide-react'
 import { ButtonLink } from '../components/ui/Button'
+import './BusinessPortal.css'
 
 export function BusinessPortal() {
   return (

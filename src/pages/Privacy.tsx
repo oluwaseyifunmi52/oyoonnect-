@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { siteConfig } from '../config/site'
+import { DashboardLayout } from '../components/layout/DashboardLayout'
 
 export function Privacy() {
   return (
+    <DashboardLayout>
     <main className="page">
       <div className="container container--narrow">
         <SectionHeading
@@ -120,6 +122,7 @@ export function Privacy() {
         </div>
       </div>
     </main>
+    </DashboardLayout>
   )
 }
 

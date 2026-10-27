@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Shield, Home, ArrowLeft, Building2 } from 'lucide-react'
 import { ButtonLink } from '../components/ui/Button'
 import { useAuth } from '../context/AuthContext'
+import { DashboardLayout } from '../components/layout/DashboardLayout'
 
 export default function Unauthorized() {
   const { user, isAdmin, isBusinessOwner } = useAuth()
@@ -21,6 +22,7 @@ export default function Unauthorized() {
   }
 
   return (
+    <DashboardLayout>
     <main className="page auth-page">
       <div className="container container--narrow">
         <div className="auth-card unauthorized-card">
@@ -63,10 +65,11 @@ export default function Unauthorized() {
 
           <p className="unauthorized-help">
             Think this is a mistake?{' '}
-            <Link to="/help" className="auth-link">Contact support</Link>
+            <Link to="/community/help" className="auth-link">Contact support</Link>
           </p>
         </div>
       </div>
     </main>
+    </DashboardLayout>
   )
 }
