@@ -135,7 +135,7 @@ interface DashboardSidebarProps {
 
 function CustomerSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { pathname, hash } = useLocation()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = async () => {
@@ -145,6 +145,7 @@ function CustomerSidebar({ open, onClose }: { open: boolean; onClose: () => void
   }
 
   const navItems = customerNavigation
+  const availableQuickAccess = quickAccess.filter((item) => item.to !== '/jobs/post' || user?.role === 'business_owner')
 
   return (
     <>
@@ -192,7 +193,7 @@ function CustomerSidebar({ open, onClose }: { open: boolean; onClose: () => void
         <hr className="my-4 border-white/20 mx-3" />
         <h2 className="px-3 text-xs font-semibold uppercase tracking-wider text-white/50 mb-2">QUICK ACCESS</h2>
         <nav className="px-3" aria-label="Quick access">
-          {quickAccess.map(({ label, to, icon: Icon }) => (
+          {availableQuickAccess.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -227,7 +228,7 @@ export function DashboardSidebar({ open, onClose, mode = 'platform', onSignOut }
   }
 
   const { pathname, hash } = useLocation()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = async () => {
@@ -268,6 +269,7 @@ export function DashboardSidebar({ open, onClose, mode = 'platform', onSignOut }
 
   const showQuickAccess = mode === 'platform'
   const showProudCard = mode === 'platform'
+  const availableQuickAccess = quickAccess.filter((item) => item.to !== '/jobs/post' || user?.role === 'business_owner')
 
   return (
     <>
@@ -303,7 +305,7 @@ export function DashboardSidebar({ open, onClose, mode = 'platform', onSignOut }
           <div className="dashboard-sidebar-divider" />
           <h2 className="dashboard-sidebar-label">QUICK ACCESS</h2>
           <nav className="dashboard-quick-nav" aria-label="Quick access">
-            {quickAccess.map(({ label, to, icon: Icon }) => (
+            {availableQuickAccess.map(({ label, to, icon: Icon }) => (
               <NavLink className="dashboard-quick-link" key={to} to={to} onClick={onClose}>
                 <span><Icon size={20} aria-hidden="true" /></span>{label}
               </NavLink>
