@@ -105,7 +105,7 @@ export function SupportRequestCard({
           Support
         </button>
         <Link
-          to={`/help/requests/${request.id}`}
+          to={`/community/help/requests/${request.id}`}
           className="btn btn--outline btn--md support-request-card__details-btn"
         >
           View Details <ExternalLink size={16} aria-hidden="true" />
