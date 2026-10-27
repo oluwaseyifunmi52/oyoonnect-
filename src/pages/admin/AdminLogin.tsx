@@ -5,6 +5,7 @@ import { AlertCircle, ArrowLeft, Crown, Eye, EyeOff, Info, ShieldAlert } from 'l
 import { Input } from '../../components/ui/Input'
 import { Button } from '../../components/ui/Button'
 import { SectionHeading } from '../../components/ui/SectionHeading'
+import { PublicLayout } from '../../components/Layout'
 
 function AdminLogin() {
   const [email, setEmail] = useState('')
@@ -46,6 +47,7 @@ function AdminLogin() {
   }
 
   return (
+    <PublicLayout>
     <main className="page auth-page admin-auth-page">
       <div className="container container--narrow">
         <div className="auth-card">
@@ -137,6 +139,7 @@ function AdminLogin() {
         </div>
       </div>
     </main>
+    </PublicLayout>
   )
 }
 

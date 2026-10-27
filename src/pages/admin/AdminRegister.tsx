@@ -5,6 +5,7 @@ import { AlertCircle, ArrowLeft, Crown, Eye, EyeOff, Info } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { SectionHeading } from '../../components/ui/SectionHeading'
+import { PublicLayout } from '../../components/Layout'
 
 interface AdminSetupFieldErrors {
   fullName?: string
@@ -70,6 +71,7 @@ function AdminRegister() {
   }
 
   return (
+    <PublicLayout>
     <main className="page auth-page admin-auth-page">
       <div className="container container--narrow">
         <div className="auth-card">
@@ -187,6 +189,7 @@ function AdminRegister() {
         </div>
       </div>
     </main>
+    </PublicLayout>
   )
 }
 

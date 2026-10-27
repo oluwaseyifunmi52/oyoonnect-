@@ -7,7 +7,7 @@ import '../../styles/dashboard-home.css'
 
 export interface DashboardLayoutProps {
   children?: ReactNode
-  navigationMode?: 'platform' | 'provider' | 'jobseeker' | 'business' | 'customer' | 'affiliate' | 'messages' | 'wallet' | 'services'
+  navigationMode?: 'platform' | 'provider' | 'jobseeker' | 'business' | 'customer' | 'affiliate' | 'messages' | 'wallet' | 'services' | 'admin'
   showWorkspaceSwitcher?: boolean
   workspaceKey?: 'customer' | 'service_provider' | 'business_owner'
 }

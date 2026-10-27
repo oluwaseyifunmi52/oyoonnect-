@@ -1,13 +1,13 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
-  BriefcaseBusiness, Building2, FileText, Heart, Home, Inbox, LayoutDashboard, LogOut,
+  Activity, Bell, BriefcaseBusiness, Building2, ClipboardList, FileText, FolderOpen, Heart, Home, Inbox, LayoutDashboard, LifeBuoy, LogOut,
   MessageCircle, Settings, UserRound, Wallet, Users, DollarSign, Banknote, HelpCircle,
-  Image, Star, MessageSquare, BarChart2, ShieldCheck, Search, CreditCard, Receipt, Zap, Tv,
+  Image, Star, MessageSquare, BarChart2, ShieldCheck, Search, CreditCard, Receipt, Truck, Zap, Tv,
   GraduationCap, Key, Box, Gamepad2, Smartphone, User, type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
-type NavigationItem = { label: string; to: string; icon: LucideIcon; end?: boolean; secondary?: boolean }
+type NavigationItem = { label: string; to: string; icon: LucideIcon; end?: boolean; secondary?: boolean; section?: string }
 
 const platformNavigation: NavigationItem[] = [
   { label: 'Home', to: '/', icon: Home },
@@ -107,10 +107,30 @@ const servicesNavigation: NavigationItem[] = [
   { label: 'Profile', to: '/services/profile', icon: User },
 ]
 
+const adminNavigation: NavigationItem[] = [
+  { section: 'Overview', label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, end: true },
+  { section: 'Management', label: 'Users', to: '/admin/users', icon: Users },
+  { label: 'Businesses', to: '/admin/businesses', icon: Building2 },
+  { label: 'Business Categories', to: '/admin/categories', icon: FolderOpen },
+  { label: 'Jobs', to: '/admin/jobs', icon: BriefcaseBusiness },
+  { label: 'Job Applications', to: '/admin/job-applications', icon: ClipboardList },
+  { section: 'Community', label: 'Community Reports', to: '/admin/community', icon: MessageCircle },
+  { label: 'Comments / Moderation', to: '/admin/community/moderation', icon: FileText },
+  { section: 'Support', label: 'Help Requests', to: '/admin/help', icon: LifeBuoy },
+  { label: 'Contributions / Payout Review', to: '/admin/payouts', icon: ShieldCheck },
+  { section: 'Marketplace', label: 'Service Providers', to: '/admin/providers', icon: Truck },
+  { label: 'Services', to: '/admin/services', icon: BriefcaseBusiness },
+  { label: 'Service Requests', to: '/admin/service-requests', icon: ClipboardList },
+  { section: 'System', label: 'Notifications', to: '/admin/notifications', icon: Bell },
+  { label: 'Settings', to: '/admin/settings', icon: Settings },
+  { label: 'Audit Logs', to: '/admin/audit-logs', icon: Activity },
+]
+
 interface DashboardSidebarProps {
   open: boolean
   onClose: () => void
-  mode?: 'platform' | 'provider' | 'jobseeker' | 'business' | 'customer' | 'affiliate' | 'messages' | 'wallet' | 'services'
+  mode?: 'platform' | 'provider' | 'jobseeker' | 'business' | 'customer' | 'affiliate' | 'messages' | 'wallet' | 'services' | 'admin'
+  onSignOut?: () => void
 }
 
 function CustomerSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -200,7 +220,7 @@ function CustomerSidebar({ open, onClose }: { open: boolean; onClose: () => void
   )
 }
 
-export function DashboardSidebar({ open, onClose, mode = 'platform' }: DashboardSidebarProps) {
+export function DashboardSidebar({ open, onClose, mode = 'platform', onSignOut }: DashboardSidebarProps) {
   // Use new Tailwind-based sidebar for customer mode
   if (mode === 'customer') {
     return <CustomerSidebar open={open} onClose={onClose} />
@@ -226,6 +246,7 @@ export function DashboardSidebar({ open, onClose, mode = 'platform' }: Dashboard
       case 'messages': return messagesNavigation
       case 'wallet': return walletNavigation
       case 'services': return servicesNavigation
+      case 'admin': return adminNavigation
       default: return platformNavigation
     }
   }
@@ -240,6 +261,7 @@ export function DashboardSidebar({ open, onClose, mode = 'platform' }: Dashboard
       case 'messages': return '/messages'
       case 'wallet': return '/wallet'
       case 'services': return '/services'
+      case 'admin': return '/admin/dashboard'
       default: return '/dashboard'
     }
   }
@@ -256,23 +278,25 @@ export function DashboardSidebar({ open, onClose, mode = 'platform' }: Dashboard
           <span>Oyo<span>Connect</span></span>
         </Link>
         <nav className="dashboard-sidebar-nav" aria-label="Main">
-          {getNavigation(mode).map(({ label, to, icon: Icon, end }) => (
-            <NavLink
-              key={label}
-              to={to}
-              end={end ?? to === '/'}
-              className={({ isActive }) => {
+          {getNavigation(mode).map(({ label, to, icon: Icon, end, section }) => (
+            <div key={to}>
+              {section && <h2 className="dashboard-sidebar-label">{section}</h2>}
+              <NavLink
+                to={to}
+                end={end ?? to === '/'}
+                className={({ isActive }) => {
                 const tab = mode === 'jobseeker' && to.startsWith('/job-seeker#') ? to.split('#')[1] : null
                 const seekerTabActive = tab ? pathname === '/job-seeker' && hash === `#${tab}` : mode === 'jobseeker' && label === 'Dashboard' ? pathname === '/job-seeker' && !hash : false
                 const seekerNavigationActive = seekerTabActive || (mode === 'jobseeker' && label === 'Browse Jobs' && pathname === '/jobs') || (mode === 'jobseeker' && label === 'Jobs' && pathname !== '/jobs' && isActive) || (mode === 'jobseeker' && !['Dashboard', 'My Applications', 'Saved Jobs', 'My Profile', 'Browse Jobs', 'Jobs'].includes(label) && isActive)
                 const active = mode === 'jobseeker' ? seekerNavigationActive : isActive || (mode === 'provider' && label === 'Dashboard' && pathname === '/provider') || (mode === 'platform' && label === 'Home' && pathname === '/dashboard') || (mode === 'business' && label === 'Dashboard' && pathname === '/business/dashboard') || (String(mode) === 'customer' && label === 'Dashboard' && pathname === '/dashboard') || (mode === 'affiliate' && label === 'Dashboard' && pathname === '/affiliate') || (mode === 'messages' && label === 'Messages' && pathname === '/messages') || (mode === 'wallet' && label === 'Wallet' && pathname === '/wallet') || (mode === 'services' && label === 'Services Home' && pathname === '/services')
                 return `dashboard-sidebar-link${active ? ' is-active' : ''}`
-              }}
-              onClick={onClose}
-            >
-              <Icon size={20} aria-hidden="true" />
-              <span>{label}</span>
-            </NavLink>
+                }}
+                onClick={onClose}
+              >
+                <Icon size={20} aria-hidden="true" />
+                <span>{label}</span>
+              </NavLink>
+            </div>
           ))}
         </nav>
         {showQuickAccess && <>
@@ -291,7 +315,7 @@ export function DashboardSidebar({ open, onClose, mode = 'platform' }: Dashboard
           <span className="dashboard-proud-icon" aria-hidden="true">◎</span>
           <span><strong>Proudly Oyo.</strong><small>Built for our people.</small></span>
         </div>}
-        <button className="dashboard-sidebar-logout" type="button" onClick={() => void handleLogout()}>
+        <button className="dashboard-sidebar-logout" type="button" onClick={() => { onClose(); onSignOut ? onSignOut() : void handleLogout() }}>
           <LogOut size={20} aria-hidden="true" /> Sign out
         </button>
       </aside>

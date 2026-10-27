@@ -7,12 +7,13 @@ import '../../styles/dashboard-home.css'
 
 interface AppShellProps {
   children?: ReactNode
-  navigationMode?: 'platform' | 'provider' | 'jobseeker' | 'business' | 'customer' | 'affiliate' | 'messages' | 'wallet' | 'services'
+  navigationMode?: 'platform' | 'provider' | 'jobseeker' | 'business' | 'customer' | 'affiliate' | 'messages' | 'wallet' | 'services' | 'admin'
   showWorkspaceSwitcher?: boolean
   workspaceKey?: 'customer' | 'service_provider' | 'business_owner'
+  onSignOut?: () => void
 }
 
-export function AppLayout({ children, navigationMode = 'platform', showWorkspaceSwitcher = false, workspaceKey }: AppShellProps) {
+export function AppLayout({ children, navigationMode = 'platform', showWorkspaceSwitcher = false, workspaceKey, onSignOut }: AppShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const closeDrawer = () => setDrawerOpen(false)
 
@@ -27,7 +28,7 @@ export function AppLayout({ children, navigationMode = 'platform', showWorkspace
 
   return (
     <div className={`dashboard-app-shell dashboard-app-shell--${navigationMode}`}>
-      <DashboardSidebar open={drawerOpen} onClose={closeDrawer} mode={navigationMode} />
+      <DashboardSidebar open={drawerOpen} onClose={closeDrawer} mode={navigationMode} onSignOut={onSignOut} />
       <div className="dashboard-app-content">
         <DashboardHeader onMenuClick={() => setDrawerOpen(true)} showWorkspaceSwitcher={showWorkspaceSwitcher} workspaceKey={workspaceKey} />
         <main className="dashboard-app-outlet" id="main-content">
