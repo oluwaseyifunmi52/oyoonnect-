@@ -1,19 +1,19 @@
 .public-layout { min-height: 100vh; width: 100%; background: var(--page, #fff); }
 .public-layout__main { min-width: 0; }
-.public-layout > .navbar { position: sticky; top: 0; z-index: 100; min-height: 64px; height: 64px; border-bottom: 1px solid #e5ebe7; background: #fff !important; color: #1f3028; }
-.public-layout > .navbar .navbar__inner { height: 64px; min-height: 64px; }
+.navbar { position: sticky; top: 0; z-index: 100; min-height: 64px; height: 64px; border-bottom: 1px solid #e5ebe7; background: #fff !important; color: #1f3028; }
+.navbar .navbar__inner { height: 64px; min-height: 64px; }
 .public-navbar__actions { display: flex; align-items: center; gap: 12px; }
 .public-navbar__actions .navbar__cta { margin-left: 0; }
-.public-layout > .navbar .logo__name { color: #064e3b; }
-.public-layout > .navbar .logo__subtitle { color: #718078; }
+.navbar .logo__name { color: #064e3b; }
+.navbar .logo__subtitle { color: #718078; }
 .public-layout .home-search-header,
 .public-layout .home-browse-header { display: none; }
 .dashboard-app-shell .home-search-header,
 .dashboard-app-shell .home-browse-header { display: none; }
 
 @media (max-width: 480px) {
-  .public-layout > .navbar .navbar__inner { padding-inline: 14px; gap: 8px; }
-  .public-layout > .navbar .logo__subtitle { display: none; }
+  .navbar .navbar__inner { padding-inline: 14px; gap: 8px; }
+  .navbar .logo__subtitle { display: none; }
   .public-navbar__actions { gap: 5px; }
   .public-navbar__actions .navbar__theme-toggle { width: 34px; height: 34px; }
   .public-navbar__actions .btn { min-height: 36px; padding-inline: 10px; font-size: 12px; }

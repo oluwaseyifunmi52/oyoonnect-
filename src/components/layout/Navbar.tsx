@@ -3,6 +3,7 @@ import { Sun, Moon } from 'lucide-react'
 import { Logo } from './Logo'
 import { ButtonLink, Button } from '../ui/Button'
 import { useTheme } from '../../context/ThemeContext'
+import '../PublicLayout.css'
 
 export function Navbar() {
   const { resolved, setTheme } = useTheme()
