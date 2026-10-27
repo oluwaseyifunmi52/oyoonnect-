@@ -1,6 +1,7 @@
 import { Suspense, useEffect, lazy } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom'
 import { ProtectedRoute, PublicOnlyRoute, ServicesRoute, ProviderRoute } from './components/common'
+import { LegacyHelpRedirect } from './components/common/LegacyHelpRedirect'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
 import { AdminLayout } from './components/admin/AdminLayout'
 import { PublicLayout } from './layouts/PublicLayout'
@@ -370,6 +371,7 @@ function App() {
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/help/*" element={<LegacyHelpRedirect />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </ErrorBoundary>
