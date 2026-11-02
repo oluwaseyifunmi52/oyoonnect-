@@ -1,15 +1,17 @@
 import { devAuthRepository } from './auth/devAuthRepository'
+import { backendAuthRepository } from './auth/backendAuthRepository'
+import type { AuthRepository } from './auth/types'
 import type { AuthUser, LoginCredentials, RegisterData, Capability } from './auth/types'
 import { AuthError } from './auth/types'
 
 export const AUTH_STORAGE_KEY = 'oyoconnect_auth'
 export const USER_STORAGE_KEY = 'oyoconnect_user'
-export const AUTH_PROVIDER = 'dev'
+export const AUTH_PROVIDER = import.meta.env.VITE_AUTH_PROVIDER === 'dev' ? 'dev' : 'backend'
 
 export type { AuthUser, Capability, LoginCredentials, RegisterData }
 
 class AuthService {
-  private repository = devAuthRepository
+  private repository: AuthRepository = AUTH_PROVIDER === 'dev' ? devAuthRepository : backendAuthRepository
 
   async login(credentials: LoginCredentials): Promise<AuthUser> {
     return this.repository.login(credentials)

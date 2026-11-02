@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import type { FormEvent, ReactNode } from 'react'
-import { Link, useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom'
+import type { FormEvent } from 'react'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import {
   User, Building2, Briefcase, Eye, EyeOff,
-  CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Info, ChevronRight,
+  CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Info,
 } from 'lucide-react'
 import { Input } from '../components/ui/Input'
 import { Button, ButtonLink } from '../components/ui/Button'
 import { useAuth } from '../context/AuthContext'
 import { Logo } from '../components/layout/Logo'
 import './Login.css'
+import './Signup.css'
 
 type AccountType = 'customer' | 'service_provider' | 'business_owner'
 
@@ -76,7 +77,12 @@ export default function Signup() {
   const [searchParams] = useSearchParams()
   const { signup } = useAuth()
   const [step, setStep] = useState<number>(0)
-  const [accountType, setAccountType] = useState<AccountType | null>(null)
+  const [accountType, setAccountType] = useState<AccountType | null>(() => {
+    const requestedRole = searchParams.get('role')
+    return ACCOUNT_TYPES.some((option) => option.type === requestedRole)
+      ? requestedRole as AccountType
+      : null
+  })
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -90,6 +96,7 @@ export default function Signup() {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitError, setSubmitError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const stateFrom = (location.state as { from?: { pathname?: string; search?: string } | string } | null)?.from
   const stateFromPath =
@@ -108,7 +115,8 @@ export default function Signup() {
     if (!values.fullName.trim()) e.fullName = 'Full name is required'
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) e.email = 'Enter a valid email address'
     if (!/^\+?\d{7,15}$/.test(values.phone.replace(/[\s-]/g, ''))) e.phone = 'Enter a valid phone number'
-    if (!checks.len || !checks.upper || !checks.lower || !checks.num) {
+    const checksForValue = passwordChecks(values.password)
+    if (!checksForValue.len || !checksForValue.upper || !checksForValue.lower || !checksForValue.num) {
       e.password = 'Password must be 8+ chars with upper, lower & number'
     }
     if (values.confirmPassword !== values.password) e.confirmPassword = 'Passwords do not match'
@@ -131,8 +139,8 @@ export default function Signup() {
     const e2 = validate(form)
     setErrors(e2)
     setTouched({ fullName: true, email: true, phone: true, password: true, confirmPassword: true })
-    if (Object.keys(e2).length) {
-      setSubmitError('Please fix the highlighted fields.')
+    if (Object.keys(e2).length || !termsAccepted) {
+      setSubmitError(!termsAccepted ? 'Please agree to the Terms & Privacy Policy to continue.' : 'Please fix the highlighted fields.')
       return
     }
     setLoading(true)
@@ -146,7 +154,7 @@ export default function Signup() {
           password: form.password,
           confirmPassword: form.confirmPassword,
           role: accountType ?? 'customer',
-          termsAccepted: true,
+          termsAccepted,
         },
         '/signup',
       )
@@ -160,7 +168,11 @@ export default function Signup() {
 
   function handleLoginRedirect() {
     const role = accountType ?? 'customer'
-    navigate('/login' + (role !== 'customer' ? `?type=${role}` : ''))
+    const params = new URLSearchParams()
+    if (role !== 'customer') params.set('type', role)
+    if (redirect) params.set('redirect', redirect)
+    const query = params.toString()
+    navigate(`/login${query ? `?${query}` : ''}`)
   }
 
   const heading = accountType === 'business_owner'
@@ -170,7 +182,7 @@ export default function Signup() {
       : 'Create your account'
 
   return (
-    <main className="login-page">
+    <main className="login-page login-page--signup">
       <div className="login-page__hero" aria-hidden="true">
         <div className="login-page__hero-gradient" />
         <img
@@ -358,7 +370,7 @@ export default function Signup() {
               />
 
               <label className="auth-checkbox signup-terms">
-                <input type="checkbox" checked readOnly />
+                <input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} />
                 <span className="auth-checkbox__custom" aria-hidden="true" />
                 <span>I agree to the Terms & Privacy Policy</span>
               </label>

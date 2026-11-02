@@ -1,10 +1,9 @@
 import { useState, useCallback } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom'
+import { Link, useSearchParams, useLocation } from 'react-router-dom'
 import { Mail, AlertCircle, CheckCircle2, Loader2, ArrowLeft, Info } from 'lucide-react'
 import { Input } from '../components/ui/Input'
 import { Button, ButtonLink } from '../components/ui/Button'
-import { SectionHeading } from '../components/ui/SectionHeading'
 import { authService, AUTH_PROVIDER } from '../services/authService'
 import { Logo } from '../components/layout/Logo'
 import './Login.css'
@@ -14,7 +13,6 @@ const DEV_RECOVERY_MESSAGE = "Password recovery will be available when OyoConnec
 type ForgotPasswordStep = 'request' | 'success'
 
 function ForgotPassword() {
-  const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const [step, setStep] = useState<ForgotPasswordStep>('request')
@@ -31,6 +29,7 @@ function ForgotPassword() {
         ? `${stateFrom.pathname ?? ''}${stateFrom.search ?? ''}`
         : ''
   const redirect = searchParams.get('redirect') || stateFromPath
+  const loginPath = redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login'
 
   const isDevAuth = AUTH_PROVIDER === 'dev'
 
@@ -60,8 +59,8 @@ function ForgotPassword() {
       } else {
         setError(result.message)
       }
-    } catch {
-      setError('An error occurred. Please try again.')
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'An error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -91,7 +90,7 @@ function ForgotPassword() {
       <div className="login-page__form-wrapper">
         <div className="login-page__form-card">
           <div className="login-page__form-header">
-            <Link to="/login" className="auth-back-link" aria-label="Back to login">
+            <Link to={loginPath} className="auth-back-link" aria-label="Back to login">
               <ArrowLeft size={20} />
             </Link>
             <Logo subtitle link={false} />
@@ -145,7 +144,7 @@ function ForgotPassword() {
               </form>
 
               <p className="auth-footer">
-                Remember your password? <Link to="/login" className="auth-link">Sign in</Link>
+                Remember your password? <Link to={loginPath} className="auth-link">Sign in</Link>
               </p>
             </>
           )}
@@ -161,7 +160,7 @@ function ForgotPassword() {
                 The link will expire in 1 hour. If you don't see the email, check your spam folder.
               </p>
               <div className="auth-success-actions">
-                <ButtonLink to="/login" variant="primary" size="lg" fullWidth className="auth-submit">
+                <ButtonLink to={loginPath} variant="primary" size="lg" fullWidth className="auth-submit">
                   Back to Sign In
                 </ButtonLink>
                 <ButtonLink to="/forgot-password" variant="outline" size="lg" fullWidth onClick={() => { setEmail(''); setStep('request'); }}>

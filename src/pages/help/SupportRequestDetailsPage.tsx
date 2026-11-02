@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
-import { useParams, useSearchParams, Link } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
+import { useParams, Link } from 'react-router-dom'
 import {
-  Clock,
   MapPin,
   Shield,
   AlertCircle,
@@ -15,102 +14,51 @@ import type { SupportRequest } from '../../types/help'
 import {
   VerificationBadge,
   ProgressBar,
-  SupportAmountSelector,
   ReportButton,
   LoadingState,
   ErrorState,
   StatusBadge,
   HelpIcon,
 } from '../../components/help'
-import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
-import { Modal } from '../../components/common/Modal'
 import { BackButton } from '../../components/ui/BackButton'
 import { helpService } from '../../services/helpService'
-import { notificationService } from '../../services/notificationService'
-import { PLATFORM_FEE_PERCENTAGE, PAYMENT_GATEWAY_FEE_PERCENTAGE } from '../../types/help'
 import { Card } from '../../components/ui/Card'
-
-const SUGGESTED_AMOUNTS = [1000, 2000, 5000, 10000]
 
 export function SupportRequestDetailsPage() {
   const { id } = useParams<{ id: string }>()
-  const [searchParams] = useSearchParams()
   const [request, setRequest] = useState<SupportRequest | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedAmount, setSelectedAmount] = useState<number>(0)
-  const [showSupportModal, setShowSupportModal] = useState(false)
-  const [supportStatus, setSupportStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle')
 
-  useEffect(() => {
-    if (id) {
-      loadRequest()
+  const loadRequest = useCallback(async (signal: AbortSignal) => {
+    if (!id) {
+      setError('Support request not found')
+      setIsLoading(false)
+      return
     }
-  }, [id])
 
-  const loadRequest = async () => {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await helpService.getRequestById(id!)
-      if (data) {
-        setRequest(data)
-        if (searchParams.get('support') === 'true') {
-          setShowSupportModal(true)
-        }
-      } else {
-        setError('Support request not found')
-      }
-    } catch {
-      setError('Failed to load request details')
+      const data = await helpService.getPublicRequestById(id, signal)
+      if (!signal.aborted) setRequest(data)
+    } catch (loadError) {
+      if (signal.aborted || (loadError instanceof DOMException && loadError.name === 'AbortError')) return
+      setRequest(null)
+      setError(loadError instanceof Error ? loadError.message : 'Failed to load request details')
     } finally {
-      setIsLoading(false)
+      if (!signal.aborted) setIsLoading(false)
     }
-  }
+  }, [id])
 
-  const handleSupportClick = () => {
-    setShowSupportModal(true)
-  }
-
-  const handleAmountChange = (amount: number) => {
-    setSelectedAmount(amount)
-  }
-
-  const handleSupportSubmit = async () => {
-    if (!selectedAmount || !request) return
-
-    setSupportStatus('processing')
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      setRequest((prev) =>
-        prev
-          ? {
-              ...prev,
-              amountRaised: prev.amountRaised + selectedAmount,
-              supportersCount: prev.supportersCount + 1,
-            }
-          : null,
-      )
-
-      notificationService.addNotification({
-        category: 'account',
-        title: 'New Support Received',
-        message: `Someone supported your request "${request.title}" with ${formatCurrency(selectedAmount, { showDecimals: false })}!`,
-        read: false,
-        createdAt: new Date().toISOString(),
-        href: `/help/requests/${request.id}`,
-      })
-
-      setSupportStatus('success')
-      setShowSupportModal(false)
-      setSelectedAmount(0)
-      setTimeout(() => setSupportStatus('idle'), 3000)
-    } catch {
-      setSupportStatus('error')
-      setTimeout(() => setSupportStatus('idle'), 3000)
+  useEffect(() => {
+    const controller = new AbortController()
+    void loadRequest(controller.signal)
+    return () => {
+      controller.abort()
     }
-  }
+  }, [loadRequest])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-NG', {
@@ -119,10 +67,6 @@ export function SupportRequestDetailsPage() {
       year: 'numeric',
     })
   }
-
-  const daysLeft = request
-    ? Math.max(0, Math.ceil((new Date(request.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : 0
 
   const percentage =
     request && request.targetAmount > 0
@@ -140,15 +84,11 @@ export function SupportRequestDetailsPage() {
           title={error || 'Request not found'}
           message="The support request you're looking for doesn't exist or has been removed."
           actionLabel="Browse Requests"
-          actionHref="/help/requests"
+          actionHref="/community/help/requests"
         />
       </div>
     )
   }
-
-  const isExpired = new Date(request.deadline) < new Date()
-  const isCompleted = request.status === 'funded_and_paid_out' || request.status === 'resolved'
-  const canSupport = request.status === 'active' && !isExpired && !isCompleted
 
   return (
     <div className="support-details-page">
@@ -181,11 +121,11 @@ export function SupportRequestDetailsPage() {
                 <div className="support-details__requester-info">
                   <h1 className="support-details__title">{request.title}</h1>
                   <div className="support-details__meta">
-                    <span className="support-details__requester-name">By {request.requesterName}</span>
-                    <span className="support-details__location">
+                    {request.requesterName && <span className="support-details__requester-name">By {request.requesterName}</span>}
+                    {request.requesterLocation && <span className="support-details__location">
                       <MapPin size={14} aria-hidden="true" />
                       {request.requesterLocation}
-                    </span>
+                    </span>}
                     <span className="support-details__category">
                       <HelpIcon name={getCategoryIcon(request.category)} size={16} aria-hidden="true" />
                       {request.category.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
@@ -300,8 +240,10 @@ export function SupportRequestDetailsPage() {
               <div className="support-details__safety-grid">
                 <Card variant="default" padding="md" className="support-details__safety-item">
                   <Shield size={24} aria-hidden="true" />
-                  <h3>Reviewed Before Publication</h3>
-                  <p>This request was reviewed by our team before going live. Documents and details were verified.</p>
+                  <h3>Verification Status</h3>
+                  <p>{request.verificationStatus === 'verified'
+                    ? 'This request was reviewed by our team. Verification does not guarantee every claim is 100% accurate.'
+                    : 'This request has not completed verification. Review its current verification status before taking action.'}</p>
                 </Card>
                 <Card variant="default" padding="md" className="support-details__safety-item">
                   <AlertCircle size={24} aria-hidden="true" />
@@ -342,64 +284,10 @@ export function SupportRequestDetailsPage() {
                 </p>
               </div>
 
-              {canSupport ? (
-                <>
-                  <SupportAmountSelector
-                    suggestedAmounts={SUGGESTED_AMOUNTS}
-                    selectedAmount={selectedAmount}
-                    onAmountChange={handleAmountChange}
-                    showFeeBreakdown
-                    platformFeePercentage={PLATFORM_FEE_PERCENTAGE}
-                    gatewayFeePercentage={PAYMENT_GATEWAY_FEE_PERCENTAGE}
-                  />
-
-                  <div className="support-details__deadline">
-                    <Clock size={16} aria-hidden="true" />
-                    <span>
-                      {daysLeft === 0
-                        ? 'Deadline today'
-                        : daysLeft === 1
-                        ? '1 day left'
-                        : `${daysLeft} days left`}
-                    </span>
-                  </div>
-
-                  <Button
-                    className="support-details__support-btn"
-                    size="lg"
-                    variant="primary"
-                    onClick={handleSupportClick}
-                    loading={supportStatus === 'processing'}
-                    disabled={supportStatus === 'processing'}
-                  >
-                    {supportStatus === 'processing' ? 'Processing...' : 'Support Now'}
-                  </Button>
-
-                  <p className="support-details__support-note">
-                    Your support amount is transferred to the requester's verified bank account upon successful
-                    processing. Platform and payment processing fees apply as shown.
-                  </p>
-                </>
-              ) : (
-                <div className="support-details__support-disabled">
-                  {isExpired ? (
-                    <>
-                      <AlertCircle size={32} aria-hidden="true" />
-                      <p>This request's deadline has passed.</p>
-                    </>
-                  ) : isCompleted ? (
-                    <>
-                      <CheckCircle size={32} aria-hidden="true" />
-                      <p>This request has been completed.</p>
-                    </>
-                  ) : (
-                    <>
-                      <Clock size={32} aria-hidden="true" />
-                      <p>This request is not currently accepting support.</p>
-                    </>
-                  )}
-                </div>
-              )}
+              <div className="support-details__support-disabled" role="status">
+                <AlertCircle size={24} aria-hidden="true" />
+                <p>Contributions are temporarily unavailable because no payment provider is currently enabled.</p>
+              </div>
 
               <div className="support-details__share">
                 <button
@@ -453,48 +341,6 @@ export function SupportRequestDetailsPage() {
         </div>
       </div>
 
-      <Modal
-        isOpen={showSupportModal}
-        onClose={() => setShowSupportModal(false)}
-        title="Confirm Your Support"
-        size="md"
-      >
-        <p className="support-modal__intro">
-          You're about to support <strong>{request.requesterName}</strong>'s request:{' '}
-          <strong>{request.title}</strong>
-        </p>
-
-        <SupportAmountSelector
-          suggestedAmounts={SUGGESTED_AMOUNTS}
-          selectedAmount={selectedAmount}
-          onAmountChange={handleAmountChange}
-          showFeeBreakdown
-          platformFeePercentage={PLATFORM_FEE_PERCENTAGE}
-          gatewayFeePercentage={PAYMENT_GATEWAY_FEE_PERCENTAGE}
-        />
-
-        <div className="modal-footer">
-          <Button variant="outline" onClick={() => setShowSupportModal(false)} disabled={supportStatus === 'processing'}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handleSupportSubmit}
-            loading={supportStatus === 'processing'}
-            disabled={!selectedAmount}
-          >
-            {supportStatus === 'processing' ? 'Processing...' : `Support with ${formatCurrency(selectedAmount || 0)}`}
-          </Button>
-        </div>
-
-        {supportStatus === 'success' && (
-          <div className="support-modal__success" role="alert">
-            <CheckCircle size={24} aria-hidden="true" />
-            <p>Thank you! Your support has been processed.</p>
-          </div>
-        )}
-      </Modal>
     </div>
   )
 }

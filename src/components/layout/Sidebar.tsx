@@ -214,7 +214,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps = {}) {
                 Sign In
               </ButtonLink>
               <ButtonLink
-                to="/get-started"
+                to="/signup"
                 variant="ghost"
                 size="sm"
               >

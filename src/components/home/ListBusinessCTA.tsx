@@ -9,7 +9,7 @@ export function ListBusinessCTA() {
     if (!isAuthenticated) {
       e.preventDefault()
       // Navigate to signup with business_owner role pre-selected
-      window.location.href = '/register?role=business_owner'
+      window.location.href = '/signup?role=business_owner'
     }
     // If authenticated, let the link work normally to /list-business
   }
@@ -41,7 +41,7 @@ export function ListBusinessCTA() {
         )}
         {isAuthenticated && user?.role === 'user' && (
           <p className="cta__note">
-            Need a Business Owner account? <a href="/register?role=business_owner">Upgrade here</a>
+            Need a Business Owner account? <a href="/signup?role=business_owner">Upgrade here</a>
           </p>
         )}
       </div>

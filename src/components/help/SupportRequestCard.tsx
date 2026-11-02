@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Users, Clock, Heart, ExternalLink } from 'lucide-react'
+import { MapPin, Users, Clock, Heart, ExternalLink, CalendarDays } from 'lucide-react'
 import { formatCurrency } from '../../utils/currency'
-import type { SupportRequest } from '../../types/help'
+import { getCategoryById, type SupportRequest } from '../../types/help'
 import { ProgressBar } from './ProgressBar'
 import { VerificationBadge } from './VerificationBadge'
+import { StatusBadge } from './StatusBadge'
+import { HelpIcon } from './IconMapping'
 
 interface SupportRequestCardProps {
   request: SupportRequest
-  onSupportClick?: (request: SupportRequest) => void
+  onSupportClick?: (_request: SupportRequest) => void
   showFullDescription?: boolean
 }
 
@@ -16,17 +18,15 @@ export function SupportRequestCard({
   onSupportClick,
   showFullDescription = false
 }: SupportRequestCardProps) {
-  const percentage = request.targetAmount > 0
-    ? Math.min(Math.round((request.amountRaised / request.targetAmount) * 100), 100)
-    : 0
-
-  const daysLeft = Math.max(
-    0,
-    Math.ceil((new Date(request.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-  )
+  const deadlineTime = request.deadline ? new Date(request.deadline).getTime() : Number.NaN
+  const daysLeft = Number.isNaN(deadlineTime)
+    ? null
+    : Math.max(0, Math.ceil((deadlineTime - Date.now()) / (1000 * 60 * 60 * 24)))
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-NG', {
+    const date = new Date(dateString)
+    if (Number.isNaN(date.getTime())) return 'Date unavailable'
+    return date.toLocaleDateString('en-NG', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
@@ -34,27 +34,24 @@ export function SupportRequestCard({
   }
 
   return (
-    <article className="support-request-card">
+    <article className="support-request-card" role="listitem">
       <div className="support-request-card__header">
         <div className="support-request-card__requester">
-          <img
-            src={request.requesterAvatar || ''}
-            alt=""
-            className="support-request-card__avatar"
-            loading="lazy"
-          />
+          {request.requesterAvatar
+            ? <img src={request.requesterAvatar} alt="" className="support-request-card__avatar" loading="lazy" />
+            : <span className="support-request-card__avatar support-request-card__avatar--fallback" aria-hidden="true"><HelpIcon name={getCategoryById(request.category)?.icon ?? 'heart'} size={19} /></span>}
           <div className="support-request-card__requester-info">
-            <h3 className="support-request-card__requester-name">{request.requesterName}</h3>
+            {request.requesterName && <h3 className="support-request-card__requester-name">{request.requesterName}</h3>}
             <div className="support-request-card__meta">
-              <span className="support-request-card__location">
-                <MapPin size={13} aria-hidden="true" />
-                {request.requesterLocation}
-              </span>
-              <span className="support-request-card__category">{request.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+              {request.requesterLocation && <span className="support-request-card__location"><MapPin size={13} aria-hidden="true" />{request.requesterLocation}</span>}
+              <span className="support-request-card__category">{getCategoryById(request.category)?.label ?? request.category}</span>
             </div>
           </div>
         </div>
-        <VerificationBadge status={request.verificationStatus} size="sm" />
+        <div className="support-request-card__badges">
+          <VerificationBadge status={request.verificationStatus} size="sm" />
+          <StatusBadge status={request.status} size="sm" />
+        </div>
       </div>
 
       <h2 className="support-request-card__title">{request.title}</h2>
@@ -84,26 +81,28 @@ export function SupportRequestCard({
 
       <div className="support-request-card__stats">
         <div className="support-request-card__stat">
+          <CalendarDays size={15} aria-hidden="true" />
+          <span>Posted {formatDate(request.createdAt)}</span>
+        </div>
+        <div className="support-request-card__stat">
           <Users size={16} aria-hidden="true" />
           <span>{request.supportersCount} supporters</span>
         </div>
-        <div className="support-request-card__stat">
+        {daysLeft !== null && <div className="support-request-card__stat">
           <Clock size={16} aria-hidden="true" />
           <span>{daysLeft} day{daysLeft !== 1 ? 's' : ''} left</span>
-        </div>
-        <div className="support-request-card__stat">
-          <span>Deadline: {formatDate(request.deadline)}</span>
-        </div>
+        </div>}
+        {request.deadline && <div className="support-request-card__stat"><span>Deadline: {formatDate(request.deadline)}</span></div>}
       </div>
 
       <div className="support-request-card__actions">
-        <button
+        {onSupportClick && <button
           type="button"
           className="btn btn--primary btn--md support-request-card__support-btn"
           onClick={() => onSupportClick?.(request)}
         >
           Support
-        </button>
+        </button>}
         <Link
           to={`/community/help/requests/${request.id}`}
           className="btn btn--outline btn--md support-request-card__details-btn"

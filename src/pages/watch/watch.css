@@ -186,6 +186,26 @@ html[data-theme='light'] .watch-room-tabs { border-color: var(--watch-line); bac
 html[data-theme='light'] .watch-room-tabs button.is-active { color: #fff; background: #087746; }
 html[data-theme='light'] .watch-room-heading h2, html[data-theme='light'] .watch-page-heading h2 { color: var(--watch-text); }
 html[data-theme='light'] .watch-muted, html[data-theme='light'] .watch-page-heading p:last-child, html[data-theme='light'] .watch-room-heading p:last-child { color: var(--watch-muted); }
+.watch-title-collection { display: grid; gap: 13px; }
+.watch-title-collection__heading h3 { margin: 0; color: var(--watch-text); font-size: clamp(1.15rem, 2vw, 1.45rem); letter-spacing: -.025em; }
+.watch-title-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+.watch-title-card { min-width: 0; overflow: hidden; border: 1px solid var(--watch-line); border-radius: 12px; color: var(--watch-text); background: var(--watch-surface); text-decoration: none; transition: transform .16s ease, border-color .16s ease; }
+.watch-title-card:hover { transform: translateY(-2px); border-color: rgba(82, 218, 143, .55); }
+.watch-title-card:focus-visible { outline: 2px solid var(--watch-green-bright); outline-offset: 3px; }
+.watch-title-card__poster { position: relative; aspect-ratio: 2 / 3; overflow: hidden; background: var(--watch-surface-raised); }
+.watch-title-card__poster img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.watch-title-card__rating { position: absolute; right: 8px; bottom: 8px; padding: 4px 7px; border-radius: 6px; color: #fff; background: rgba(5, 16, 10, .82); font-size: .72rem; font-weight: 750; }
+.watch-title-card__copy { display: grid; gap: 4px; padding: 10px; }
+.watch-title-card__copy h4 { overflow: hidden; margin: 0; color: var(--watch-text); font-size: .84rem; text-overflow: ellipsis; white-space: nowrap; }
+.watch-title-card__copy p { margin: 0; color: var(--watch-muted); font-size: .72rem; }
+.watch-title-card__copy p span { padding-inline: 3px; }
+.watch-detail { display: grid; grid-template-columns: minmax(150px, 230px) minmax(0, 1fr); align-items: center; gap: clamp(20px, 4vw, 44px); padding: clamp(20px, 4vw, 42px); border: 1px solid var(--watch-line); border-radius: 18px; background-position: center; background-size: cover; }
+.watch-detail__poster { display: block; width: 100%; max-height: 345px; aspect-ratio: 2 / 3; border-radius: 11px; object-fit: cover; box-shadow: 0 14px 35px rgba(0, 0, 0, .3); }
+.watch-detail__content { display: grid; justify-items: start; gap: 12px; }
+.watch-detail__content h2 { margin: 0; color: #f5faf6; font-size: clamp(1.8rem, 4vw, 3.2rem); letter-spacing: -.04em; }
+.watch-detail__meta, .watch-detail__genres, .watch-detail__overview { margin: 0; color: #d5e0d8; line-height: 1.6; }
+.watch-detail__genres { color: #8de7ad; font-size: .9rem; }
+.watch-detail__overview { max-width: 760px; }
 @media (max-width: 900px) {
   .watch-shell { padding-inline: 20px; }
   .watch-nav { flex-wrap: wrap; overflow: visible; }
@@ -194,6 +214,7 @@ html[data-theme='light'] .watch-muted, html[data-theme='light'] .watch-page-head
   .watch-art-card { width: 158px; }
   .watch-art-card--back { width: 145px; }
   .watch-room-layout { grid-template-columns: minmax(0, 1fr) 290px; }
+  .watch-title-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 700px) {
   .watch-shell { padding: 22px 16px 40px; }
@@ -220,6 +241,12 @@ html[data-theme='light'] .watch-muted, html[data-theme='light'] .watch-page-head
   .watch-section-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .watch-room-layout { grid-template-columns: 1fr; }
   .watch-room-heading { align-items: flex-start; flex-direction: column; }
+  .watch-title-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .watch-detail { grid-template-columns: 110px minmax(0, 1fr); align-items: start; gap: 15px; padding: 16px; }
+  .watch-detail__poster { max-height: 180px; }
+  .watch-detail__content { gap: 8px; }
+  .watch-detail__content h2 { font-size: 1.45rem; }
+  .watch-detail__meta, .watch-detail__genres, .watch-detail__overview { font-size: .8rem; }
 }
 @media (max-width: 500px) {
   .watch-search-row, .watch-form-grid, .watch-toggle-grid, .watch-draft dl { grid-template-columns: 1fr; }

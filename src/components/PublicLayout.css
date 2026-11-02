@@ -3,6 +3,9 @@
 .navbar { position: sticky; top: 0; z-index: 100; min-height: 64px; height: 64px; border-bottom: 1px solid #e5ebe7; background: #fff !important; color: #1f3028; }
 .navbar .navbar__inner { height: 64px; min-height: 64px; }
 .public-navbar__actions { display: flex; align-items: center; gap: 12px; }
+.navbar__watch-link { display: inline-flex; min-height: 38px; align-items: center; gap: 7px; padding: 0 10px; border-radius: 8px; color: #075b3b; font-size: 13px; font-weight: 650; text-decoration: none; }
+.navbar__watch-link:hover { background: #edf6f0; }
+.navbar__watch-link:focus-visible { outline: 2px solid #12834c; outline-offset: 2px; }
 .public-navbar__actions .navbar__cta { margin-left: 0; }
 .navbar .logo__name { color: #064e3b; }
 .navbar .logo__subtitle { color: #718078; }
@@ -15,6 +18,7 @@
   .navbar .navbar__inner { padding-inline: 14px; gap: 8px; }
   .navbar .logo__subtitle { display: none; }
   .public-navbar__actions { gap: 5px; }
+  .navbar__watch-link { min-height: 34px; gap: 4px; padding-inline: 6px; font-size: 12px; }
   .public-navbar__actions .navbar__theme-toggle { width: 34px; height: 34px; }
   .public-navbar__actions .btn { min-height: 36px; padding-inline: 10px; font-size: 12px; }
 }

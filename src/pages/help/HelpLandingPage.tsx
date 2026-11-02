@@ -4,13 +4,9 @@ import { ArrowRight, ShieldCheck, HeartHandshake, Flag } from 'lucide-react'
 import type { SupportRequest, HelpCategoryValue } from '../../types/help'
 import { HELP_CATEGORIES } from '../../types/help'
 import {
-  Button,
   ButtonLink,
   SearchInput,
-  Badge,
   Card,
-  Skeleton,
-  FormField,
   Select,
 } from '../../components/ui'
 import {
@@ -19,8 +15,6 @@ import {
   ErrorState,
   HelpEmptyState,
   SupportRequestCard,
-  VerificationBadge,
-  StatusBadge,
 } from '../../components/help'
 import { helpService } from '../../services/helpService'
 
@@ -299,9 +293,6 @@ export function HelpLandingPage() {
                   <SupportRequestCard
                     key={request.id}
                     request={request}
-                    onSupportClick={(req) => {
-                      window.location.href = `/help/requests/${req.id}?support=true`
-                    }}
                   />
                 ))}
 

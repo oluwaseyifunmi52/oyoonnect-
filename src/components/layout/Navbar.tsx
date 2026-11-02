@@ -1,14 +1,12 @@
-import { useNavigate } from 'react-router-dom'
-import { Sun, Moon } from 'lucide-react'
+import { Clapperboard, Sun, Moon } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Logo } from './Logo'
-import { ButtonLink, Button } from '../ui/Button'
+import { ButtonLink } from '../ui/Button'
 import { useTheme } from '../../context/ThemeContext'
 import '../PublicLayout.css'
 
 export function Navbar() {
   const { resolved, setTheme } = useTheme()
-  const navigate = useNavigate()
-
   const themeClass = resolved === 'dark' ? ' dark' : ''
 
   return (
@@ -16,6 +14,7 @@ export function Navbar() {
       <div className="navbar__inner container">
         <Logo subtitle />
         <div className="public-navbar__actions">
+          <Link className="navbar__watch-link" to="/watch"><Clapperboard size={17} aria-hidden="true" /><span>Watch</span></Link>
           <button
             type="button"
             className="navbar__theme-toggle"
@@ -25,15 +24,14 @@ export function Navbar() {
             {resolved === 'dark' ? <Sun size={20} aria-hidden="true" /> : <Moon size={20} aria-hidden="true" />}
           </button>
           <ButtonLink to="/login" variant="ghost" size="sm">Sign In</ButtonLink>
-          <Button
-            type="button"
+          <ButtonLink
+            to="/signup"
             variant="primary"
             size="sm"
-            onClick={() => navigate('/get-started')}
             className="navbar__cta"
           >
             Get Started
-          </Button>
+          </ButtonLink>
         </div>
       </div>
     </header>

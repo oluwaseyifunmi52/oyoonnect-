@@ -7,6 +7,58 @@ import type {
 import { HELP_CATEGORIES } from '../types/help'
 import { helpRequests } from '../data/helpRequests'
 
+const HELP_API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '')
+
+export interface PublicSupportRequestPage {
+  items: SupportRequest[]
+  total: number
+  page: number
+  totalPages: number
+  hasMore: boolean
+}
+
+interface BackendSupportRequestPage {
+  items: unknown[]
+  total: number
+  page: number
+  totalPages: number
+  hasMore: boolean
+}
+
+function mapPublicSupportRequest(value: unknown): SupportRequest {
+  const row = value as Record<string, unknown>
+  const rawRequesterId = row.requesterId
+  const requester = typeof rawRequesterId === 'object' && rawRequesterId !== null
+    ? rawRequesterId as { _id?: unknown; id?: unknown; name?: unknown; avatar?: unknown }
+    : undefined
+  const requesterId = typeof rawRequesterId === 'string'
+    ? rawRequesterId
+    : String(requester?.id ?? requester?._id ?? '')
+
+  return {
+    ...(row as unknown as SupportRequest),
+    id: String(row.id ?? row._id ?? ''),
+    requesterId,
+    requesterName: typeof row.requesterName === 'string' ? row.requesterName : typeof requester?.name === 'string' ? requester.name : '',
+    requesterAvatar: typeof row.requesterAvatar === 'string' ? row.requesterAvatar : typeof requester?.avatar === 'string' ? requester.avatar : undefined,
+    requesterLocation: typeof row.requesterLocation === 'string' ? row.requesterLocation : '',
+    targetAmount: Number(row.targetAmount ?? 0) / 100,
+    amountRaised: Number(row.amountRaised ?? 0) / 100,
+    createdAt: String(row.createdAt ?? ''),
+    updatedAt: String(row.updatedAt ?? ''),
+    deadline: String(row.deadline ?? ''),
+  }
+}
+
+async function getPublicJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(`${HELP_API_BASE}${path}`, { signal })
+  const body = await response.json().catch(() => ({})) as Record<string, unknown>
+  if (!response.ok) {
+    throw new Error(typeof body.message === 'string' ? body.message : `Request failed (${response.status})`)
+  }
+  return body as T
+}
+
 export const helpService = {
   async verifyBankAccount(bankRequest: BankVerificationRequest): Promise<BankVerificationResponse> {
     return new Promise((resolve) => {
@@ -152,6 +204,38 @@ export const helpService = {
         resolve(results)
       }, 100)
     })
+  },
+
+  async searchPublicRequests(filters: {
+    category?: HelpCategoryValue
+    location?: string
+    status?: SupportRequest['status']
+    sort?: 'recent' | 'almost-funded' | 'verified' | 'deadline'
+    page?: number
+    limit?: number
+    signal?: AbortSignal
+  } = {}): Promise<PublicSupportRequestPage> {
+    const params = new URLSearchParams()
+    if (filters.category) params.set('category', filters.category)
+    if (filters.location) params.set('location', filters.location)
+    if (filters.status) params.set('status', filters.status)
+    if (filters.sort) params.set('sort', filters.sort)
+    params.set('page', String(filters.page ?? 1))
+    params.set('limit', String(filters.limit ?? 12))
+
+    const result = await getPublicJson<BackendSupportRequestPage>(
+      `/help/requests?${params.toString()}`,
+      filters.signal,
+    )
+    return {
+      ...result,
+      items: Array.isArray(result.items) ? result.items.map(mapPublicSupportRequest) : [],
+    }
+  },
+
+  async getPublicRequestById(id: string, signal?: AbortSignal): Promise<SupportRequest> {
+    const result = await getPublicJson<unknown>(`/help/requests/${encodeURIComponent(id)}`, signal)
+    return mapPublicSupportRequest(result)
   },
 
   async getRecent(limit: number = 10): Promise<SupportRequest[]> {

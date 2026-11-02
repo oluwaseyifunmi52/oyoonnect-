@@ -1,0 +1,293 @@
+.login-page--signup {
+  min-height: calc(100svh - 64px);
+  flex-direction: column;
+  background: #f1f6f3;
+}
+
+.login-page--signup .login-page__hero {
+  display: none;
+}
+
+.login-page--signup .login-page__form-wrapper {
+  width: 100%;
+  min-height: calc(100svh - 64px);
+  padding: 24px 20px;
+  background: transparent;
+}
+
+.login-page--signup .login-page__form-card {
+  width: 100%;
+  max-width: 540px;
+  padding: 26px 30px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(11, 69, 55, 0.07);
+}
+
+.login-page--signup .login-page__form-header {
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.login-page--signup .login-page__form-header .logo {
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.login-page--signup .login-page__form-header .section-heading__title {
+  margin: 0 0 6px;
+  font-size: 25px;
+  line-height: 1.25;
+}
+
+.login-page--signup .login-page__form-header .section-heading__subtitle {
+  max-width: 420px;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.login-page--signup .signup-stepper {
+  margin-bottom: 18px !important;
+}
+
+.login-page--signup .auth-form {
+  gap: 12px;
+}
+
+.login-page--signup .account-type-grid {
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.login-page--signup .account-type-card {
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.login-page--signup .account-type-card:hover {
+  box-shadow: none;
+}
+
+.login-page--signup .account-type-card.is-selected {
+  border: 1px solid #0f6b4f;
+  background: #d4f3e2;
+  box-shadow: 0 0 0 1px #0f6b4f;
+}
+
+.login-page--signup .account-type-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+
+.login-page--signup .account-type-card__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.login-page--signup .account-type-card__title {
+  margin-bottom: 2px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.login-page--signup .account-type-card__desc {
+  margin-bottom: 5px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.login-page--signup .account-type-card__bullets {
+  gap: 4px 10px;
+  margin-top: 0;
+}
+
+.login-page--signup .account-type-card__bullet {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.login-page--signup .account-type-card__check {
+  position: static;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+.login-page--signup .account-type-card__check svg {
+  width: 16px;
+  height: 16px;
+}
+
+.login-page--signup .auth-notice {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.login-page--signup .signup-actions {
+  margin-top: 12px;
+}
+
+.login-page--signup .auth-form .field {
+  gap: 5px;
+}
+
+.login-page--signup .auth-form .field__label {
+  font-size: 13px;
+}
+
+.login-page--signup .auth-form .input {
+  min-height: 46px;
+  padding-block: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.login-page--signup .auth-submit.btn {
+  min-height: 46px;
+  border-radius: 8px;
+  background: #0f6b4f;
+  border-color: #0f6b4f;
+}
+
+.login-page--signup .auth-submit.btn:hover:not(:disabled) {
+  background: #0b4537;
+  border-color: #0b4537;
+}
+
+.login-page--signup .signup-step__back {
+  margin-bottom: 0;
+}
+
+.login-page--signup .signup-step__selected {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.login-page--signup .signup-step__heading {
+  margin-bottom: 4px !important;
+  font-size: 20px !important;
+}
+
+.login-page--signup .auth-checkbox.signup-terms {
+  margin-top: 2px;
+}
+
+.login-page--signup .auth-error {
+  margin: 0;
+  padding: 9px 10px;
+  font-size: 12px;
+}
+
+.login-page--signup .auth-footer {
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.login-page--signup .signup-success {
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.login-page--signup .signup-success__icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 2px;
+}
+
+.login-page--signup .signup-success__icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.login-page--signup .signup-success h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.login-page--signup .signup-success p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.login-page--signup .signup-actions--stack {
+  gap: 8px;
+  padding-top: 0;
+}
+
+:root.dark .login-page--signup {
+  background: var(--auth-bg);
+}
+
+:root.dark .login-page--signup .account-type-card.is-selected {
+  background: rgba(15, 107, 79, 0.22);
+}
+
+@media (max-width: 767px) {
+  .login-page--signup .login-page__form-wrapper {
+    min-height: calc(100svh - 64px);
+    align-items: center;
+    padding: 18px 16px;
+  }
+
+  .login-page--signup .login-page__form-card {
+    max-width: 540px;
+    min-height: 0;
+    padding: 22px 20px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+
+  .login-page--signup .login-page__form-header {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .login-page--signup .login-page__form-wrapper {
+    padding: 12px;
+  }
+
+  .login-page--signup .login-page__form-card {
+    padding: 18px 14px;
+  }
+
+  .login-page--signup .login-page__form-header .section-heading__title {
+    font-size: 23px;
+  }
+
+  .login-page--signup .account-type-card {
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .login-page--signup .account-type-card__desc {
+    font-size: 11.5px;
+  }
+
+  .login-page--signup .account-type-card__bullets {
+    gap: 3px 8px;
+  }
+
+  .login-page--signup .account-type-card__bullet {
+    font-size: 10.5px;
+  }
+
+  .login-page--signup .signup-stepper__label {
+    display: block;
+    font-size: 11px;
+  }
+}

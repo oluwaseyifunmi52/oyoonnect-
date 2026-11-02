@@ -1,6 +1,6 @@
 import { Suspense, useEffect, lazy } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom'
-import { ProtectedRoute, PublicOnlyRoute, ServicesRoute, ProviderRoute } from './components/common'
+import { AdminRoute, ProtectedRoute, PublicOnlyRoute, ServicesRoute, ProviderRoute } from './components/common'
 import { LegacyHelpRedirect } from './components/common/LegacyHelpRedirect'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
 import { AdminLayout } from './components/admin/AdminLayout'
@@ -24,6 +24,8 @@ const HomeSearchResults = lazy(() => import('./pages/HomeSearchResults'))
 const HomeBrowsePages = lazy(() => import('./pages/HomeBrowsePages'))
 const BusinessesPage = lazy(() => import('./pages/businesses/BusinessesPage'))
 const BusinessProfile = lazy(() => import('./pages/BusinessProfile'))
+const PropertyListings = lazy(() => import('./pages/property/PropertyListings'))
+const PropertyDetail = lazy(() => import('./pages/property/PropertyDetail'))
 const ListBusiness = lazy(() => import('./pages/ListBusiness'))
 const HowItWorks = lazy(() => import('./pages/HowItWorks'))
 const About = lazy(() => import('./pages/About'))
@@ -184,6 +186,8 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/watch/*" element={<WatchExperience />} />
               <Route path="/business/:id" element={<BusinessProfile />} />
+              <Route path="/rentals" element={<PropertyListings />} />
+              <Route path="/rentals/:id" element={<PropertyDetail />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/about" element={<About />} />
@@ -192,6 +196,7 @@ function App() {
               {/* Auth pages - public */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/get-started" element={<Signup />} />
               <Route path="/signin" element={<Navigate to="/login" replace />} />
               <Route path="/account-selection" element={<Navigate to="/signup" replace />} />
               <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -200,6 +205,7 @@ function App() {
               <Route path="/services/login" element={<Navigate to="/login" replace />} />
               <Route path="/business/login" element={<Navigate to="/login" replace />} />
               <Route path="/services/signup" element={<Navigate to="/signup" replace />} />
+              <Route path="/services/settings" element={<Navigate to="/settings" replace />} />
               <Route path="/business/signup" element={<Navigate to="/signup" replace />} />
               <Route path="/become-a-business-owner" element={<Navigate to="/signup" replace />} />
 
@@ -418,7 +424,9 @@ function App() {
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/register" element={<AdminRegister />} />
             <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+            <Route path="/admin/pending" element={<AdminRoute><AdminLayout><PendingListings /></AdminLayout></AdminRoute>} />
             <Route path="/admin/businesses" element={<AdminLayout><AdminBusinesses /></AdminLayout>} />
+            <Route path="/admin/businesses/:id" element={<AdminRoute><AdminLayout><BusinessProfile /></AdminLayout></AdminRoute>} />
             <Route path="/admin/listings" element={<Navigate to="/admin/businesses" replace />} />
             <Route path="/admin/categories" element={<AdminLayout><AdminCategories /></AdminLayout>} />
             <Route path="/admin/verification" element={<AdminLayout><AdminVerification /></AdminLayout>} />

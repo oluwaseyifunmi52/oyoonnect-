@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   ArrowRight, ArrowUpRight, Bell, BriefcaseBusiness, Building2,
   ChevronDown, ChevronRight, Compass, FileWarning, HeartHandshake, Home as HomeIcon,
-  LogOut, MapPin, Menu, MessageCircle, Search, Share2, ShoppingBag, Sparkles, Users, Wallet,
+  LogOut, MapPin, Menu, MessageCircle, Search, Share2, ShoppingBag, Sparkles, Users, Wallet, Clapperboard,
   X, Gamepad2, type LucideIcon,
 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
@@ -28,6 +28,7 @@ const primaryLinks: { label: string; to: string; icon: LucideIcon }[] = [
   { label: 'Community', to: '/community', icon: Users },
   { label: 'Messages', to: '/messages', icon: MessageCircle },
   { label: 'Wallet', to: '/community/wallet', icon: Wallet },
+  { label: 'Watch', to: '/watch', icon: Clapperboard },
 ]
 
 const features: { title: string; description: string; to: string; icon: LucideIcon; color: string }[] = [

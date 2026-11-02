@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, NavLink, Route, Routes, useParams } from 'react-router-dom'
 import {
   ArrowLeft, Bookmark, CircleAlert, Clapperboard, Film, History, Info, Link2,
@@ -6,6 +6,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { WatchPlayerPreview } from './WatchPlayerPreview'
+import { watchService, type WatchGenre, type WatchMediaType, type WatchTitle } from '../../services/watchService'
 import './watch.css'
 
 type BrowseMode = 'discover' | 'movies' | 'series'
@@ -24,13 +25,35 @@ const watchSections = [
   { label: 'Create Room', to: '/watch/create-room', icon: Plus },
   { label: 'Join Room', to: '/watch/join-room', icon: LogIn },
 ]
-const genres = ['All genres', 'Action', 'Comedy', 'Drama', 'Romance', 'Thriller', 'Horror', 'Science Fiction', 'Documentary', 'Nollywood', 'African cinema']
 
 function IntegrationNotice({ title, children }: { title: string; children: ReactNode }) {
   return <div className="watch-integration" role="status"><Info size={18} aria-hidden="true" /><div><strong>{title}</strong><p>{children}</p></div></div>
 }
 function EmptyPanel({ title, children, icon: Icon = Film }: { title: string; children: ReactNode; icon?: LucideIcon }) {
   return <div className="watch-empty"><span className="watch-empty__icon"><Icon size={23} aria-hidden="true" /></span><h3>{title}</h3><p>{children}</p></div>
+}
+
+function TitleCard({ title }: { title: WatchTitle }) {
+  const year = title.releaseDate?.slice(0, 4)
+  return (
+    <Link className="watch-title-card" to={`/watch/title/${title.mediaType}/${title.id}`} aria-label={`View details for ${title.title}`}>
+      <div className="watch-title-card__poster">
+        {title.posterUrl ? <img src={title.posterUrl} alt={`${title.title} poster`} loading="lazy" /> : <span className="watch-title-card__placeholder" aria-label="Poster unavailable"><Film size={26} aria-hidden="true" /></span>}
+        {title.voteAverage > 0 && <span className="watch-title-card__rating">★ {title.voteAverage.toFixed(1)}</span>}
+      </div>
+      <div className="watch-title-card__copy"><h4>{title.title}</h4><p>{year || (title.mediaType === 'series' ? 'Series' : 'Movie')} <span>·</span> {title.mediaType === 'series' ? 'Series' : 'Movie'}</p></div>
+    </Link>
+  )
+}
+
+function TitleCollection({ title, titles, loading, error }: { title: string; titles: WatchTitle[]; loading: boolean; error: string }) {
+  return <section className="watch-title-collection" aria-label={title}>
+    <div className="watch-title-collection__heading"><h3>{title}</h3></div>
+    {loading ? <p className="watch-muted" role="status">Loading titles…</p>
+      : error ? <p className="watch-inline-error" role="alert"><CircleAlert size={16} />{error}</p>
+        : titles.length ? <div className="watch-title-grid">{titles.map((item) => <TitleCard key={`${item.mediaType}-${item.id}`} title={item} />)}</div>
+          : <EmptyPanel title="No titles found">Try another search or browse a different collection.</EmptyPanel>}
+  </section>
 }
 
 function WatchShell() {
@@ -66,17 +89,85 @@ function WatchShell() {
 
 function BrowseScreen({ mode }: { mode: BrowseMode }) {
   const [query, setQuery] = useState('')
-  const [genre, setGenre] = useState('All genres')
+  const [genreId, setGenreId] = useState('all')
+  const [genres, setGenres] = useState<{ movies: WatchGenre[]; series: WatchGenre[] }>({ movies: [], series: [] })
+  const [collections, setCollections] = useState<Record<string, WatchTitle[]>>({})
+  const [searchResults, setSearchResults] = useState<WatchTitle[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searching, setSearching] = useState(false)
+  const [error, setError] = useState('')
+  const [searchError, setSearchError] = useState('')
   const heading = mode === 'series' ? 'Series' : mode === 'movies' ? 'Movies' : 'Discover'
-  const sections = mode === 'series'
-    ? ['Popular series', 'African series']
-    : mode === 'movies'
-      ? ['Trending movies', 'Nollywood & African cinema', 'Popular movies']
-      : ['Trending now', 'Nollywood & African cinema', 'Popular series']
+  const mediaType: WatchMediaType | undefined = mode === 'movies' ? 'movie' : mode === 'series' ? 'series' : undefined
+  const availableGenres = mediaType === 'series' ? genres.series : genres.movies
+  const visibleTitles = (titles: WatchTitle[]) => genreId === 'all' ? titles : titles.filter((item) => item.genreIds?.includes(Number(genreId)))
+
+  useEffect(() => {
+    let active = true
+    void watchService.genres().then((result) => { if (active) setGenres(result) }).catch(() => {
+      // Catalog titles remain usable if the optional genre endpoint is unavailable.
+    })
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    setError('')
+    const lists = mode === 'discover'
+      ? [
+        ['trendingMovies', watchService.list('movie', 'trending')],
+        ['popularMovies', watchService.list('movie', 'popular')],
+        ['latestMovies', watchService.list('movie', 'latest')],
+        ['trendingSeries', watchService.list('series', 'trending')],
+      ] as const
+      : (['trending', 'popular', 'latest'] as const).map((sort) => [`${sort}${mode}`, watchService.list(mediaType!, sort)] as const)
+    void Promise.all(lists.map(async ([key, request]) => [key, await request] as const)).then((results) => {
+      if (active) setCollections(Object.fromEntries(results))
+    }).catch((cause: unknown) => {
+      if (active) setError(cause instanceof Error ? cause.message : 'The catalog could not be loaded. Please try again.')
+    }).finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [mode, mediaType])
+
+  useEffect(() => {
+    const value = query.trim()
+    if (!value) {
+      setSearchResults([])
+      setSearchError('')
+      setSearching(false)
+      return
+    }
+    let active = true
+    setSearching(true)
+    setSearchError('')
+    const timer = window.setTimeout(() => {
+      void watchService.search(value, mediaType).then((results) => {
+        if (active) setSearchResults(results)
+      }).catch((cause: unknown) => {
+        if (active) setSearchError(cause instanceof Error ? cause.message : 'Search failed. Please try again.')
+      }).finally(() => { if (active) setSearching(false) })
+    }, 300)
+    return () => { active = false; window.clearTimeout(timer) }
+  }, [query, mediaType])
+
+  const sections = mode === 'discover'
+    ? [
+      { key: 'trendingMovies', title: 'Trending movies' },
+      { key: 'popularMovies', title: 'Popular movies' },
+      { key: 'latestMovies', title: 'Recently added movies' },
+      { key: 'trendingSeries', title: 'Trending series' },
+    ]
+    : [
+      { key: `trending${mode}`, title: `Trending ${heading.toLowerCase()}` },
+      { key: `popular${mode}`, title: `Popular ${heading.toLowerCase()}` },
+      { key: `latest${mode}`, title: `Recently added ${heading.toLowerCase()}` },
+    ]
+  const featured = collections.trendingMovies?.[0]
   return (
     <div className="watch-page">
       {mode === 'discover' ? (
-        <section className="watch-hero" aria-labelledby="watch-hero-title">
+        <section className="watch-hero" aria-labelledby="watch-hero-title" style={featured?.backdropUrl ? { backgroundImage: `linear-gradient(90deg, rgba(5, 12, 8, .97) 0%, rgba(5, 12, 8, .88) 43%, rgba(5, 12, 8, .58) 100%), url("${featured.backdropUrl}")` } : undefined}>
           <div className="watch-hero__copy">
             <p className="watch-eyebrow">YOUR NEXT MOVIE NIGHT STARTS HERE</p>
             <h2 id="watch-hero-title">Discover. Watch.<br /><span>Enjoy together.</span></h2>
@@ -85,7 +176,7 @@ function BrowseScreen({ mode }: { mode: BrowseMode }) {
               <Link className="watch-button watch-button--primary" to="/watch/movies"><Film size={17} /> Explore movies</Link>
               <Link className="watch-button watch-button--hero-secondary" to="/watch/parties"><Users size={17} /> Watch together</Link>
             </div>
-            <p className="watch-hero__availability"><Info size={14} /> Catalog and room services are waiting to be connected.</p>
+            <p className="watch-hero__availability"><Info size={14} /> {featured ? <>Featured: <Link to={`/watch/title/movie/${featured.id}`}>{featured.title}</Link></> : 'Explore films and series from the OyoConnect catalog.'}</p>
           </div>
           <div className="watch-hero__art" aria-hidden="true">
             <span className="watch-hero__halo" />
@@ -95,22 +186,19 @@ function BrowseScreen({ mode }: { mode: BrowseMode }) {
           </div>
         </section>
       ) : (
-        <div className="watch-page-heading watch-page-heading--banner"><p className="watch-eyebrow">{mode === 'series' ? 'SERIES' : 'MOVIES'}</p><h2>Explore {heading.toLowerCase()}.</h2><p>Find something to enjoy together when the catalog is connected.</p></div>
+        <div className="watch-page-heading watch-page-heading--banner"><p className="watch-eyebrow">{mode === 'series' ? 'SERIES' : 'MOVIES'}</p><h2>Explore {heading.toLowerCase()}.</h2><p>Discover titles and details from the connected catalog.</p></div>
       )}
-      <IntegrationNotice title="Movie catalog isn’t connected">OyoConnect Web has no TMDB or movie-catalog service configured. Titles, posters, cast, ratings, trailers and availability will appear here when a secure catalog integration is connected.</IntegrationNotice>
       <div className="watch-search-row">
         <label className="watch-search"><Search size={18} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${heading.toLowerCase()}…`} aria-label={`Search ${heading}`} /></label>
-        <label className="watch-field watch-field--compact"><span>Genre</span><select value={genre} onChange={(event) => setGenre(event.target.value)}>{genres.map((item) => <option key={item}>{item}</option>)}</select></label>
+        <label className="watch-field watch-field--compact"><span>Genre</span><select value={genreId} onChange={(event) => setGenreId(event.target.value)}><option value="all">All genres</option>{availableGenres.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
       </div>
-      <p className="watch-filter-note">{query || genre !== 'All genres' ? 'Search and genre filters will return results after catalog integration.' : 'Search titles or choose a genre when catalog results are available.'}</p>
+      {query.trim() ? <TitleCollection title={`Search results for “${query.trim()}”`} titles={visibleTitles(searchResults)} loading={searching} error={searchError} /> : null}
+      {!query.trim() && error && <p className="watch-inline-error" role="alert"><CircleAlert size={16} />{error}</p>}
       {mode === 'discover' && <div className="watch-discovery-grid">
-        <section className="watch-discovery-card watch-discovery-card--continue"><div className="watch-discovery-card__heading"><span className="watch-discovery-icon"><History size={17} /></span><div><p className="watch-eyebrow">PICK UP WHERE YOU LEFT OFF</p><h3>Continue watching</h3></div></div><p>Playback history and resume positions will appear here when account sync is available.</p></section>
+        <section className="watch-discovery-card watch-discovery-card--continue"><div className="watch-discovery-card__heading"><span className="watch-discovery-icon"><History size={17} /></span><div><p className="watch-eyebrow">PICK UP WHERE YOU LEFT OFF</p><h3>Continue watching</h3></div></div><p>Playback history will appear here when the account session is connected to Watch.</p><Link className="watch-text-link" to="/watch/history">View watch history <ArrowLeft className="watch-arrow-forward" size={14} /></Link></section>
         <section className="watch-discovery-card watch-discovery-card--together"><div className="watch-discovery-icon"><Users size={19} /></div><p className="watch-eyebrow">WATCH TOGETHER</p><h3>Make it a movie night.</h3><p>Create a room draft or join a party when room services are ready.</p><div className="watch-actions"><Link className="watch-button watch-button--primary" to="/watch/create-room"><Plus size={16} /> Create a room</Link><Link className="watch-text-link" to="/watch/join-room">Join with a code <ArrowLeft className="watch-arrow-forward" size={14} /></Link></div></section>
       </div>}
-      <section className="watch-catalog-section" aria-labelledby="watch-catalog-heading">
-        <div className="watch-catalog-section__heading"><div><p className="watch-eyebrow">{mode === 'discover' ? 'READY WHEN YOU ARE' : 'THE COLLECTION'}</p><h3 id="watch-catalog-heading">{mode === 'discover' ? 'A good story is worth sharing.' : `Browse ${heading.toLowerCase()}`}</h3></div><span className="watch-catalog-section__mark"><Film size={20} /></span></div>
-        <div className="watch-section-grid">{sections.map((section, index) => <section className={`watch-section-card watch-section-card--${index + 1}`} key={section}><div className="watch-section-card__heading"><h4>{section}</h4><Film size={17} aria-hidden="true" /></div><div className="watch-section-card__empty"><span className="watch-section-card__art" aria-hidden="true"><Clapperboard size={22} /></span><span>Titles and artwork appear here after the catalog connects.</span></div></section>)}</div>
-      </section>
+      {!query.trim() && sections.map((section) => <TitleCollection key={section.key} title={section.title} titles={visibleTitles(collections[section.key] || [])} loading={loading} error={error} />)}
       <div className="watch-actions watch-actions--bottom"><Link className="watch-button watch-button--secondary" to="/watch/watchlist"><Bookmark size={16} /> My watchlist</Link><Link className="watch-button watch-button--secondary" to="/watch/parties"><Users size={16} /> Watch parties</Link><Link className="watch-button watch-button--secondary" to="/watch/player-preview"><Play size={16} /> Test a permitted source</Link></div>
     </div>
   )
@@ -118,7 +206,7 @@ function BrowseScreen({ mode }: { mode: BrowseMode }) {
 
 function LibraryScreen({ kind }: { kind: 'watchlist' | 'history' }) {
   const isHistory = kind === 'history'
-  return <div className="watch-page"><div className="watch-page-heading"><p className="watch-eyebrow">YOUR LIBRARY</p><h2>{isHistory ? 'Watch history' : 'My watchlist'}</h2><p>{isHistory ? 'Continue titles from where you left off when playback history is available.' : 'Keep the films and series you want to watch in one place.'}</p></div><IntegrationNotice title={isHistory ? 'Watch history isn’t connected' : 'Watchlist sync isn’t connected'}>{isHistory ? 'There is no playback-history service or player progress store in this app yet.' : 'There is no catalog or account-backed watchlist in this app yet. Nothing is stored locally as if it were synced.'}</IntegrationNotice><EmptyPanel title={isHistory ? 'No watch history yet' : 'Your list is ready'} icon={isHistory ? History : Bookmark}>{isHistory ? 'Recently watched titles and resume positions will be shown when playback history is supported.' : 'Catalog titles will be available to save when the movie service is connected.'}</EmptyPanel><Link className="watch-text-link" to="/watch">Explore Watch</Link></div>
+  return <div className="watch-page"><div className="watch-page-heading"><p className="watch-eyebrow">YOUR LIBRARY</p><h2>{isHistory ? 'Watch history' : 'My watchlist'}</h2><p>{isHistory ? 'Continue titles from where you left off.' : 'Keep the films and series you want to watch in one place.'}</p></div><IntegrationNotice title={isHistory ? 'Watch history needs an account connection' : 'Watchlist needs an account connection'}>{isHistory ? 'History is available from the Watch API, but this web sign-in session does not provide the backend authentication needed to load your account history.' : 'Watchlist is available from the Watch API, but this web sign-in session does not provide the backend authentication needed to load or save your list.'}</IntegrationNotice><EmptyPanel title={isHistory ? 'History unavailable' : 'Watchlist unavailable'} icon={isHistory ? History : Bookmark}>{isHistory ? 'Connect an authenticated backend account to view your saved playback history.' : 'Connect an authenticated backend account to manage your saved titles.'}</EmptyPanel><Link className="watch-text-link" to="/watch">Explore Watch</Link></div>
 }
 
 function PartiesScreen() {
@@ -168,9 +256,46 @@ function JoinRoomScreen() {
 }
 
 function DetailsScreen() {
-  const { mediaType } = useParams()
+  const { mediaType: routeType, id = '' } = useParams()
+  const mediaType: WatchMediaType = routeType === 'series' ? 'series' : 'movie'
   const category = mediaType === 'series' ? 'series' : 'movies'
-  return <div className="watch-page"><Link className="watch-text-link" to={`/watch/${category}`}><ArrowLeft size={16} /> Back to {category}</Link><EmptyPanel title="Title details are unavailable">This page needs real catalog metadata. No poster, cast, rating, trailer or availability has been invented.</EmptyPanel><div className="watch-actions"><button className="watch-button watch-button--secondary" disabled><Bookmark size={16} /> Add to watchlist</button><button className="watch-button watch-button--primary" disabled><Play size={16} /> Watch now</button><Link className="watch-button watch-button--secondary" to="/watch/create-room"><Plus size={16} /> Create party draft</Link></div><IntegrationNotice title="Connect a catalog and licensed source">Details, watchlist actions and Watch Now become available when catalog metadata and an authorized video source are supplied.</IntegrationNotice></div>
+  const [title, setTitle] = useState<WatchTitle | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    setError('')
+    void watchService.details(mediaType, id).then((result) => {
+      if (active) setTitle(result)
+    }).catch((cause: unknown) => {
+      if (active) setError(cause instanceof Error ? cause.message : 'Title details could not be loaded.')
+    }).finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [id, mediaType])
+
+  return <div className="watch-page">
+    <Link className="watch-text-link" to={`/watch/${category}`}><ArrowLeft size={16} /> Back to {category}</Link>
+    {loading ? <p className="watch-muted" role="status">Loading title…</p>
+      : error ? <><p className="watch-inline-error" role="alert"><CircleAlert size={16} />{error}</p><Link className="watch-button watch-button--secondary" to={`/watch/${category}`}>Browse {category}</Link></>
+        : title ? <>
+          <article className="watch-detail" style={title.backdropUrl ? { backgroundImage: `linear-gradient(90deg, rgba(5, 12, 8, .97), rgba(5, 12, 8, .72)), url("${title.backdropUrl}")` } : undefined}>
+            {title.posterUrl ? <img className="watch-detail__poster" src={title.posterUrl} alt={`${title.title} poster`} /> : <div className="watch-detail__poster-placeholder" aria-label="Poster unavailable"><Film size={34} aria-hidden="true" /></div>}
+            <div className="watch-detail__content"><p className="watch-eyebrow">{title.mediaType === 'series' ? 'SERIES' : 'MOVIE'}{title.releaseDate ? ` · ${title.releaseDate.slice(0, 4)}` : ''}</p>
+              <h2>{title.title}</h2><p className="watch-detail__meta">{title.voteAverage > 0 ? `★ ${title.voteAverage.toFixed(1)}${title.voteCount ? ` (${title.voteCount.toLocaleString()} ratings)` : ''}` : 'Rating unavailable'}{title.runtime ? ` · ${title.runtime} min` : ''}{title.numberOfSeasons ? ` · ${title.numberOfSeasons} seasons` : ''}</p>
+              <p className="watch-detail__genres">{title.genres?.length ? title.genres.map((item) => item.name).join(' · ') : 'Genre information unavailable'}</p>
+              <p className="watch-detail__overview">{title.overview || 'No description is available for this title.'}</p>
+              <div className="watch-actions">
+                {title.trailer?.url && <a className="watch-button watch-button--primary" href={title.trailer.url} target="_blank" rel="noreferrer"><Play size={16} /> View trailer</a>}
+                <button className="watch-button watch-button--secondary" type="button" disabled title="Watchlist requires an authenticated backend account session"><Bookmark size={16} /> Add to watchlist</button>
+                <Link className="watch-button watch-button--secondary" to="/watch/create-room"><Plus size={16} /> Create party draft</Link>
+              </div>
+            </div>
+          </article>
+          {!title.trailer?.url && <p className="watch-muted">No trailer is available for this title. Full movie playback is not provided by the catalog.</p>}
+        </> : <EmptyPanel title="Title not found">This title is not available in the connected catalog.</EmptyPanel>}
+  </div>
 }
 
 function RoomScreen({ settings = false }: { settings?: boolean }) {

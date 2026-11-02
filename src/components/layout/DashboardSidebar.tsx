@@ -3,7 +3,7 @@ import {
   Activity, Bell, BriefcaseBusiness, Building2, ClipboardList, FileText, FolderOpen, Heart, Home, Inbox, LayoutDashboard, LifeBuoy, LogOut,
   MessageCircle, Settings, UserRound, Wallet, Users, DollarSign, Banknote, HelpCircle,
   Image, Star, MessageSquare, BarChart2, ShieldCheck, Search, CreditCard, Receipt, Truck, Zap, Tv, ChevronLeft, ChevronRight,
-  GraduationCap, Key, Box, Gamepad2, Smartphone, User, type LucideIcon,
+  GraduationCap, Key, Box, Gamepad2, Smartphone, User, Clapperboard, type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
@@ -16,6 +16,7 @@ const platformNavigation: NavigationItem[] = [
   { label: 'Community', to: '/community', icon: MessageCircle },
   { label: 'Messages', to: '/messages', icon: MessageCircle },
   { label: 'Wallet', to: '/wallet', icon: Wallet },
+  { label: 'Watch', to: '/watch', icon: Clapperboard },
 ]
 
 const quickAccess: { label: string; to: string; icon: LucideIcon }[] = [
