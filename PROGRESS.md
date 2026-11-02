@@ -1,0 +1,25 @@
+- [x] 0 Report: routers, layouts, sidebars, all pages and roles
+- [x] 1 Shared CSS, sidebar, top bar and page shell (all roles)
+- [x] 2 Businesses /businesses
+- [x] 3 Community /community
+- [x] 4 Messages /messages
+- [x] 5 Wallet /wallet
+- [x] 6 Provider Dashboard /provider/dashboard
+- [x] 7 Provider Profile /provider/profile
+- [x] 8 Provider Services /provider/services
+- [x] 9 Provider Requests /provider/requests
+- [x] 10 Work Opportunities /jobs
+- [x] 11 Job Seeker Dashboard
+- [x] 12 Notifications
+- [x] 13 Profile /profile
+- [x] 14 Saved Businesses /saved
+- [x] 15 Settings /settings
+- [x] 16 Account /account
+- [x] 17 My Requests /my-requests
+- [x] 18 Support Requests /help/requests
+- [x] 19 Post a Job
+- [x] 20 List Your Business
+- [x] 21 Report an Issue
+- [x] 22 Sign In and Sign Out, then Create account, Forgot password, Reset password
+- [x] 23 Every remaining page and component not listed (detail pages, modals, dialogs, empty and error screens)
+- [x] 24 Final report

@@ -4,6 +4,7 @@ import { PLATFORM_FEE_PERCENTAGE, PAYMENT_GATEWAY_FEE_PERCENTAGE, SUGGESTED_SUPP
 import { Card } from '../ui/Card'
 import { FormField } from '../ui/FormField'
 import { Input } from '../ui/Input'
+import { Badge } from '../ui/Badge'
 
 interface SupportAmountSelectorProps {
   suggestedAmounts?: readonly number[]
@@ -72,7 +73,7 @@ export function SupportAmountSelector({
   const { platformFee, gatewayFee, totalFees, totalCharge } = calculateFees(currentAmount)
 
   return (
-    <Card variant="default" padding="md" className="support-amount-selector">
+    <Card variant="default" padding="md" className="support-amount-selector" style={{ borderColor: 'var(--color-border)' }}>
       <FormField
         label="Choose an amount to support"
         htmlFor="support-amount"
@@ -125,7 +126,7 @@ export function SupportAmountSelector({
       </FormField>
 
       {showFeeBreakdown && currentAmount > 0 && (
-        <div className="support-amount-selector__fee-breakdown">
+        <div className="support-amount-selector__fee-breakdown" style={{ borderColor: 'var(--color-border)' }}>
           <h4 className="support-amount-selector__fee-title">Fee breakdown</h4>
           <dl className="support-amount-selector__fee-list">
             <div className="support-amount-selector__fee-row">

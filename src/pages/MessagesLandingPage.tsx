@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, ArrowUpRight, CheckCheck, Clock, MessageCircle, Search, Send, UserRound, UsersRound } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, CheckCheck, Clock, Gamepad2, MessageCircle, Search, Send, UserRound, UsersRound } from 'lucide-react'
 import { messageService, type Conversation, type Message } from '../services/messageService'
 import { useToast } from '../components/ui/Toast/Toast'
+import GamesPanel, { GameInvitationCard, GameResultCard } from '../components/messages/GamesPanel'
+import { encodeGameInvitation, encodeGameResult, miniGames, parseGameInvitation, parseGameResult, type MiniGameId } from '../components/messages/gameInviteData'
 import './messages/MessagesWorkspace.css'
 
 type InboxFilter = 'all' | 'unread' | 'personal' | 'business' | 'jobs'
@@ -33,6 +35,9 @@ export default function MessagesLandingPage() {
   const [loadError, setLoadError] = useState('')
   const [filter, setFilter] = useState<InboxFilter>('all')
   const [section, setSection] = useState<SocialSection>('inbox')
+  const [gamesOpen, setGamesOpen] = useState(false)
+  const [inviteStatuses, setInviteStatuses] = useState<Record<string, 'accepted' | 'declined'>>({})
+  const [launchGameId, setLaunchGameId] = useState<MiniGameId | null>(null)
 
   const reload = useCallback(() => {
     try {
@@ -94,6 +99,71 @@ export default function MessagesLandingPage() {
     }
   }
 
+  const createGameInvitation = (game: (typeof miniGames)[number]) => {
+    if (!displayConversation) return
+    const targetConversationId = conversationId ?? displayConversation.id
+    const invitation = {
+      gameId: game.id,
+      gameName: game.name,
+      conversationName: displayConversation.participantName || 'this conversation',
+      createdAt: new Date().toISOString(),
+    }
+    const sent = messageService.sendMessage(
+      targetConversationId,
+      encodeGameInvitation(invitation),
+      displayConversation.participantId,
+      displayConversation.participantId,
+      displayConversation.participantName,
+      displayConversation.context,
+      displayConversation.applicationId,
+      displayConversation.jobTitle,
+      displayConversation.applicantName,
+      displayConversation.employerName,
+    )
+    messageService.markConversationRead(targetConversationId)
+    const updatedConversation = {
+      ...(messageService.getConversation(targetConversationId) ?? displayConversation),
+      lastMessage: `Game invite preview: ${game.name}`,
+      lastMessageAt: sent.createdAt,
+      unreadCount: 0,
+    }
+    messageService.saveConversation(updatedConversation)
+    setMessages((current) => [...current, sent])
+    setConversations((current) => current.map((conversation) => conversation.id === targetConversationId
+      ? updatedConversation
+      : conversation))
+  }
+
+  const shareGameResult = ({ gameId, result }: { gameId: MiniGameId; result: string }) => {
+    if (!displayConversation) return
+    const game = miniGames.find((item) => item.id === gameId)
+    if (!game) return
+    const targetConversationId = conversationId ?? displayConversation.id
+    const createdAt = new Date().toISOString()
+    const sent = messageService.sendMessage(
+      targetConversationId,
+      encodeGameResult({ gameId, gameName: game.name, result, createdAt }),
+      displayConversation.participantId,
+      displayConversation.participantId,
+      displayConversation.participantName,
+      displayConversation.context,
+      displayConversation.applicationId,
+      displayConversation.jobTitle,
+      displayConversation.applicantName,
+      displayConversation.employerName,
+    )
+    const updatedConversation = {
+      ...(messageService.getConversation(targetConversationId) ?? displayConversation),
+      lastMessage: `Local game result: ${game.name}`,
+      lastMessageAt: sent.createdAt,
+    }
+    messageService.saveConversation(updatedConversation)
+    setMessages((current) => [...current, sent])
+    setConversations((current) => current.map((conversation) => conversation.id === targetConversationId
+      ? updatedConversation
+      : conversation))
+  }
+
   const displayConversation = activeConversation ?? (conversationId ? null : conversations[0] ?? null)
   const displayMessages = activeConversation && activeConversation.id === displayConversation?.id
     ? messages
@@ -123,8 +193,28 @@ export default function MessagesLandingPage() {
           {displayConversation ? <>
             <header className="messages-chat-header"><button className="messages-back" onClick={() => navigate('/messages')} aria-label="Back to conversations"><ArrowLeft size={18} /></button><span className="messages-avatar">{displayConversation.participantAvatar ? <img src={displayConversation.participantAvatar} alt="" /> : personInitials(displayConversation.participantName)}</span><div><strong>{displayConversation.participantName || 'Conversation'}</strong><small>{displayConversation.context === 'BUSINESS_ENQUIRY' ? 'Business conversation' : displayConversation.context === 'JOB_APPLICATION' ? 'Job application' : 'OyoConnect conversation'}</small></div></header>
             <div className="messages-chat-context">{displayConversation.jobTitle && <span>{displayConversation.jobTitle}</span>}{displayConversation.employerName && <span>{displayConversation.employerName}</span>}{!displayConversation.jobTitle && !displayConversation.employerName && <span>Local demo conversation · not delivered</span>}</div>
-            <div className="messages-chat-history" aria-live="polite">{displayMessages.length ? displayMessages.map((message) => { const sent = message.senderId === displayConversation.participantId; return <div key={message.id} className={`messages-bubble-row${sent ? ' is-sent' : ''}`}><span className={`messages-bubble${sent ? ' is-sent' : ''}`}>{message.content}<time>{new Date(message.createdAt).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })}{sent && <CheckCheck size={12} />}</time></span></div> }) : <div className="messages-chat-empty"><span><MessageCircle size={19} /></span><strong>No messages yet</strong><p>Start the conversation with a message below.</p></div>}</div>
-            <form className="messages-send-form" onSubmit={submitMessage}><input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Write a message…" aria-label="Write a message" /><button type="submit" disabled={!draft.trim()}><span>Send</span><Send size={15} /></button></form>
+            <div className="messages-chat-history" aria-live="polite">{displayMessages.length ? displayMessages.map((message) => {
+              const sent = message.senderId === displayConversation.participantId
+              const invite = parseGameInvitation(message.content)
+              const gameResult = parseGameResult(message.content)
+              return <div key={message.id} className={`messages-bubble-row${sent ? ' is-sent' : ''}`}><div className={`messages-bubble${sent ? ' is-sent' : ''}`}>
+                {invite ? <GameInvitationCard
+                  invite={invite}
+                  status={inviteStatuses[message.id] ?? 'pending'}
+                  onAccept={() => { setInviteStatuses((current) => ({ ...current, [message.id]: 'accepted' })); setLaunchGameId(invite.gameId); setGamesOpen(true) }}
+                  onDecline={() => setInviteStatuses((current) => ({ ...current, [message.id]: 'declined' }))}
+                /> : gameResult ? <GameResultCard result={gameResult} /> : <span>{message.content}</span>}
+                <time>{new Date(message.createdAt).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })}{sent && <CheckCheck size={12} />}</time>
+              </div></div>
+            }) : <div className="messages-chat-empty"><span><MessageCircle size={19} /></span><strong>No messages yet</strong><p>Start the conversation with a message below.</p></div>}</div>
+            {gamesOpen && <GamesPanel
+              conversationName={displayConversation.participantName || 'this conversation'}
+              onClose={() => { setGamesOpen(false); setLaunchGameId(null) }}
+              onCreateInvitation={createGameInvitation}
+              onShareResult={shareGameResult}
+              launchGameId={launchGameId}
+            />}
+            <form className="messages-send-form" onSubmit={submitMessage}><button type="button" className="messages-games-trigger" aria-label="Open games and entertainment" aria-expanded={gamesOpen} onClick={() => { setGamesOpen((open) => !open); setLaunchGameId(null) }}><Gamepad2 size={17} /><span>Games</span></button><input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Write a message…" aria-label="Write a message" /><button type="submit" disabled={!draft.trim()}><span>Send</span><Send size={15} /></button></form>
             {loadError && <p className="messages-inline-error">{loadError}</p>}
           </> : conversationId ? <div className="messages-empty messages-empty--chat"><UserRound size={26} /><strong>Conversation not found</strong><p>This conversation may have been removed.</p><button onClick={() => navigate('/messages')}>Back to messages</button></div> : <div className="messages-empty messages-empty--chat"><span><MessageCircle size={24} /></span><strong>{conversations.length ? 'Select a conversation' : 'Your conversations will appear here'}</strong><p>{conversations.length ? 'Choose a conversation on the left to see its messages.' : 'Contact a business or reply to a message to start a conversation.'}</p></div>}
         </section>

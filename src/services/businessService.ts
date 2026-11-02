@@ -1,5 +1,6 @@
 import { apiClient, type ApiResponse, ApiError } from './apiClient'
 import type { Business, BusinessFilters, Category, Location, BusinessStats, Review, ReviewStatus } from '../types/business'
+import { devBusinessRepository } from './business/devBusinessRepository'
 
 interface PaginatedResult<T> {
   items: T[]
@@ -23,6 +24,9 @@ function handleApiError(error: unknown): never {
 
 export const businessService = {
   async search(filters: BusinessFilters): Promise<Business[]> {
+    if (import.meta.env.DEV) {
+      return devBusinessRepository.search(filters)
+    }
     const params = new URLSearchParams()
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== '' && value !== false) {
@@ -67,6 +71,9 @@ export const businessService = {
   },
 
   async getById(id: string): Promise<Business | undefined> {
+    if (import.meta.env.DEV) {
+      return devBusinessRepository.getById(id)
+    }
     try {
       const response = await apiClient.get<Business>(`/businesses/${id}`)
       return handleApiResponse(response)
@@ -79,31 +86,49 @@ export const businessService = {
   },
 
   async getAll(): Promise<Business[]> {
+    if (import.meta.env.DEV) {
+      return devBusinessRepository.getAll()
+    }
     const response = await apiClient.get<Business[]>('/businesses')
     return handleApiResponse(response)
   },
 
   async getMyBusinesses(): Promise<Business[]> {
+    if (import.meta.env.DEV) {
+      return devBusinessRepository.getMyBusinesses()
+    }
     const response = await apiClient.get<Business[]>('/businesses/my-businesses')
     return handleApiResponse(response)
   },
 
   async getByOwner(ownerId: string): Promise<Business[]> {
+    if (import.meta.env.DEV) {
+      return devBusinessRepository.getByOwner(ownerId)
+    }
     const response = await apiClient.get<Business[]>(`/businesses/owner/${ownerId}`)
     return handleApiResponse(response)
   },
 
   async create(data: Partial<Business>): Promise<Business> {
+    if (import.meta.env.DEV) {
+      return devBusinessRepository.create(data)
+    }
     const response = await apiClient.post<Business>('/businesses', data)
     return handleApiResponse(response)
   },
 
   async update(id: string, data: Partial<Business>): Promise<Business> {
+    if (import.meta.env.DEV) {
+      return devBusinessRepository.update(id, data)
+    }
     const response = await apiClient.patch<Business>(`/businesses/${id}`, data)
     return handleApiResponse(response)
   },
 
   async delete(id: string): Promise<void> {
+    if (import.meta.env.DEV) {
+      return devBusinessRepository.delete(id)
+    }
     const response = await apiClient.delete<void>(`/businesses/${id}`)
     handleApiResponse(response)
   },
@@ -114,6 +139,9 @@ export const businessService = {
   },
 
   async getFeatured(): Promise<Business[]> {
+    if (import.meta.env.DEV) {
+      return devBusinessRepository.getFeatured()
+    }
     const response = await apiClient.get<Business[]>('/businesses/featured')
     return handleApiResponse(response)
   },
@@ -123,6 +151,9 @@ export const businessService = {
   },
 
   async fetchCategories(): Promise<Category[]> {
+    if (import.meta.env.DEV) {
+      return businessService.getCategories()
+    }
     const response = await apiClient.get<Category[]>('/categories')
     return handleApiResponse(response)
   },

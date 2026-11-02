@@ -1,0 +1,5 @@
+src/components/Layout.tsx(12,15): error TS2322: Type '{ onMobileToggle: () => void; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'onMobileToggle' does not exist on type 'IntrinsicAttributes'.
+src/components/layout/Navbar.tsx(309,28): error TS2304: Cannot find name 'Menu'.
+src/layouts/PublicLayout.tsx(14,15): error TS2322: Type '{ onMobileToggle: () => void; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'onMobileToggle' does not exist on type 'IntrinsicAttributes'.

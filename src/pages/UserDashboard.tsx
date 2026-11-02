@@ -120,7 +120,7 @@ function AttentionSection({ data }: { data: DashboardData }) {
       type: 'info',
       title: `Help request "${request.title}" is awaiting review`,
       description: `Submitted ${formatDate(request.createdAt)}. A community administrator will review your request soon.`,
-      action: <ButtonLink to="/help/requests" variant="ghost" size="sm">View Request</ButtonLink>,
+      action: <ButtonLink to="/community/help/requests" variant="ghost" size="sm">View Request</ButtonLink>,
     })
   })
 
@@ -216,7 +216,7 @@ export default function UserDashboard() {
             emptyAction={
               <div className="dash-empty__actions">
                 <ButtonLink to="/jobs" variant="primary" size="sm">Browse Jobs</ButtonLink>
-                <ButtonLink to="/help" variant="outline" size="sm">Request Help</ButtonLink>
+                <ButtonLink to="/community/help" variant="outline" size="sm">Request Help</ButtonLink>
               </div>
             }
           />

@@ -1,4 +1,6 @@
-﻿/* ==========================================================================
+﻿@import "tailwindcss";
+
+/* ==========================================================================
    OYOCONNECT - GLOBAL STYLESHEET (src/index.css)
    ==========================================================================
     ARCHITECTURE
@@ -9,25 +11,25 @@
 
     SECTION MAP
       1. Reset, Base Elements & Layout
-     3. Buttons, Forms & Form Controls
-     4. Navigation (Navbar, Submenu, User Menu, Notifications)
-     5. Auth, Account & Loading Skeletons
-     6. Footer
-     7. Marketing & Landing
-     8. Business Profile, Reviews & Ratings
-     9. Static Pages (About, How It Works, 404, Help)
-    10. Dashboard & Admin
-    11. Wallet
-     13. Data & Bill Payments
-     14. Help Center
-     15. Settings
-     16. Community
+      3. Buttons, Forms & Form Controls
+      4. Navigation (Navbar, Submenu, User Menu, Notifications)
+      5. Auth, Account & Loading Skeletons
+      6. Footer
+      7. Marketing & Landing
+      8. Business Profile, Reviews & Ratings
+      9. Static Pages (About, How It Works, 404, Help)
+     10. Dashboard & Admin
+     11. Wallet
+      13. Data & Bill Payments
+      14. Help Center
+      15. Settings
+      16. Community
 
-   MAINTENANCE NOTES
-      - Keep new component styles inside the matching PART section.
-      - Reuse --space-*, --radius-*, --shadow-*, --color tokens; avoid literals.
-      - Merge duplicate selectors instead of re-declaring them.
-    ========================================================================== */
+    MAINTENANCE NOTES
+       - Keep new component styles inside the matching PART section.
+       - Reuse --space-*, --radius-*, --shadow-*, --color tokens; avoid literals.
+       - Merge duplicate selectors instead of re-declaring them.
+     ========================================================================== */
 
 :root.dark body {
   background: var(--bg);
@@ -16395,6 +16397,7 @@ textarea {
   flex-shrink: 0;
 }
 
+
 .business-portal__footer {
   text-align: center;
   color: var(--muted);
@@ -24692,7 +24695,3 @@ a {
 html, body { max-width: 100%; overflow-x: clip; }
 img, svg { max-width: 100%; }
 * { min-width: 0; }
-
-
-
-

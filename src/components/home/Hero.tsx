@@ -1,47 +1,37 @@
-import { ShieldCheck, Building2, MapPin } from 'lucide-react'
-import { siteConfig } from '../../config/site'
-import { SearchBar } from '../search/SearchBar'
-
-const stats = [
-  { icon: Building2, value: 'Local', label: 'Businesses & services' },
-  { icon: ShieldCheck, value: 'Trusted', label: 'Business discovery' },
-  { icon: MapPin, value: '33', label: 'LGAs across Oyo State' },
-];
-
 export function Hero() {
   return (
-    <section className="hero">
-      <div className="container hero__inner">
-        <p className="hero__eyebrow">
-          <span className="hero__dot" aria-hidden="true" />
-          Trusted local directory for {siteConfig.state}
-        </p>
-        <h1 className="hero__title">
-          Find trusted businesses &amp; services in{' '}
-          <span className="hero__title-accent">Oyo State</span>
-        </h1>
-        <p className="hero__subtitle">
-          {siteConfig.description}
-        </p>
-
-        <SearchBar />
-        
-        <div className="hero__hint">
-          <span>Popular searches:</span> Mechanics · Restaurants · Tailors · Barbers ·
-          Hair Salons · Electricians · Plumbers · Solar Installers · Tutors ·
-          Caterers · Phone Repairs · Fashion Designers · Event Planners
-        </div>
-
-        <dl className="hero__stats">
-          {stats.map((stat) => (
-            <div key={stat.label} className="hero__stat">
-              <stat.icon className="hero__stat-icon" aria-hidden="true" />
-              <dt className="hero__stat-label">{stat.label}</dt>
-              <dd className="hero__stat-value">{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
+    <section
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '320px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        backgroundColor: '#064e3b',
+      }}
+      aria-label="Oyo State hero banner"
+    >
+      <img
+        src="/images/oyo-hero.jpg"
+        alt=""
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'right center',
+        }}
+        aria-hidden="true"
+      />
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(90deg, rgba(2,44,34,.97) 0%, rgba(6,78,59,.88) 38%, rgba(6,78,59,.3) 65%, rgba(6,78,59,0) 100%)',
+        }}
+        aria-hidden="true"
+      />
     </section>
   )
 }

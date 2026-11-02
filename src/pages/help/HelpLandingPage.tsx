@@ -1,18 +1,26 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, HeartHandshake, Flag, ShieldCheck } from 'lucide-react'
-import type { SupportRequest, HelpCategoryType } from '../../types/help'
+import { ArrowRight, ShieldCheck, HeartHandshake, Flag } from 'lucide-react'
+import type { SupportRequest, HelpCategoryValue } from '../../types/help'
 import { HELP_CATEGORIES } from '../../types/help'
 import {
+  Button,
   ButtonLink,
-  Card,
   SearchInput,
+  Badge,
+  Card,
+  Skeleton,
+  FormField,
+  Select,
 } from '../../components/ui'
 import {
   HelpIcon,
   SupportCategoryCard,
   ErrorState,
+  HelpEmptyState,
   SupportRequestCard,
+  VerificationBadge,
+  StatusBadge,
 } from '../../components/help'
 import { helpService } from '../../services/helpService'
 
@@ -76,7 +84,7 @@ export function HelpLandingPage() {
   const [requests, setRequests] = useState<SupportRequest[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedCategory, setSelectedCategory] = useState<HelpCategoryType | 'all'>('all')
+  const [selectedCategory, setSelectedCategory] = useState<HelpCategoryValue | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<string>('recent')
 
@@ -116,18 +124,18 @@ export function HelpLandingPage() {
     return result
   }, [requests, searchQuery, selectedCategory])
 
-  const handleCategoryClick = (categoryId: HelpCategoryType) => {
+  const handleCategoryClick = (categoryId: HelpCategoryValue) => {
     setSelectedCategory(categoryId)
   }
 
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortBy(e.target.value)
+  const handleSortChange = (value: string) => {
+    setSortBy(value)
   }
 
   return (
     <>
       {/* Hero Section */}
-      <section className="help-hero">
+      <section className="help-hero" style={{ background: 'var(--color-page)' }}>
         <div className="container">
           <div className="help-hero__content">
             <div className="help-hero__badge">
@@ -143,19 +151,19 @@ export function HelpLandingPage() {
 
             <div className="help-hero__actions">
               <ButtonLink
-                to="/help/request"
+                to="/community/help/request"
                 variant="primary"
                 size="lg"
-                className="help-hero__btn fullWidth"
+                fullWidth
               >
                 <HelpIcon name="heart" size={20} aria-hidden="true" />
                 Request Help
               </ButtonLink>
               <ButtonLink
-                to="/help/requests"
+                to="/community/help/requests"
                 variant="secondary"
                 size="lg"
-                className="help-hero__btn fullWidth"
+                fullWidth
               >
                 <HelpIcon name="users" size={20} aria-hidden="true" />
                 Support Someone
@@ -176,8 +184,8 @@ export function HelpLandingPage() {
                   key={item.title}
                   variant="default"
                   padding="md"
-                  className="help-trust-card"
                   role="listitem"
+                  style={{ borderColor: 'var(--color-border)' }}
                 >
                   <div className="help-trust-card__icon">
                     <Icon size={24} aria-hidden="true" />
@@ -209,14 +217,14 @@ export function HelpLandingPage() {
               <SupportCategoryCard
                 key={category.id}
                 category={category}
-                isSelected={selectedCategory === category.id}
-                onClick={() => handleCategoryClick(category.id)}
+                isSelected={selectedCategory === category.id!}
+                onClick={() => handleCategoryClick(category.id!)}
               />
             ))}
           </div>
 
           <div className="help-section__action">
-            <Link to="/help/requests" className="help-view-all-link">
+            <Link to="/community/help/requests" className="help-view-all-link">
               Browse All Requests <ArrowRight size={18} aria-hidden="true" />
             </Link>
           </div>
@@ -233,7 +241,8 @@ export function HelpLandingPage() {
                 Verified requests that currently need community support.
               </p>
             </div>
-            <Link to="/help/requests" className="help-section__link">
+
+            <Link to="/community/help/requests" className="help-section__link">
               View all <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </header>
@@ -246,18 +255,18 @@ export function HelpLandingPage() {
               ariaLabel="Search support requests"
             />
 
-            <select
+            <Select
               value={sortBy}
               onChange={handleSortChange}
-              className="help-sort-select"
               aria-label="Sort requests"
+              className="help-sort-select"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {isLoading ? (
@@ -275,23 +284,14 @@ export function HelpLandingPage() {
               onRetry={loadRequests}
             />
           ) : filteredRequests.length === 0 ? (
-            <div className="help-empty-state">
-              <div className="help-empty-state__icon">
-                <HelpIcon name="heart" size={48} aria-hidden="true" />
-              </div>
-              <h3 className="help-empty-state__title">No active support requests right now</h3>
-              <p className="help-empty-state__description">
-                New verified requests will appear here when available.
-              </p>
-              <div className="help-empty-state__actions">
-                <Link to="/help/categories" className="btn btn--outline btn--lg">
-                  Browse Categories
-                </Link>
-                <Link to="/help/request" className="btn btn--primary btn--lg">
-                  Request Help
-                </Link>
-              </div>
-            </div>
+            <HelpEmptyState
+              title="No active support requests"
+              description={
+                'No support requests are currently available. Check back soon.'
+              }
+              primaryAction={{ label: 'Request Help', to: '/community/help/request' }}
+              secondaryAction={{ label: 'Browse Categories', to: '/community/help/categories' }}
+            />
           ) : filteredRequests.length > 0 ? (
             <>
               <div className="help-requests-grid" role="list" aria-label="Support requests">
@@ -304,15 +304,15 @@ export function HelpLandingPage() {
                     }}
                   />
                 ))}
-              </div>
 
-              {filteredRequests.length > 6 && (
-                <div className="help-section__action">
-                  <ButtonLink to="/help/requests" variant="primary" size="lg">
-                    View All Requests <ArrowRight size={18} aria-hidden="true" />
-                  </ButtonLink>
-                </div>
-              )}
+                {filteredRequests.length > 6 && (
+                  <div className="help-section__action">
+                    <ButtonLink to="/community/help/requests" variant="primary" size="lg">
+                      View All Requests <ArrowRight size={18} aria-hidden="true" />
+                    </ButtonLink>
+                  </div>
+                )}
+              </div>
             </>
           ) : null}
         </div>
@@ -355,10 +355,10 @@ export function HelpLandingPage() {
               </p>
             </div>
             <div className="help-cta-card__actions">
-              <ButtonLink to="/help/requests" variant="primary" size="lg">
+              <ButtonLink to="/community/help/requests" variant="primary" size="lg">
                 Browse Requests <ArrowRight size={18} aria-hidden="true" />
               </ButtonLink>
-              <ButtonLink to="/help/request" variant="outline" size="lg">
+              <ButtonLink to="/community/help/request" variant="outline" size="lg">
                 Request Help
               </ButtonLink>
             </div>

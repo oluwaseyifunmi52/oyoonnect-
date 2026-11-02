@@ -4,12 +4,12 @@
  * All arrays are empty. This file is used by helpService.ts during
  * local development. In production this will be replaced by API calls.
  */
-import type { SupportRequest, HelpCategoryType } from '../types/help'
+import type { SupportRequest, HelpCategoryValue } from '../types/help'
 
 export const helpRequests: SupportRequest[] = []
 
 export function getHelpRequests(filters?: {
-  category?: HelpCategoryType
+  category?: HelpCategoryValue
   status?: SupportRequest['status']
   verificationStatus?: SupportRequest['verificationStatus']
   limit?: number

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Copy, Check, AlertCircle, Loader2, Wifi, Smartphone, Zap, Tv, GraduationCap, Key, Monitor, Gamepad2, Share2, CreditCard, Plus, ArrowRight, History, Settings, Bell, User, ChevronDown } from 'lucide-react'
+import { Eye, EyeOff, Copy, Check, AlertCircle, Loader2, Wifi, Smartphone, Zap, Tv, GraduationCap, Key, Monitor, Gamepad2, Share2, CreditCard, Plus, ArrowRight, History, Settings, Bell, User, ChevronDown, LogOut } from 'lucide-react'
 import { useAuth } from '@context/AuthContext'
 import { walletService } from '@services/walletService'
 import { formatCurrency } from '@utils/currency'
 import type { Wallet, WalletTransaction, Transaction } from '@/types/bills'
+import { Button } from '../components/ui/Button'
 
 const services = [
   { id: 'data', label: 'Data', icon: Wifi, path: '/services/data', color: '#0066CC', description: 'Buy data bundles' },
@@ -183,11 +184,19 @@ export function ServicesDashboard() {
                   <Link to="/services/settings" className="user-menu__item" role="menuitem">
                     <Settings size={18} /> Settings
                   </Link>
-                  <hr />
-                  <button className="user-menu__item user-menu__item--logout" role="menuitem" onClick={() => { logout(); navigate('/'); }}>
-                    <ArrowRight size={18} /> Sign Out
-                  </button>
-                </div>
+<hr />
+                   <Button
+                     variant="ghost"
+                     size="sm"
+                     onClick={() => { logout(); navigate('/'); }}
+                     className="user-menu__item user-menu__item--logout"
+                     role="menuitem"
+                     fullWidth
+                   >
+                     <ArrowRight size={18} aria-hidden="true" />
+                     <span>Sign Out</span>
+                   </Button>
+                 </div>
               )}
             </div>
           </div>

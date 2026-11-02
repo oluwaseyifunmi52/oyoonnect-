@@ -1,6 +1,5 @@
-import { ReactNode } from 'react';
 import { User } from 'lucide-react';
-import styles from './Avatar.css';
+import styles from './Avatar.module.css';
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 export type AvatarStatus = 'online' | 'offline' | 'busy' | 'away';
@@ -14,17 +13,8 @@ interface AvatarProps {
   className?: string;
 }
 
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
-
 export function Avatar({ src, alt, name, size = 'md', status, className = '' }: AvatarProps) {
-  const initials = name ? getInitials(name) : '?';
+  const accessibleName = alt || name || 'Avatar'
   const hasImage = !!src;
 
   return (
@@ -33,7 +23,7 @@ export function Avatar({ src, alt, name, size = 'md', status, className = '' }: 
         <img
           className={styles['avatar__image']}
           src={src}
-          alt={alt || name || 'Avatar'}
+          alt={accessibleName}
           aria-hidden="true"
         />
       ) : (

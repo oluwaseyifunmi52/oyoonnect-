@@ -62,10 +62,10 @@ export function RequestSuccessPage() {
           </div>
 
           <div className="request-success-page__actions">
-            <ButtonLink to="/help/requests" variant="primary" size="lg">
+            <ButtonLink to="/community/help/requests" variant="primary" size="lg">
               View Requests
             </ButtonLink>
-            <ButtonLink to="/help" variant="outline" size="lg">
+            <ButtonLink to="/community/help" variant="outline" size="lg">
               Back to Help
             </ButtonLink>
           </div>

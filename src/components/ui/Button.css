@@ -66,6 +66,18 @@
   background: var(--brand-dark);
 }
 
+.btn--primary-elevated {
+  background: var(--brand);
+  color: var(--on-primary);
+  box-shadow: 0 8px 24px -4px rgb(15 118 110 / 0.6), 0 4px 8px -4px rgb(15 118 110 / 0.3);
+}
+
+.btn--primary-elevated:hover:not(:disabled) {
+  background: var(--brand-dark);
+  box-shadow: 0 12px 32px -4px rgb(15 118 110 / 0.7), 0 6px 12px -4px rgb(15 118 110 / 0.4);
+  transform: translateY(-1px);
+}
+
 .btn--secondary {
   background: var(--brand-soft);
   color: var(--brand-dark);

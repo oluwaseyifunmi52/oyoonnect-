@@ -33,21 +33,22 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  border: none;
-  background: transparent;
-  color: var(--brand);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  cursor: pointer;
-  padding: var(--space-1) 0;
-  transition: color var(--transition-fast), gap var(--transition-fast);
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
-.session-section__signout:hover {
-  color: var(--brand-dark);
-  gap: var(--space-2);
+/* Override Button component ghost variant for signout */
+.session-section__signout.btn--ghost {
+  color: var(--error);
+  background: transparent;
+}
+
+.session-section__signout.btn--ghost:hover:not(:disabled) {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
+.session-section__signout.btn--ghost:focus-visible {
+  outline: 2px solid var(--error);
+  outline-offset: 2px;
 }
 
 @media (max-width: 480px) {

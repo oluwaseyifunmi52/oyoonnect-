@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom'
 import {
   User, Building2, Briefcase, Eye, EyeOff,
-  CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Info,
+  CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Info, ChevronRight,
 } from 'lucide-react'
 import { Input } from '../components/ui/Input'
 import { Button, ButtonLink } from '../components/ui/Button'
 import { useAuth } from '../context/AuthContext'
 import { Logo } from '../components/layout/Logo'
+import './Login.css'
 
 type AccountType = 'customer' | 'service_provider' | 'business_owner'
 
@@ -71,6 +72,8 @@ function PasswordToggle({ shown, onToggle }: { shown: boolean; onToggle: () => v
 
 export default function Signup() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
   const { signup } = useAuth()
   const [step, setStep] = useState<number>(0)
   const [accountType, setAccountType] = useState<AccountType | null>(null)
@@ -87,6 +90,15 @@ export default function Signup() {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitError, setSubmitError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const stateFrom = (location.state as { from?: { pathname?: string; search?: string } | string } | null)?.from
+  const stateFromPath =
+    typeof stateFrom === 'string'
+      ? stateFrom
+      : stateFrom
+        ? `${stateFrom.pathname ?? ''}${stateFrom.search ?? ''}`
+        : ''
+  const redirect = searchParams.get('redirect') || stateFromPath
 
   const checks = passwordChecks(form.password)
   const passwordScore = Object.values(checks).filter(Boolean).length
@@ -157,232 +169,245 @@ export default function Signup() {
       ? 'Create your professional account'
       : 'Create your account'
 
-  const benefits: ReactNode = (
-    <ul className="signup-intro__points">
-      <li><CheckCircle2 size={18} aria-hidden="true" /> One login for Business, Services, Jobs, Community &amp; Help</li>
-      <li><CheckCircle2 size={18} aria-hidden="true" /> Switch between workspaces anytime</li>
-      <li><CheckCircle2 size={18} aria-hidden="true" /> Upgrade your account as your needs grow</li>
-    </ul>
-  )
-
   return (
-    <main className="auth-page">
-      <div className="auth-card signup-card-wide">
-        <div className="auth-header">
-          <Logo to="/" subtitle />
-          <h1 className="section-heading__title">Create your account</h1>
-          <p className="section-heading__subtitle">
-            One account for everything in Oyo State — run a business, offer services, or find what you need.
+    <main className="login-page">
+      <div className="login-page__hero" aria-hidden="true">
+        <div className="login-page__hero-gradient" />
+        <img
+          src="/images/oyo-hero.jpg"
+          alt=""
+          className="login-page__hero-image"
+          loading="eager"
+        />
+        <div className="login-page__hero-content">
+          <Logo subtitle />
+          <p className="login-page__eyebrow">OYO STATE, NIGERIA</p>
+          <h1 className="login-page__hero-title">Together for a better Oyo</h1>
+          <p className="login-page__hero-description">
+            One platform to find services, hire talent, grow your business,
+            and connect with your community across all 33 LGAs.
           </p>
-          {step === 0 && benefits}
         </div>
+      </div>
 
-        <ol className="signup-stepper" aria-label="Signup progress">
-          {STEPS.map((label, i) => {
-            const isDone = i < step
-            const isCurrent = i === step
-            return (
-              <li
-                key={label}
-                className={`signup-stepper__item ${isCurrent ? 'is-current' : ''} ${isDone ? 'is-done' : ''}`}
-                aria-current={isCurrent ? 'step' : undefined}
-              >
-                <span className="signup-stepper__dot">
-                  {isDone ? <CheckCircle2 size={14} aria-hidden="true" /> : i + 1}
-                </span>
-                <span className="signup-stepper__label">{label}</span>
-              </li>
-            )
-          })}
-        </ol>
-
-        {step === 0 && (
-          <div className="auth-form">
-            <div className="account-type-grid">
-              {ACCOUNT_TYPES.map((opt) => {
-                const Icon = opt.icon
-                const selected = accountType === opt.type
-                return (
-                  <button
-                    type="button"
-                    key={opt.type}
-                    className={`account-type-card ${selected ? 'is-selected' : ''}`}
-                    onClick={() => setAccountType(opt.type)}
-                    aria-pressed={selected}
-                  >
-                    <span className="account-type-card__icon"><Icon size={24} aria-hidden="true" /></span>
-                    <span className="account-type-card__body">
-                      <span className="account-type-card__title">{opt.title}</span>
-                      <span className="account-type-card__desc">{opt.description}</span>
-                      <span className="account-type-card__bullets">
-                        {opt.bullets.map((b) => (
-                          <span key={b} className="account-type-card__bullet">{b}</span>
-                        ))}
-                      </span>
-                    </span>
-                    {selected && (
-                      <span className="account-type-card__check" aria-hidden="true">
-                        <CheckCircle2 size={20} />
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-
-            {!accountType && (
-              <p className="auth-notice"><Info size={16} aria-hidden="true" /> Pick an account type to continue.</p>
-            )}
-
-            <div className="signup-actions">
-              <Button
-                type="button"
-                variant="primary"
-                size="lg"
-                disabled={!accountType}
-                onClick={() => setStep(1)}
-                fullWidth
-              >
-                Continue <ArrowRight size={16} aria-hidden="true" />
-              </Button>
-            </div>
+      <div className="login-page__form-wrapper">
+        <div className="login-page__form-card signup-card-wide">
+          <div className="login-page__form-header">
+            <Logo subtitle link={false} />
+            <h1 className="section-heading__title">Create your account</h1>
+            <p className="section-heading__subtitle">
+              One account for everything in Oyo State — run a business, offer services, or find what you need.
+            </p>
           </div>
-        )}
 
-        {step === 1 && accountType && (
-          <form onSubmit={handleSubmit} noValidate className="auth-form">
-            <div className="signup-step__back">
-              <button type="button" className="auth-link" onClick={() => setStep(0)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <ArrowLeft size={14} aria-hidden="true" /> Change account type
-              </button>
-              <span className="signup-step__selected">
-                {ACCOUNT_TYPES.find((a) => a.type === accountType)?.title}
-              </span>
+          <ol className="signup-stepper" aria-label="Signup progress" style={{ marginBottom: '24px' }}>
+            {STEPS.map((label, i) => {
+              const isDone = i < step
+              const isCurrent = i === step
+              return (
+                <li
+                  key={label}
+                  className={`signup-stepper__item ${isCurrent ? 'is-current' : ''} ${isDone ? 'is-done' : ''}`}
+                  aria-current={isCurrent ? 'step' : undefined}
+                >
+                  <span className="signup-stepper__dot">
+                    {isDone ? <CheckCircle2 size={14} aria-hidden="true" /> : i + 1}
+                  </span>
+                  <span className="signup-stepper__label">{label}</span>
+                </li>
+              )
+            })}
+          </ol>
+
+          {step === 0 && (
+            <div className="auth-form">
+              <div className="account-type-grid">
+                {ACCOUNT_TYPES.map((opt) => {
+                  const Icon = opt.icon
+                  const selected = accountType === opt.type
+                  return (
+                    <button
+                      type="button"
+                      key={opt.type}
+                      className={`account-type-card ${selected ? 'is-selected' : ''}`}
+                      onClick={() => setAccountType(opt.type)}
+                      aria-pressed={selected}
+                    >
+                      <span className="account-type-card__icon"><Icon size={24} aria-hidden="true" /></span>
+                      <span className="account-type-card__body">
+                        <span className="account-type-card__title">{opt.title}</span>
+                        <span className="account-type-card__desc">{opt.description}</span>
+                        <span className="account-type-card__bullets">
+                          {opt.bullets.map((b) => (
+                            <span key={b} className="account-type-card__bullet">{b}</span>
+                          ))}
+                        </span>
+                      </span>
+                      {selected && (
+                        <span className="account-type-card__check" aria-hidden="true">
+                          <CheckCircle2 size={20} />
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {!accountType && (
+                <p className="auth-notice"><Info size={16} aria-hidden="true" /> Pick an account type to continue.</p>
+              )}
+
+              <div className="signup-actions">
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="lg"
+                  disabled={!accountType}
+                  onClick={() => setStep(1)}
+                  fullWidth
+                  className="auth-submit"
+                >
+                  Continue <ArrowRight size={16} aria-hidden="true" />
+                </Button>
+              </div>
             </div>
+          )}
 
-            <h2 className="section-heading__title signup-step__heading">{heading}</h2>
+          {step === 1 && accountType && (
+            <form onSubmit={handleSubmit} noValidate className="auth-form">
+              <div className="signup-step__back">
+                <button type="button" className="auth-link" onClick={() => setStep(0)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <ArrowLeft size={14} aria-hidden="true" /> Change account type
+                </button>
+                <span className="signup-step__selected">
+                  {ACCOUNT_TYPES.find((a) => a.type === accountType)?.title}
+                </span>
+              </div>
 
-            <Input
-              label="Full name"
-              name="fullName"
-              autoComplete="name"
-              value={form.fullName}
-              onChange={(e) => handleChange('fullName', e.target.value)}
-              onBlur={() => handleBlur('fullName')}
-              error={touched.fullName ? errors.fullName : undefined}
-              required
-            />
+              <h2 className="section-heading__title signup-step__heading">{heading}</h2>
 
-            <Input
-              label="Email"
-              type="email"
-              name="email"
-              autoComplete="email"
-              value={form.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-              onBlur={() => handleBlur('email')}
-              error={touched.email ? errors.email : undefined}
-              required
-            />
-
-            <Input
-              label="Phone number"
-              type="tel"
-              name="phone"
-              autoComplete="off"
-              value={form.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
-              onBlur={() => handleBlur('phone')}
-              error={touched.phone ? errors.phone : undefined}
-              required
-            />
-
-            <div>
               <Input
-                label="Password"
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                autoComplete="new-password"
-                value={form.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                onBlur={() => handleBlur('password')}
-                error={touched.password ? errors.password : undefined}
-                rightIcon={<PasswordToggle shown={showPassword} onToggle={() => setShowPassword((s) => !s)} />}
+                label="Full name"
+                name="fullName"
+                autoComplete="name"
+                value={form.fullName}
+                onChange={(e) => handleChange('fullName', e.target.value)}
+                onBlur={() => handleBlur('fullName')}
+                error={touched.fullName ? errors.fullName : undefined}
                 required
               />
-              {form.password && (
-                <div className="password-strength" data-score={passwordScore}>
-                  <div className={`password-strength__bar password-strength__bar--${passwordScore}`} />
-                  <span className="password-strength__label">
-                    {['Weak', 'Fair', 'Good', 'Strong'][Math.min(passwordScore - 1, 3)] || 'Weak'}
-                  </span>
-                </div>
+
+              <Input
+                label="Email"
+                type="email"
+                name="email"
+                autoComplete="email"
+                value={form.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                onBlur={() => handleBlur('email')}
+                error={touched.email ? errors.email : undefined}
+                required
+              />
+
+              <Input
+                label="Phone number"
+                type="tel"
+                name="phone"
+                autoComplete="off"
+                value={form.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                onBlur={() => handleBlur('phone')}
+                error={touched.phone ? errors.phone : undefined}
+                required
+              />
+
+              <div>
+                <Input
+                  label="Password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  onBlur={() => handleBlur('password')}
+                  error={touched.password ? errors.password : undefined}
+                  rightIcon={<PasswordToggle shown={showPassword} onToggle={() => setShowPassword((s) => !s)} />}
+                  required
+                />
+                {form.password && (
+                  <div className="password-strength" data-score={passwordScore}>
+                    <div className={`password-strength__bar password-strength__bar--${passwordScore}`} />
+                    <span className="password-strength__label">
+                      {['Weak', 'Fair', 'Good', 'Strong'][Math.min(passwordScore - 1, 3)] || 'Weak'}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <Input
+                label="Confirm password"
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                autoComplete="new-password"
+                value={form.confirmPassword}
+                onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                onBlur={() => handleBlur('confirmPassword')}
+                error={touched.confirmPassword ? errors.confirmPassword : undefined}
+                rightIcon={<PasswordToggle shown={showConfirmPassword} onToggle={() => setShowConfirmPassword((s) => !s)} />}
+                required
+              />
+
+              <label className="auth-checkbox signup-terms">
+                <input type="checkbox" checked readOnly />
+                <span className="auth-checkbox__custom" aria-hidden="true" />
+                <span>I agree to the Terms & Privacy Policy</span>
+              </label>
+
+              {submitError && (
+                <p className="auth-error" role="alert"><AlertCircle size={16} aria-hidden="true" /> {submitError}</p>
               )}
+
+              <div className="signup-actions">
+                <Button type="submit" variant="primary" size="lg" loading={loading} disabled={loading} fullWidth className="auth-submit">
+                  Create account
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {step === 2 && accountType && (
+            <div className="auth-form signup-success">
+              <span className="signup-success__icon"><CheckCircle2 size={44} aria-hidden="true" /></span>
+              <h2 className="section-heading__title">You're all set!</h2>
+              <p className="section-heading__subtitle">
+                {accountType === 'business_owner'
+                  ? 'Finish your business profile to start listing services.'
+                  : accountType === 'service_provider'
+                    ? 'Complete your provider profile so customers can find you.'
+                    : 'Start exploring services and opportunities around Oyo State.'}
+              </p>
+              <div className="signup-actions signup-actions--stack">
+                {accountType === 'business_owner' && (
+                  <ButtonLink to="/business/register" variant="primary" size="lg" fullWidth className="auth-submit">Set up your business</ButtonLink>
+                )}
+                {accountType === 'service_provider' && (
+                  <ButtonLink to="/provider/onboarding" variant="primary" size="lg" fullWidth className="auth-submit">Complete provider profile</ButtonLink>
+                )}
+                {accountType === 'customer' && (
+                  <ButtonLink to="/dashboard" variant="primary" size="lg" fullWidth className="auth-submit">Go to dashboard</ButtonLink>
+                )}
+                <ButtonLink to="/login" variant="ghost" size="lg" fullWidth>I'll do this later</ButtonLink>
+              </div>
             </div>
+          )}
 
-            <Input
-              label="Confirm password"
-              type={showConfirmPassword ? 'text' : 'password'}
-              name="confirmPassword"
-              autoComplete="new-password"
-              value={form.confirmPassword}
-              onChange={(e) => handleChange('confirmPassword', e.target.value)}
-              onBlur={() => handleBlur('confirmPassword')}
-              error={touched.confirmPassword ? errors.confirmPassword : undefined}
-              rightIcon={<PasswordToggle shown={showConfirmPassword} onToggle={() => setShowConfirmPassword((s) => !s)} />}
-              required
-            />
-
-            <label className="auth-checkbox signup-terms">
-              <input type="checkbox" checked readOnly />
-              <span className="auth-checkbox__custom" aria-hidden="true" />
-              <span>I agree to the Terms &amp; Privacy Policy</span>
-            </label>
-
-            {submitError && (
-              <p className="auth-error" role="alert"><AlertCircle size={16} aria-hidden="true" /> {submitError}</p>
-            )}
-
-            <div className="signup-actions">
-              <Button type="submit" variant="primary" size="lg" loading={loading} disabled={loading} fullWidth>
-                Create account
-              </Button>
-            </div>
-          </form>
-        )}
-
-        {step === 2 && accountType && (
-          <div className="auth-form signup-success">
-            <span className="signup-success__icon"><CheckCircle2 size={44} aria-hidden="true" /></span>
-            <h2 className="section-heading__title">You're all set!</h2>
-            <p className="section-heading__subtitle">
-              {accountType === 'business_owner'
-                ? 'Finish your business profile to start listing services.'
-                : accountType === 'service_provider'
-                  ? 'Complete your provider profile so customers can find you.'
-                  : 'Start exploring services and opportunities around Oyo State.'}
-            </p>
-            <div className="signup-actions signup-actions--stack">
-              {accountType === 'business_owner' && (
-                <ButtonLink to="/business/register" variant="primary" size="lg" fullWidth>Set up your business</ButtonLink>
-              )}
-              {accountType === 'service_provider' && (
-                <ButtonLink to="/provider/onboarding" variant="primary" size="lg" fullWidth>Complete provider profile</ButtonLink>
-              )}
-              {accountType === 'customer' && (
-                <ButtonLink to="/dashboard" variant="primary" size="lg" fullWidth>Go to dashboard</ButtonLink>
-              )}
-              <ButtonLink to="/login" variant="ghost" size="lg" fullWidth>I'll do this later</ButtonLink>
-            </div>
-          </div>
-        )}
-
-        <p className="auth-footer">
-          Already have an account?{' '}
-          <button type="button" className="auth-link" style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', padding: 0 }} onClick={handleLoginRedirect}>
-            Log in
-          </button>
-        </p>
+          <p className="auth-footer">
+            Already have an account?{' '}
+            <button type="button" className="auth-link" style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', padding: 0 }} onClick={handleLoginRedirect}>
+              Log in
+            </button>
+          </p>
+        </div>
       </div>
     </main>
   )

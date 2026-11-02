@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom'
-import { User, Shield, Bell, Monitor, Eye, Lock, Key, AlertTriangle, LogOut, Building2, ChevronRight, HelpCircle } from 'lucide-react'
+import { User, Shield, Bell, Monitor, Eye, Lock, Key, AlertTriangle, LogOut, Building2, ChevronRight, HelpCircle, Moon, Sun } from 'lucide-react'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { BackButton } from '../components/ui/BackButton'
 
 const settingsCategories = [
@@ -39,7 +40,6 @@ const settingsCategories = [
         title: 'Appearance',
         description: 'Customize how OyoConnect looks and feels.',
         icon: Monitor,
-        path: '/settings/appearance',
       },
     ]
   },
@@ -66,11 +66,12 @@ const settingsCategories = [
         path: '/help',
       },
     ]
-  },
+  }
 ]
 
 export function Settings() {
   const { user, isAuthenticated, logout } = useAuth()
+  const { theme, setTheme } = useTheme()
 
   if (!isAuthenticated) {
     return (
@@ -83,6 +84,10 @@ export function Settings() {
         </div>
       </main>
     )
+  }
+
+  const handleSetTheme = (t: 'light' | 'dark') => {
+    setTheme(t)
   }
 
   return (
@@ -101,7 +106,7 @@ export function Settings() {
             </header>
             <div className="settings-cards">
               {category.items.map((item) => (
-                <NavLink key={item.key} to={item.path} className="settings-card">
+                <NavLink key={item.key} to={item.path || '/profile'} className="settings-card">
                   <div className="settings-card-icon">
                     <item.icon size={24} aria-hidden="true" />
                   </div>
@@ -116,21 +121,39 @@ export function Settings() {
           </section>
         ))}
 
-        <section className="settings-card-group danger-zone">
+        <section className="settings-card-group" aria-label="Theme settings">
           <header className="card-group-header">
-            <h2>Account Actions</h2>
+            <h2>Theme</h2>
           </header>
           <div className="settings-cards">
-            <NavLink to="/" className="settings-card danger" onClick={() => { logout(); }}>
-              <div className="settings-card-icon danger">
-                <LogOut size={24} aria-hidden="true" />
+            <button
+              className="settings-card"
+              onClick={() => handleSetTheme('dark')}
+              aria-pressed={theme === 'dark'}
+              aria-label="Switch to dark mode"
+            >
+              <div className="settings-card-icon">
+                <Moon size={24} aria-hidden="true" />
               </div>
               <div className="settings-card-content">
-                <h3>Sign Out</h3>
-                <p>Sign out of your OyoConnect account.</p>
+                <h3>Dark Mode</h3>
+                <p>Use dark color scheme</p>
               </div>
-              <ChevronRight size={20} aria-hidden="true" />
-            </NavLink>
+            </button>
+            <button
+              className="settings-card"
+              onClick={() => handleSetTheme('light')}
+              aria-pressed={theme !== 'dark'}
+              aria-label="Switch to light mode"
+            >
+              <div className="settings-card-icon">
+                <Sun size={24} aria-hidden="true" />
+              </div>
+              <div className="settings-card-content">
+                <h3>Light Mode</h3>
+                <p>Use light color scheme</p>
+              </div>
+            </button>
           </div>
         </section>
       </div>

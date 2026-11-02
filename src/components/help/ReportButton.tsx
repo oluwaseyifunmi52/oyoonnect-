@@ -77,17 +77,8 @@ export function ReportButton({ requestId, requestTitle, onReport }: ReportButton
     setDetails('')
   }
 
-  if (submitStatus === 'success') {
-    return (
-      <div className="report-button__success" role="alert">
-        <CheckCircle size={20} aria-hidden="true" />
-        <span>Report submitted. Thank you for keeping OyoConnect safe.</span>
-      </div>
-    )
-  }
-
   return (
-    <div className="report-button">
+    <div className="report-button" style={{ borderColor: 'var(--color-border)' }}>
       <button
         type="button"
         className="report-button__trigger"
@@ -129,8 +120,15 @@ export function ReportButton({ requestId, requestTitle, onReport }: ReportButton
                     disabled={isSubmitting}
                   />
                   <div className="report-button__reason-content">
-                    <span className="report-button__reason-label">{reason.label}</span>
-                    <span className="report-button__reason-desc">{reason.description}</span>
+                    <span className="report-button__reason-label">
+                      {reason.label}
+                    </span>
+                    <span className="report-button__reason-desc">
+                      {reason.description || 'Please select a reason for reporting.'}
+                    </span>
+                    <span className="report-button__reason-desc">
+                      {reason.description || 'Please select a reason for reporting.'}
+                    </span>
                   </div>
                 </label>
               ))}

@@ -1,0 +1,12 @@
+
+> oyoconnect@0.0.0 build
+> tsc && vite build
+
+src/components/layout/Navbar.tsx(229,5): error TS2657: JSX expressions must have one parent element.
+src/components/layout/Navbar.tsx(317,17): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/components/layout/Navbar.tsx(583,17): error TS1003: Identifier expected.
+src/components/layout/Navbar.tsx(605,12): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/components/layout/Navbar.tsx(606,11): error TS17002: Expected corresponding JSX closing tag for 'div'.
+src/components/layout/Navbar.tsx(619,9): error TS17002: Expected corresponding JSX closing tag for 'header'.
+src/components/layout/Navbar.tsx(621,5): error TS1005: ')' expected.
+src/components/layout/Navbar.tsx(622,3): error TS1109: Expression expected.

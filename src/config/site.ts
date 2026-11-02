@@ -1,7 +1,6 @@
 export interface NavItem {
   label: string
   to: string
-  submenu?: ReadonlyArray<{ label: string; to: string }>
 }
 
 export const siteConfig = {
@@ -13,15 +12,14 @@ export const siteConfig = {
   email: 'oyoconnect5@gmail.com',
   phone: '+234 816 670 9577',
   url: 'https://oyoconnect.ng',
-  // Core platform modules — kept in sync with PLATFORM_NAV in
-  // src/components/navigation/PlatformNav.tsx. Home is excluded here because
-  // the Logo already links to the home route.
+  // Core platform modules — flat navigation, no submenus
   nav: [
-    { label: 'Businesses', to: '/business' },
-    { label: 'Search', to: '/search' },
+    { label: 'Home', to: '/' },
     { label: 'Jobs', to: '/jobs' },
+    { label: 'Businesses', to: '/business' },
     { label: 'Community', to: '/community' },
-    { label: 'Help', to: '/help' },
-    { label: 'Services', to: '/services' },
+    { label: 'Watch', to: '/watch' },
+    { label: 'Messages', to: '/messages' },
+    { label: 'Wallet', to: '/wallet' },
   ] as const satisfies readonly NavItem[],
-} as const
+}

@@ -40,6 +40,11 @@
   line-height: 1.4;
 }
 
+.personal-info__label .required {
+  color: var(--error);
+  margin-left: 2px;
+}
+
 .personal-info__value {
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
@@ -70,4 +75,64 @@
   flex-shrink: 0;
   margin-left: var(--space-2);
   color: var(--subtle);
+}
+
+/* Edit mode styles */
+.personal-info__field .input-wrapper {
+  width: 100%;
+}
+
+.personal-info__hint {
+  font-size: var(--fs-xs);
+  color: var(--subtle);
+  margin-top: var(--space-1);
+}
+
+.personal-info__actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+  grid-column: 1 / -1;
+}
+
+.personal-info__save-success {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--success);
+  font-size: var(--fs-sm);
+  padding: var(--space-2) var(--space-3);
+  background: var(--success-soft);
+  border: 1px solid var(--success-line);
+  border-radius: var(--radius-sm);
+  grid-column: 1 / -1;
+  margin-top: var(--space-3);
+}
+
+.personal-info__save-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--error);
+  font-size: var(--fs-sm);
+  padding: var(--space-2) var(--space-3);
+  background: var(--error-soft);
+  border: 1px solid var(--error-line);
+  border-radius: var(--radius-sm);
+  grid-column: 1 / -1;
+  margin-top: var(--space-3);
+}
+
+/* Pending changes card */
+.profile-pending-changes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-line);
+  border-radius: var(--radius-sm);
+  color: var(--warning);
 }

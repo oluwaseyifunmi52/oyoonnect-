@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import './Button.css'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'whatsapp' | 'danger'
+export type ButtonVariant = 'primary' | 'primary-elevated' | 'secondary' | 'outline' | 'ghost' | 'whatsapp' | 'danger'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

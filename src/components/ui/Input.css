@@ -161,11 +161,205 @@
   color: var(--muted);
 }
 
-[data-theme="dark"] .input-icon {
+/* Collapsible sections */
+.collapsible-section {
+  margin-top: var(--space-3);
+}
+
+.collapsible-trigger {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--ink);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background var(--transition-fast);
+}
+
+.collapsible-trigger:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+.collapsible-trigger:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.collapsible-trigger.open {
+  background: var(--surface);
+}
+
+.collapsible-trigger .rotate {
+  transform: rotate(180deg);
+}
+
+/* Always keep textarea in DOM but hide when collapsed */
+.collapsible-section textarea {
+  display: none;
+}
+
+/* Show textarea when section is open */
+.collapsible-section.open textarea {
+  display: block;
+}
+
+[data-theme="dark"] .collapsible-trigger {
+  color: var(--ink);
+}
+
+[data-theme="dark"] .collapsible-trigger:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+/* ===== Notifications Screen Styles ===== */
+
+.dash-panel {
+  padding: var(--space-4);
+}
+
+.notifications-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.filter-active {
+  color: var(--brand);
+  font-weight: var(--fw-semibold);
+}
+
+.filter-label {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+}
+
+.filter-badge {
+  margin-left: var(--space-1);
+  font-size: var(--text-xs);
+}
+
+.notifications-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .notifications-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .notifications-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.notification-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition:
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.notification-card--unread {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+}
+
+.notification-card__header {
+  display: flex;
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-3) 0;
+}
+
+.notification-card__icon-wrapper {
+  flex: 0 0 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-card__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.notification-card__icon--amber {
+  color: var(--warning);
+}
+
+.notification-card__icon--green {
+  color: var(--success);
+}
+
+.notification-card__icon--error {
+  color: var(--error);
+}
+
+.notification-card__icon--default {
   color: var(--subtle);
 }
 
-[data-theme="dark"] .input:focus + .input-icon,
-[data-theme="dark"] .input-wrapper:focus-within .input-icon {
-  color: var(--brand);
+.notification-card__unread-dot {
+  flex: 0 0 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--error);
+  margin: 0 var(--space-2);
+}
+
+.notification-card__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.notification-card__title {
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--space-1);
+  line-height: var(--lh-normal);
+}
+
+.notification-card__description {
+  font-size: var(--text-sm);
+  color: var(--subtle);
+  margin-bottom: var(--space-2);
+  line-height: 1.5;
+}
+
+.notification-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-xs);
+  color: var(--subtle);
+}
+
+.notification-card__time {
+  font-weight: var(--fw-medium);
+}
+
+.notification-card__category {
+  text-transform: uppercase;
+  font-weight: var(--fw-semibold);
+}
+
+.empty-state-center {
+  text-align: center;
 }

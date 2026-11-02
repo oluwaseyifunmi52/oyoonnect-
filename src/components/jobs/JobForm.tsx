@@ -166,67 +166,64 @@ export function JobForm({ initialData, onSubmit, onCancel, isEditing = false }: 
       <div className="collapsible-section">
         <button
           type="button"
-          className={`collapsible-trigger ${showResponsibilities ? 'open' : ''}`}
+          className="collapsible-trigger"
           onClick={() => setShowResponsibilities(!showResponsibilities)}
           aria-expanded={showResponsibilities}
         >
           <span>Key Responsibilities</span>
           <ChevronDown size={18} className={showResponsibilities ? 'rotate' : ''} />
         </button>
-        {showResponsibilities && (
-          <Textarea
-            label="Responsibilities (one per line)"
-            name="responsibilities"
-            placeholder="e.g.\nDesign and develop web applications\nMentor junior developers\nParticipate in code reviews"
-            value={form.responsibilities}
-            onChange={(e) => handleTextAreaChange('responsibilities', e.target.value)}
-            rows={4}
-          />
-        )}
+        <Textarea
+          label="Responsibilities (one per line)"
+          name="responsibilities"
+          placeholder="e.g.\nDesign and develop web applications\nMentor junior developers\nParticipate in code reviews"
+          value={form.responsibilities}
+          onChange={(e) => handleTextAreaChange('responsibilities', e.target.value)}
+          rows={4}
+          style={{ display: showResponsibilities ? 'block' : 'none' }}
+        />
       </div>
 
       <div className="collapsible-section">
         <button
           type="button"
-          className={`collapsible-trigger ${showRequirements ? 'open' : ''}`}
+          className="collapsible-trigger"
           onClick={() => setShowRequirements(!showRequirements)}
           aria-expanded={showRequirements}
         >
           <span>Requirements</span>
           <ChevronDown size={18} className={showRequirements ? 'rotate' : ''} />
         </button>
-        {showRequirements && (
-          <Textarea
-            label="Requirements (one per line)"
-            name="requirements"
-            placeholder="e.g.\n5+ years experience\nStrong React/TypeScript skills\nAWS certification preferred"
-            value={form.requirements}
-            onChange={(e) => handleTextAreaChange('requirements', e.target.value)}
-            rows={4}
-          />
-        )}
+        <Textarea
+          label="Requirements (one per line)"
+          name="requirements"
+          placeholder="e.g.\n5+ years experience\nStrong React/TypeScript skills\nAWS certification preferred"
+          value={form.requirements}
+          onChange={(e) => handleTextAreaChange('requirements', e.target.value)}
+          rows={4}
+          style={{ display: showRequirements ? 'block' : 'none' }}
+        />
       </div>
 
       <div className="collapsible-section">
         <button
           type="button"
-          className={`collapsible-trigger ${showSkills ? 'open' : ''}`}
+          className="collapsible-trigger"
           onClick={() => setShowSkills(!showSkills)}
           aria-expanded={showSkills}
         >
           <span>Required Skills</span>
           <ChevronDown size={18} className={showSkills ? 'rotate' : ''} />
         </button>
-        {showSkills && (
-          <Textarea
-            label="Skills (one per line)"
-            name="skills"
-            placeholder="e.g.\nReact\nTypeScript\nNode.js\nPostgreSQL"
-            value={form.skills}
-            onChange={(e) => handleTextAreaChange('skills', e.target.value)}
-            rows={3}
-          />
-        )}
+        <Textarea
+          label="Skills (one per line)"
+          name="skills"
+          placeholder="e.g.\nReact\nTypeScript\nNode.js\nPostgreSQL"
+          value={form.skills}
+          onChange={(e) => handleTextAreaChange('skills', e.target.value)}
+          rows={3}
+          style={{ display: showSkills ? 'block' : 'none' }}
+        />
       </div>
 
       <SectionHeading
@@ -369,12 +366,14 @@ export function JobForm({ initialData, onSubmit, onCancel, isEditing = false }: 
             : { lat: 7.3775, lng: 3.9470 }}
           defaultZoom={form.lga ? 13 : 12}
         />
-        {(form.latitude || form.longitude) && (
-          <div className="map-coords-display">
-            <p><strong>Coordinates:</strong> {form.latitude}, {form.longitude}</p>
-            {form.formattedAddress && <p><strong>Address:</strong> {form.formattedAddress}</p>}
-          </div>
-        )}
+        <div className="map-coords-display">
+          {(form.latitude || form.longitude) && (
+            <>
+              <p><strong>Coordinates:</strong> {form.latitude}, {form.longitude}</p>
+              {form.formattedAddress && <p><strong>Address:</strong> {form.formattedAddress}</p>}
+            </>
+          )}
+        </div>
       </div>
 
       <SectionHeading

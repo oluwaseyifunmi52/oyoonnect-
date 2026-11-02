@@ -1,11 +1,23 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Copy, Check, AlertCircle, Loader2, Banknote, Shield, Eye, EyeOff, Info, AlertCircle as AlertCircleIcon } from 'lucide-react'
-import { SectionHeading } from '../components/ui/SectionHeading'
-import { Button, ButtonLink } from '../components/ui/Button'
-import { walletService } from '../services/walletService'
-import { formatCurrency } from '../utils/currency'
-import type { VirtualAccount } from '../types/bills'
+import {
+  ArrowLeft,
+  Copy,
+  Check,
+  AlertCircle,
+  Loader2,
+  Banknote,
+  Shield,
+  Eye,
+  EyeOff,
+  Info,
+  AlertCircle as AlertCircleIcon,
+} from 'lucide-react'
+import { SectionHeading } from '@/components/ui/SectionHeading'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { walletService } from '@/services/walletService'
+import { formatCurrency } from '@/utils/currency'
+import type { VirtualAccount } from '@/types/bills'
 
 function WalletFund() {
   const [walletBalance, setWalletBalance] = useState(0)
@@ -121,7 +133,7 @@ function WalletFund() {
   return (
     <main className="wallet-fund-page">
       <div className="container container--narrow">
-        <Link to="/wallet" className="back-link">
+        <Link to="/community/wallet" className="back-link">
           <ArrowLeft size={16} /> Back to Wallet
         </Link>
 
@@ -137,7 +149,7 @@ function WalletFund() {
           <p className="wallet-balance__amount">{formatCurrency(walletBalance)}</p>
         </section>
 
-        {/* Virtual Account Section - Professional Empty State */}
+        {/* Virtual Account Section */}
         <section className="virtual-account-section" aria-labelledby="funding-account-label">
           <h2 id="funding-account-label" className="virtual-account__title">
             <Banknote size={20} aria-hidden="true" />
@@ -238,7 +250,7 @@ function WalletFund() {
           </div>
         </section>
 
-        {/* Wallet Funding Info - Professional Neutral State */}
+        {/* Wallet Funding Info */}
         <section className="wallet-funding-info-section" aria-labelledby="funding-info-label">
           <h2 id="funding-info-label" className="wallet-funding-info-section__title">
             <Shield size={20} aria-hidden="true" />
@@ -281,7 +293,7 @@ function WalletFund() {
           </div>
         </section>
 
-        {/* Identity Verification Placeholder */}
+        {/* Identity Verification */}
         <section className="wallet-verification-section" aria-labelledby="verification-label">
           <h2 id="verification-label" className="wallet-verification-section__title">Identity Verification</h2>
           <div className="wallet-verification-card">
@@ -293,7 +305,7 @@ function WalletFund() {
               <p className="wallet-verification-card__description">
                 Identity verification will be required before certain financial features can be activated.
               </p>
-              <p className="wallet-verification-card__description wallet-verification-card__description--muted">
+              <p className="wallet-verification-card__description--muted">
                 Secure verification will be available when OyoConnect's backend and approved payment provider integration are ready.
               </p>
             </div>
@@ -304,7 +316,7 @@ function WalletFund() {
         </section>
 
         {/* Funding Instructions */}
-        <div className="funding-instructions">
+        <section className="funding-instructions">
           <h3 className="funding-instructions__title">How It Works</h3>
           <ol className="funding-instructions__steps">
             <li>
@@ -336,16 +348,18 @@ function WalletFund() {
               </div>
             </li>
           </ol>
-        </div>
+        </section>
 
         {/* Security Note */}
-        <div className="security-note">
+        <section className="security-note">
           <Shield size={18} aria-hidden="true" />
           <div>
             <strong>Secure by Design</strong>
-            <p>We never confirm payments from the frontend. Your balance only updates after our backend verifies the transaction with the payment provider.</p>
+            <p>
+              We never confirm payments from the frontend. Your balance only updates after our backend verifies the transaction with the payment provider.
+            </p>
           </div>
-        </div>
+        </section>
       </div>
     </main>
   )

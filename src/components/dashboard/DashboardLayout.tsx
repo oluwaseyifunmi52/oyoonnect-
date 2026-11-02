@@ -1,12 +1,14 @@
 import { useState, type ReactNode, useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
-import { Menu, LogOut, Bell, type LucideIcon } from 'lucide-react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Bell, Menu, LogOut, type LucideIcon } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { notificationService } from '../../services/notificationService'
+import { SearchBar } from '../search/SearchBar'
 import { WorkspaceSwitcher } from '../WorkspaceSwitcher'
 import { Avatar } from '../profile/Avatar'
-import { notificationService } from '../../services/notificationService'
-import type { Notification } from '../../types/notifications'
 import { PLATFORM_NAV, type PlatformNavItem } from '../navigation/PlatformNav'
+import { Modal } from '../ui/Modal'
+import { Button } from '../ui/Button'
 
 export interface DashboardNavItem {
   to: string
@@ -57,48 +59,32 @@ function renderSidebarLink(
 
 export function DashboardLayout({ navItems, children, workspaceLabel }: DashboardLayoutProps) {
   const { user, logout } = useAuth()
+  const { pathname } = useLocation()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [notificationsLoading, setNotificationsLoading] = useState(false)
-  const notificationPanelRef = useRef<HTMLDivElement>(null)
+  const [unreadCount, setUnreadCount] = useState(() => notificationService.getNotifications().filter((item) => !item.read).length)
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false)
+
+  useEffect(() => {
+    const syncUnreadCount = () => setUnreadCount(notificationService.getNotifications().filter((item) => !item.read).length)
+    window.addEventListener('dashboardNotificationsChanged', syncUnreadCount)
+    return () => window.removeEventListener('dashboardNotificationsChanged', syncUnreadCount)
+  }, [])
 
   const initials = getInitials(user?.name)
 
-  const loadNotifications = async (force = false) => {
-    if (force || notificationService.getNotifications().length === 0) {
-      setNotificationsLoading(true)
-      try {
-        const fetched = await notificationService.fetchFromApi()
-        setNotifications(fetched)
-      } catch {
-        setNotifications(notificationService.getNotifications())
-      } finally {
-        setNotificationsLoading(false)
-      }
-    }
-  }
-
-  useEffect(() => {
-    loadNotifications()
-  }, [])
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (notificationPanelOpen && notificationPanelRef.current && !notificationPanelRef.current.contains(event.target as Node)) {
-        setNotificationPanelOpen(false)
-    }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [notificationPanelOpen])
-
-  const unreadCount = notifications.filter(n => !n.read).length
-
   const primary = navItems.filter((item) => !item.secondary)
   const secondary = navItems.filter((item) => item.secondary)
-  const workspaceSectionLabel = workspaceLabel ?? 'My Account'
+  const workspaceSectionLabel = workspaceLabel ?? 'JOB SEEKER'
   const closeDrawer = () => setDrawerOpen(false)
+
+  const handleSignOutClick = () => {
+    setShowSignOutDialog(true)
+  }
+
+  const handleSignOutConfirm = async () => {
+    setShowSignOutDialog(false)
+    await logout()
+  }
 
   const sidebar = (
     <div className="dash-sidebar">
@@ -106,7 +92,6 @@ export function DashboardLayout({ navItems, children, workspaceLabel }: Dashboar
         <span className="dash-sidebar__logo" aria-hidden="true">OC</span>
         <div>
           <p className="dash-sidebar__name">OyoConnect</p>
-          <span className="dash-sidebar__role">{workspaceLabel ?? 'Dashboard'}</span>
         </div>
       </div>
 
@@ -128,9 +113,18 @@ export function DashboardLayout({ navItems, children, workspaceLabel }: Dashboar
       </nav>
 
       <div className="dash-sidebar__footer">
-        <button type="button" className="dash-sidebar__logout" onClick={() => logout()}>
-          <LogOut size={18} aria-hidden="true" /> Sign out
-        </button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleSignOutClick}
+          aria-label="Sign out of your account"
+          className="dash-sidebar__logout"
+          fullWidth
+        >
+          <LogOut size={18} aria-hidden="true" />
+          <span>Sign out</span>
+        </Button>
       </div>
     </div>
   )
@@ -158,101 +152,12 @@ export function DashboardLayout({ navItems, children, workspaceLabel }: Dashboar
             <WorkspaceSwitcher />
           </div>
 
-          <div className="dash-topbar__notification-wrapper" ref={notificationPanelRef}>
-            <button
-              type="button"
-              className="dash-topbar__notification-trigger"
-              aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
-              aria-expanded={notificationPanelOpen}
-              onClick={() => {
-                const opening = !notificationPanelOpen
-                setNotificationPanelOpen(opening)
-                if (opening) {
-                  loadNotifications(true)
-                }
-              }}
-            >
-              <Bell size={20} aria-hidden="true" />
-              {unreadCount > 0 && (
-                <span className="dash-topbar__notification-badge" aria-hidden="true">
-                  {unreadCount > 99 ? '99+' : unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </button>
-            {notificationPanelOpen && (
-              <div className="dash-topbar__notification-panel" role="region" aria-label="Notifications">
-                <div className="dash-topbar__notification-panel-header">
-                  <h2 className="dash-topbar__notification-panel-title">Notifications</h2>
-                  <div className="dash-topbar__notification-panel-actions">
-                    {unreadCount > 0 && (
-                      <button
-                        type="button"
-                        className="dash-topbar__notification-panel-action"
-                        onClick={() => {
-                          notificationService.markAllAsRead()
-                          setNotifications(notificationService.getNotifications())
-                        }}
-                      >
-                        Mark all as read
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div className="dash-topbar__notification-list">
-                  {notificationsLoading && notifications.length === 0 ? (
-                    <div className="dash-topbar__notification-empty">
-                      <div className="dash-topbar__notification-empty-icon">
-                        <Bell size={24} aria-hidden="true" />
-                      </div>
-                      <p className="dash-topbar__notification-empty-title">Loading notifications…</p>
-                    </div>
-                  ) : notifications.length === 0 ? (
-                    <div className="dash-topbar__notification-empty">
-                      <div className="dash-topbar__notification-empty-icon">
-                        <Bell size={24} aria-hidden="true" />
-                      </div>
-                      <p className="dash-topbar__notification-empty-title">No notifications yet</p>
-                      <p className="dash-topbar__notification-empty-text">Important updates from OyoConnect will appear here.</p>
-                    </div>
-                  ) : (
-                    notifications.slice(0, 8).map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`dash-topbar__notification-item ${notification.read ? '' : 'dash-topbar__notification-item--unread'}`}
-                        onClick={() => {
-                          if (!notification.read) {
-                            notificationService.markAsRead(notification.id)
-                            setNotifications(notificationService.getNotifications())
-                          }
-                        }}
-                      >
-                        <div className={`dash-topbar__notification-icon dash-topbar__notification-icon--${notification.category}`}>
-                          <Bell size={18} aria-hidden="true" />
-                        </div>
-                        <div className="dash-topbar__notification-content">
-                          <div className="dash-topbar__notification-header">
-                            <span className="dash-topbar__notification-time">{new Date(notification.createdAt).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' })}</span>
-                          </div>
-                          <p className="dash-topbar__notification-title">{notification.title}</p>
-                          <p className="dash-topbar__notification-message">{notification.message}</p>
-                        </div>
-                        {!notification.read && (
-                          <span className="dash-topbar__notification-unread-dot" aria-hidden="true" />
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-                {notifications.length > 0 && (
-                  <div className="dash-topbar__notification-footer">
-                    <NavLink to="/notifications" onClick={() => setNotificationPanelOpen(false)}>
-                      View all notifications
-                    </NavLink>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          {pathname === '/notifications' && <div className="dash-topbar__search"><SearchBar size="md" /></div>}
+
+          <Link className="dash-topbar__notifications" to="/notifications" aria-label={`Notifications, ${unreadCount} unread`}>
+            <Bell size={19} aria-hidden="true" />
+            {unreadCount > 0 && <span className="dash-topbar__notification-count">{unreadCount}</span>}
+          </Link>
 
           <div className="dash-topbar__user" title={user?.name}>
             <Avatar src={user?.avatar} initials={initials} size="sm" variant={user?.avatar ? 'image' : 'gradient'} />
@@ -264,6 +169,33 @@ export function DashboardLayout({ navItems, children, workspaceLabel }: Dashboar
           {children}
         </main>
       </div>
+
+      {/* Sign Out Confirmation Modal */}
+      <Modal
+        isOpen={showSignOutDialog}
+        onClose={() => setShowSignOutDialog(false)}
+        title="Sign out?"
+        size="sm"
+        closeOnOverlayClick={false}
+        closeOnEscape={true}
+      >
+        <div className="signout-dialog">
+          <div className="signout-dialog__icon" aria-hidden="true">
+            <LogOut size={28} />
+          </div>
+          <p className="signout-dialog__message">
+            Are you sure you want to sign out? You'll need to sign in again to access your dashboard.
+          </p>
+          <div className="signout-dialog__actions">
+            <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleSignOutConfirm}>
+              Sign out
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

@@ -11,6 +11,7 @@ import type { Notification } from '../../types/notifications'
 interface DashboardHeaderProps {
   onMenuClick: () => void
   showWorkspaceSwitcher?: boolean
+  showWalletShortcut?: boolean
   workspaceKey?: 'customer' | 'service_provider' | 'business_owner'
 }
 
@@ -28,7 +29,7 @@ function relativeTime(value: string) {
   return `${Math.floor(hours / 24)}d ago`
 }
 
-export function DashboardHeader({ onMenuClick, showWorkspaceSwitcher = false, workspaceKey = 'service_provider' }: DashboardHeaderProps) {
+export function DashboardHeader({ onMenuClick, showWorkspaceSwitcher = false, showWalletShortcut = false, workspaceKey = 'service_provider' }: DashboardHeaderProps) {
   const { user, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
   const [notifications, setNotifications] = useState<Notification[]>(() => notificationService.getNotifications())
@@ -78,6 +79,12 @@ export function DashboardHeader({ onMenuClick, showWorkspaceSwitcher = false, wo
       <div className="dashboard-topbar-search"><SearchBar size="md" /></div>
       <div className="dashboard-topbar-actions">
         {showWorkspaceSwitcher && <div className="dashboard-topbar-workspace"><WorkspaceSwitcher activeKey={workspaceKey} /></div>}
+        {showWalletShortcut && (
+          <Link className="dashboard-topbar-wallet" to="/services/wallet" aria-label="Open Services wallet" title="Open wallet">
+            <Wallet size={16} aria-hidden="true" />
+            <span>Wallet</span>
+          </Link>
+        )}
         <div className="dashboard-popover-anchor" ref={notificationRef}>
           <button
             className="dashboard-topbar-icon"

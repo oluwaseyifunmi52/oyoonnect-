@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { X } from 'lucide-react'
-import type { SupportRequest, HelpCategoryType, HelpFilters, SupportRequestStatus } from '../../types/help'
+import type { SupportRequest, HelpCategoryValue, SupportRequestStatus } from '../../types/help'
 import { HELP_CATEGORIES } from '../../types/help'
 import {
   SupportRequestCard,
@@ -9,25 +9,21 @@ import {
   HelpEmptyState,
 } from '../../components/help'
 import { SearchInput } from '../../components/ui/SearchInput'
-import { Select } from '../../components/ui/Input'
+import { Select, Badge } from '../../components/ui'
 import { Card } from '../../components/ui/Card'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { helpService } from '../../services/helpService'
+import { STATUS_LABELS } from '../../types/help'
+import type { HelpCategory } from '../../types/help'
 
 const SORT_OPTIONS = [
   { value: 'recent', label: 'Recently Posted' },
   { value: 'almost-funded', label: 'Closing Soon' },
-  { value: 'most-supported', label: 'Most Supported' },
   { value: 'verified', label: 'Verified' },
-  { value: 'urgent', label: 'Urgent' },
+  { value: 'deadline', label: 'Deadline' },
 ]
 
-const CATEGORY_OPTIONS = [
-  { value: 'all', label: 'All Categories' },
-  ...HELP_CATEGORIES.map((c) => ({ value: c.id, label: c.name, icon: c.icon })),
-]
-
-const STATUS_OPTIONS: { value: string; label: string }[] = [
+const STATUS_OPTIONS = [
   { value: 'all', label: 'All Statuses' },
   { value: 'active', label: 'Active' },
   { value: 'pending_review', label: 'Pending Review' },
@@ -45,15 +41,15 @@ export function HelpRequestsPage() {
 
   const query = searchParams.get('q') || ''
   const categoryParam = searchParams.get('category') || 'all'
-  const sortParam = (searchParams.get('sort') as HelpFilters['sort']) || 'recent'
-  const statusParam = searchParams.get('status') || 'all'
+  const sortParam = (searchParams.get('sort') as 'recent' | 'almost-funded' | 'verified' | 'deadline') || 'recent'
+  const statusParam = (searchParams.get('status') as SupportRequestStatus | 'all') || 'all'
 
   const loadRequests = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
       const data = await helpService.search({
-        category: categoryParam !== 'all' ? (categoryParam as HelpCategoryType) : undefined,
+        category: categoryParam !== 'all' ? (categoryParam as HelpCategoryValue) : undefined,
         sort: sortParam,
         status: statusParam !== 'all' ? (statusParam as SupportRequestStatus) : undefined,
         limit: 20,
@@ -94,8 +90,12 @@ export function HelpRequestsPage() {
       result = result.filter((r) => r.requesterLocation === selectedLocation)
     }
 
+    if (selectedStatus !== 'all') {
+      result = result.filter((r) => r.status === selectedStatus)
+    }
+
     return result
-  }, [requests, query, selectedLocation])
+  }, [requests, query, selectedLocation, selectedStatus])
 
   const handleSearch = (value: string) => {
     setSearchParams((prev) => {
@@ -126,13 +126,25 @@ export function HelpRequestsPage() {
     })
   }
 
+  const handleStatusChange = (value: string) => {
+    setSearchParams((prev) => {
+      if (value && value !== 'all') {
+        prev.set('status', value)
+      } else {
+        prev.delete('status')
+      }
+      return prev
+    })
+  }
+
   const clearFilters = () => {
     setSelectedLocation('all')
+    setSelectedStatus('all')
     setSearchParams({})
   }
 
   const hasActiveFilters =
-    query !== '' || categoryParam !== 'all' || sortParam !== 'recent' || selectedLocation !== 'all' || statusParam !== 'all'
+    query !== '' || categoryParam !== 'all' || sortParam !== 'recent' || selectedLocation !== 'all' || selectedStatus !== 'all'
 
   const skeletonCards = Array(6).fill(0).map((_, i) => (
     <Card key={i} variant="skeleton" className="skeleton-card">
@@ -154,7 +166,7 @@ export function HelpRequestsPage() {
       key={request.id}
       request={request}
       onSupportClick={(req) => {
-        window.location.href = `/help/requests/${req.id}?support=true`
+        window.location.href = `/community/help/requests/${req.id}?support=true`
       }}
     />
   ))
@@ -184,24 +196,27 @@ export function HelpRequestsPage() {
                 onChange={handleCategoryChange}
                 aria-label="Filter by category"
                 className="help-requests__category-select"
-                options={CATEGORY_OPTIONS}
+                options={[
+                  { value: 'all', label: 'All Categories' },
+                  ...HELP_CATEGORIES.map((c) => ({ value: c.value, label: c.label })) as {
+                    value: string
+                    label: string
+                  }[],
+                ]}
               />
 
               <Select
                 value={statusParam}
-                onChange={(value) => {
-                  setSearchParams((prev) => {
-                    if (value && value !== 'all') {
-                      prev.set('status', value)
-                    } else {
-                      prev.delete('status')
-                    }
-                    return prev
-                  })
-                }}
+                onChange={handleStatusChange}
                 aria-label="Filter by status"
                 className="help-requests__status-select"
-                options={STATUS_OPTIONS}
+                options={[
+                  { value: 'all', label: 'All Statuses' },
+                  ...STATUS_OPTIONS.map((opt) => ({
+                    value: opt.value,
+                    label: STATUS_LABELS[opt.value as SupportRequestStatus] || opt.label,
+                  })),
+                ]}
               />
 
               <Select
@@ -243,14 +258,14 @@ export function HelpRequestsPage() {
             <ErrorState title="Unable to Load Requests" message={error} onRetry={loadRequests} />
           ) : filteredRequests.length === 0 ? (
             <HelpEmptyState
-              title={query || categoryParam !== 'all' || selectedLocation !== 'all' ? 'No requests match your search' : 'No active support requests'}
+              title={query || categoryParam !== 'all' || selectedLocation !== 'all' || selectedStatus !== 'all' ? 'No requests match your search' : 'No active support requests'}
               description={
                 hasActiveFilters
                   ? 'Try adjusting your search or filters to find more requests.'
                   : 'No support requests are currently available. Check back soon.'
               }
-              primaryAction={{ label: 'Request Help', to: '/help/request' }}
-              secondaryAction={{ label: 'Clear Filters', to: '/help/requests' }}
+              primaryAction={{ label: 'Request Help', to: '/community/help/request' }}
+              secondaryAction={{ label: 'Clear Filters', to: '/community/help/requests' }}
             />
           ) : (
             <>{requestCards}</>

@@ -1,0 +1,6 @@
+
+> oyoconnect@0.0.0 build
+> tsc && vite build
+
+src/components/Layout.tsx(12,15): error TS2322: Type '{ onMobileToggle: () => void; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'onMobileToggle' does not exist on type 'IntrinsicAttributes'.

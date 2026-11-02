@@ -249,7 +249,7 @@ export function ServicesDashboard() {
             <p className="services-dashboard__empty-message">
               You don't have a wallet yet. Fund your wallet to start making payments and accessing all services.
             </p>
-            <Link to="/wallet/fund" className="btn btn--primary btn--lg">
+            <Link to="/community/wallet/fund" className="btn btn--primary btn--lg">
               Fund Wallet
             </Link>
           </div>
@@ -298,7 +298,7 @@ export function ServicesDashboard() {
                 </button>
               </div>
             </div>
-            <Link to="/wallet/transactions" className="services-dashboard__history-link">
+            <Link to="/community/wallet/transactions" className="services-dashboard__history-link">
               <Clock size={16} /> History
             </Link>
           </div>

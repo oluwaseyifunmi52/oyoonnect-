@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { messageService } from '../services/messageService'
 import { useDashboardData } from '../hooks/useDashboardData'
 import type { Business } from '../types/business'
 import {
@@ -297,14 +298,71 @@ function ServicesTab() {
 }
 
 function EnquiriesTab() {
+  const { user, isAuthenticated } = useAuth()
+
   return (
     <section className="dash-panel">
       <h2 className="dash-panel__title">Customer Enquiries</h2>
-      <EmptyState
-        icon={<MessageSquare size={28} />}
-        title="No enquiries yet"
-        description="Customer enquiries will appear here when messaging or contact tracking is connected."
-      />
+
+      {isAuthenticated ? (
+        <div className="space-y-4 max-h-[400px] overflow-y-auto">
+          {messageService.getConversations().length === 0 ? (
+            <EmptyState
+              icon={<MessageSquare size={28} />}
+              title="No enquiries yet"
+              description="No customer messages yet. Customers can message you from your business profile."
+            />
+          ) : (
+            <div>
+              {messageService.getConversations().map((conv) => {
+                // Only show conversations where the business owner is the participant
+                const isRelevantConversation =
+                  conv.participantId === user?.id || conv.participantName?.includes(user?.name || '')
+
+                if (!isRelevantConversation) return null
+
+                const lastMessage = conv.lastMessage || 'New conversation'
+                const lastMessageAt = conv.lastMessageAt
+                  ? new Date(conv.lastMessageAt).toLocaleString()
+                  : ''
+
+                return (
+                  <div
+                    key={conv.id}
+                    className="conversation-item flex items-center gap-3 rounded-lg p-3 hover:bg-surface/50 transition-colors"
+                    onClick={() => window.location.hash = `/messages/${conv.id}`}
+                  >
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                      {conv.participantAvatar
+                        ? <img src={conv.participantAvatar} alt={conv.participantName} className="w-full h-full rounded-full object-cover" />
+                        : <div className="w-full h-full rounded-full bg-muted/30 flex items-center justify-center text-muted flex-shrink-0">
+                          {conv.participantName ? conv.participantName.split(' ')[0][0] : 'U'}
+                        </div>
+                    }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{conv.participantName || 'Unknown'}</p>
+                      <p className="text-xs text-muted/60 truncate">{lastMessage}</p>
+                    </div>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary">
+                      {conv.unreadCount > 0 ? conv.unreadCount : ''}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+          <p className="text-xs text-muted/60">
+            {messageService.getConversations().length > 0 ? `${messageService.getConversations().length} new enquiry` : 'No enquiries yet'}
+          </p>
+        </div>
+      ) : (
+        <EmptyState
+          icon={<MessageSquare size={32} />}
+          title="Sign in to view enquiries"
+          description="Sign in to your business account to see customer messages."
+        />
+      )}
     </section>
   )
 }

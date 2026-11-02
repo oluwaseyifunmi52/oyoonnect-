@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   MapPin,
   Briefcase,
@@ -82,6 +82,7 @@ function statusVariant(status: Job['status']): 'success' | 'warning' | 'error' |
 
 function JobDetail() {
   const { id } = useParams<{ id: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { user, isAuthenticated } = useAuth()
   const [job, setJob] = useState<Job | undefined>()
   const [loading, setLoading] = useState(true)
@@ -118,6 +119,17 @@ function JobDetail() {
       loadJob()
     }
   }, [id, isAuthenticated])
+
+  useEffect(() => {
+    if (loading || !job || searchParams.get('apply') !== '1') return
+    if (job.status === 'active') {
+      if (isAuthenticated) setShowApplyForm(true)
+      else { setPendingAction('apply'); setShowAuthModal(true) }
+    }
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete('apply')
+    setSearchParams(nextParams, { replace: true })
+  }, [isAuthenticated, job, loading, searchParams, setSearchParams])
 
   useEffect(() => {
     if (user) {

@@ -1,14 +1,24 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Filter, ChevronDown, ChevronUp, Search, RefreshCw, SearchX, Receipt, Plus } from 'lucide-react'
-import { SectionHeading } from '../components/ui/SectionHeading'
-import { EmptyState } from '../components/ui/EmptyState'
-import { Button, ButtonLink } from '../components/ui/Button'
-import { Select } from '../components/ui/Input'
-import { Pagination } from '../components/common/Pagination'
-import { walletService } from '../services/walletService'
-import { formatCurrency } from '../utils/currency'
-import type { WalletTransaction } from '../types/bills'
+import {
+  ArrowLeft,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  RefreshCw,
+  SearchX,
+  Receipt,
+  Plus,
+} from 'lucide-react'
+import { SectionHeading } from '@/components/ui/SectionHeading'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Input'
+import { Pagination } from '@/components/common/Pagination'
+import { walletService } from '@/services/walletService'
+import { formatCurrency } from '@/utils/currency'
+import type { WalletTransaction } from '@/types/bills'
 
 const ITEMS_PER_PAGE = 20
 
@@ -105,11 +115,10 @@ function WalletTransactions() {
         <div className="container">
           <div className="page-skeleton">
             <div className="skeleton skeleton--text skeleton--wide" style={{ maxWidth: '400px', margin: '0 auto 16px' }} />
-            <div className="skeleton skeleton--text skeleton--mid" style={{ maxWidth: '300px', margin: '0 auto 16px' }} />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="skeleton skeleton--media" style={{ aspectRatio: '4/3', borderRadius: '12px' }} />
-              ))}
+            <div className="skeleton-row" style={{ marginBottom: '24px' }}>
+              <div className="skeleton skeleton--text" style={{ width: '120px', height: '16px' }} />
+              <div className="skeleton skeleton--text" style={{ width: '100px', height: '16px' }} />
+              <div className="skeleton skeleton--text" style={{ width: '100px', height: '16px' }} />
             </div>
           </div>
         </div>
@@ -120,7 +129,7 @@ function WalletTransactions() {
   return (
     <main className="wallet-page">
       <div className="container">
-        <Link to="/wallet" className="back-link">
+        <Link to="/community/wallet" className="back-link">
           <ArrowLeft size={16} /> Back to Wallet
         </Link>
 
@@ -320,16 +329,21 @@ function WalletTransactions() {
               <div className="transaction-empty__icon" aria-hidden="true">
                 <Receipt size={48} />
               </div>
-              <h3 className="transaction-empty__title">{hasAnyFilters ? 'No transactions match your filters' : 'No transactions yet'}</h3>
+              <h3 className="transaction-empty__title">
+                {hasAnyFilters ? 'No transactions match your filters' : 'No transactions yet'}
+              </h3>
               <p className="transaction-empty__description">
                 {hasAnyFilters
                   ? 'Try adjusting your filters to see more results.'
                   : 'Your transaction history will appear here once you make transactions.'}
               </p>
               {!hasAnyFilters && (
-                <ButtonLink to="/wallet/fund" variant="primary" className="transaction-empty__action">
-                  <Plus size={16} aria-hidden="true" />
-                  Fund Your Wallet
+                <ButtonLink
+                  to="/community/wallet/fund"
+                  variant="primary"
+                  className="transaction-empty__action"
+                >
+                  <Plus size={16} aria-hidden="true" /> Fund Your Wallet
                 </ButtonLink>
               )}
             </div>
@@ -360,24 +374,6 @@ function formatTime(dateString: string) {
     hour: '2-digit',
     minute: '2-digit',
   })
-}
-
-function getStatusBadgeClass(status: string) {
-  switch (status) {
-    case 'completed': return 'status-badge--success'
-    case 'pending': return 'status-badge--pending'
-    case 'failed': return 'status-badge--error'
-    default: return 'status-badge--neutral'
-  }
-}
-
-function getStatusLabel(status: string) {
-  switch (status) {
-    case 'completed': return 'Completed'
-    case 'pending': return 'Pending'
-    case 'failed': return 'Failed'
-    default: return status
-  }
 }
 
 export default WalletTransactions

@@ -4,7 +4,7 @@ import { ProtectedRoute, PublicOnlyRoute, ServicesRoute, ProviderRoute } from '.
 import { LegacyHelpRedirect } from './components/common/LegacyHelpRedirect'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
 import { AdminLayout } from './components/admin/AdminLayout'
-import { PublicLayout } from './layouts/PublicLayout'
+import { Layout } from './components/Layout'
 import { JobsLayout } from './layouts/JobsLayout'
 import { CommunityLayout } from './layouts/CommunityLayout'
 import { BusinessLayout } from './layouts/BusinessLayout'
@@ -13,9 +13,16 @@ import { ServicesCustomerLayout } from './layouts/ServicesCustomerLayout'
 import { WalletLayout } from './layouts/WalletLayout'
 import { AffiliateLayout } from './layouts/AffiliateLayout'
 import { MessagesLayout } from './layouts/MessagesLayout'
+import { DashboardLayout } from './components/layout/DashboardLayout'
+import { useAuth } from './context/AuthContext'
+const MessagesLandingPage = lazy(() => import('./pages/MessagesLandingPage'))
+const ConversationPage = lazy(() => import('./pages/ConversationPage'))
+const WatchExperience = lazy(() => import('./pages/watch/WatchExperience'))
 
 const Home = lazy(() => import('./pages/Home'))
-const SearchResults = lazy(() => import('./pages/SearchResults'))
+const HomeSearchResults = lazy(() => import('./pages/HomeSearchResults'))
+const HomeBrowsePages = lazy(() => import('./pages/HomeBrowsePages'))
+const BusinessesPage = lazy(() => import('./pages/businesses/BusinessesPage'))
 const BusinessProfile = lazy(() => import('./pages/BusinessProfile'))
 const ListBusiness = lazy(() => import('./pages/ListBusiness'))
 const HowItWorks = lazy(() => import('./pages/HowItWorks'))
@@ -31,7 +38,7 @@ const SettingsPrivacy = lazy(() => import('./pages/SettingsPrivacy'))
 const SettingsSecurity = lazy(() => import('./pages/SettingsSecurity'))
 const Terms = lazy(() => import('./pages/Terms'))
 const Privacy = lazy(() => import('./pages/Privacy'))
-const Notifications = lazy(() => import('./pages/Notifications'))
+const NotificationsWorkspace = lazy(() => import('./pages/NotificationsWorkspace'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const PendingListings = lazy(() => import('./pages/admin/PendingListings'))
 const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'))
@@ -58,7 +65,6 @@ const Categories = lazy(() => import('./pages/Categories'))
 
 const BusinessPortal = lazy(() => import('./pages/BusinessPortal'))
 const BusinessRegistration = lazy(() => import('./pages/BusinessRegistration'))
-const ServicesDashboard = lazy(() => import('./pages/ServicesDashboard'))
 const BusinessDashboard = lazy(() => import('./pages/BusinessDashboard'))
 const UserDashboard = lazy(() => import('./pages/UserDashboard'))
 const Login = lazy(() => import('./pages/Login'))
@@ -72,6 +78,10 @@ const ProviderProfile = lazy(() => import('./pages/provider/ProviderProfile'))
 const ProviderServices = lazy(() => import('./pages/provider/ProviderServices'))
 const ProviderRequests = lazy(() => import('./pages/provider/ProviderRequests'))
 const ServiceDiscovery = lazy(() => import('./pages/services/ServiceDiscovery'))
+const ServiceUnavailablePage = lazy(() => import('./pages/services/ServiceUnavailablePage'))
+const ServicesTransactions = lazy(() => import('./pages/services/ServicesTransactions'))
+const ServicesWallet = lazy(() => import('./pages/services/ServicesWallet'))
+const ServicesProfile = lazy(() => import('./pages/services/ServicesProfile'))
 const ServiceRequest = lazy(() => import('./pages/services/ServiceRequest'))
 const MyRequests = lazy(() => import('./pages/services/MyRequests'))
 
@@ -97,6 +107,7 @@ const RechargePin = lazy(() => import('./pages/RechargePin'))
 const DigitalProducts = lazy(() => import('./pages/DigitalProducts'))
 const Games = lazy(() => import('./pages/Games'))
 const SocialMedia = lazy(() => import('./pages/SocialMedia'))
+const VTUPurchase = lazy(() => import('./pages/VTUPurchase'))
 
 const Wallet = lazy(() => import('./pages/Wallet'))
 const WalletFund = lazy(() => import('./pages/WalletFund'))
@@ -115,10 +126,11 @@ const CommunityReportForm = lazy(() => import('./pages/community/CommunityReport
 const CommunityReportDetail = lazy(() => import('./pages/community/CommunityReportDetail'))
 
 const HelpLandingPage = lazy(() => import('./pages/help/HelpLandingPage'))
+import DashboardPage from './pages/DashboardPage'
 const HelpRequestsPage = lazy(() => import('./pages/help/HelpRequestsPage'))
 const RequestHelpPage = lazy(() => import('./pages/help/RequestHelpPage'))
-const SupportRequestDetailsPage = lazy(() => import('./pages/help/SupportRequestDetailsPage'))
 const RequestSuccessPage = lazy(() => import('./pages/help/RequestSuccessPage'))
+const SupportRequestDetailsPage = lazy(() => import('./pages/help/SupportRequestDetailsPage'))
 const HelpLayout = lazy(() => import('./pages/help/HelpLayout'))
 
 function ScrollToTop() {
@@ -145,6 +157,13 @@ function PageSkeleton() {
   )
 }
 
+function JobsRouteLayout() {
+  const { isServiceProvider } = useAuth()
+  return isServiceProvider
+    ? <DashboardLayout navigationMode="provider" showWorkspaceSwitcher><JobsListing /></DashboardLayout>
+    : <DashboardLayout><JobsListing /></DashboardLayout>
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -155,10 +174,15 @@ function App() {
       <Suspense fallback={<PageSkeleton />}>
         <ErrorBoundary>
           <Routes>
-            {/* PUBLIC LAYOUT - Marketing/Discovery pages with global Navbar */}
-            <Route element={<PublicLayout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/search" element={<SearchResults />} />
+            {/* Home dashboard has its own responsive navigation shell. */}
+            <Route path="/" element={<Home />} />
+            <Route path="/search" element={<HomeSearchResults />} />
+            <Route path="/nearby" element={<HomeBrowsePages variant="nearby" />} />
+            <Route path="/marketplace" element={<HomeBrowsePages variant="marketplace" />} />
+
+            {/* APP LAYOUT - All pages with single Navbar */}
+            <Route element={<Layout />}>
+              <Route path="/watch/*" element={<WatchExperience />} />
               <Route path="/business/:id" element={<BusinessProfile />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
@@ -200,31 +224,85 @@ function App() {
               <Route path="/provider/onboarding" element={<ProtectedRoute><ProviderOnboarding /></ProtectedRoute>} />
             </Route>
 
-            {/* JOBS LAYOUT - Jobs discovery and posting */}
-<Route element={<JobsLayout />}>
-  <Route path="/jobs" element={<JobsListing />} />
-  <Route path="/jobs/:id" element={<JobDetail />} />
-  <Route path="/jobs/post" element={<PostJob />} />
-  <Route path="/jobs/:jobId/applicants/:applicationId/interview/schedule" element={<ProtectedRoute><InterviewSchedule /></ProtectedRoute>} />
-</Route>
+{/* JOBS LISTING uses the shared dashboard shell. */}
+            <Route path="/jobs" element={<JobsRouteLayout />} />
+
+            {/* POST A JOB - Business owner only, uses dashboard layout */}
+            <Route
+              path="/jobs/post"
+              element={
+                <ProtectedRoute allowedRoles={['business_owner']}>
+                  <DashboardLayout navigationMode="provider" showWorkspaceSwitcher workspaceKey="business_owner">
+                    <PostJob />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route element={<DashboardLayout />}>
+              <Route path="/businesses" element={<BusinessesPage />} />
+              <Route path="/community" element={<CommunityHome />} />
+            </Route>
+
+            {/* Job detail and interview routes retain their existing layout. */}
+            <Route element={<JobsLayout />}>
+              <Route path="/jobs/:id" element={<JobDetail />} />
+              <Route path="/jobs/:jobId/applicants/:applicationId/interview/schedule" element={<ProtectedRoute><InterviewSchedule /></ProtectedRoute>} />
+            </Route>
+
+            {/* LIST YOUR BUSINESS - Any authenticated user, uses user dashboard layout */}
+            <Route
+              path="/list-business"
+              element={
+                <ProtectedRoute>
+                  <UserLayout>
+                    <ListBusiness />
+                  </UserLayout>
+                </ProtectedRoute>
+              }
+            />
 
             {/* COMMUNITY LAYOUT - Community features */}
             <Route element={<CommunityLayout />}>
-              <Route path="/community" element={<CommunityHome />} />
-              <Route path="/community/report" element={<CommunityReportForm />} />
+              <Route path="/community/events" element={<HomeBrowsePages variant="events" />} />
+              <Route path="/community/events/:id" element={<HomeBrowsePages variant="events" />} />
               <Route path="/community/report/:id" element={<CommunityReportDetail />} />
               <Route path="/community/:categorySlug" element={<CommunityCategoryPage />} />
+
+              <Route path="/community/wallet" element={<Navigate to="/wallet" replace />} />
+              <Route path="/community/wallet/fund" element={<Navigate to="/wallet/fund" replace />} />
+              <Route path="/community/wallet/transactions" element={<Navigate to="/wallet/transactions" replace />} />
             </Route>
 
-            {/* HELP LAYOUT - Help/Support pages (already has its own layout) */}
-            <Route element={<HelpLayout />}>
-              <Route path="/help" element={<HelpLandingPage />} />
-              <Route path="/help/categories" element={<HelpLandingPage />} />
-              <Route path="/help/requests" element={<HelpRequestsPage />} />
-              <Route path="/help/requests/:id" element={<SupportRequestDetailsPage />} />
-              <Route path="/help/request/:id" element={<SupportRequestDetailsPage />} />
+            {/* REPORT AN ISSUE - Any authenticated user, uses user dashboard layout */}
+            <Route
+              path="/community/report"
+              element={
+                <ProtectedRoute>
+                  <UserLayout>
+                    <CommunityReportForm />
+                  </UserLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route element={<ProtectedRoute><WalletLayout /></ProtectedRoute>}>
+              <Route path="/wallet" element={<Wallet />} />
+              <Route path="/wallet/fund" element={<WalletFund />} />
+              <Route path="/wallet/transactions" element={<WalletTransactions />} />
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/transactions/:id" element={<TransactionDetail />} />
+            </Route>
+
+            {/* HELP LAYOUT - Help & Support section */}
+            <Route path="/community/help" element={<HelpLayout />}>
+              <Route index element={<HelpLandingPage />} />
+              <Route path="categories" element={<HelpLandingPage />} />
+              <Route path="requests" element={<HelpRequestsPage />} />
+              <Route path="requests/:id" element={<SupportRequestDetailsPage />} />
+              <Route path="request/:id" element={<SupportRequestDetailsPage />} />
               <Route
-                path="/help/request"
+                path="request"
                 element={
                   <ProtectedRoute>
                     <RequestHelpPage />
@@ -232,34 +310,44 @@ function App() {
                 }
               />
               <Route
-                path="/help/request/success"
+                path="request/success"
                 element={
                   <ProtectedRoute>
                     <RequestSuccessPage />
                   </ProtectedRoute>
                 }
               />
+</Route>
+
+            {/* DASHBOARD LAYOUT - Main civic dashboard */}
+            <Route element={<DashboardLayout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="dashboard" element={<DashboardPage />} />
             </Route>
+
+            {/* Backward compatibility redirects for old /help/* routes */}
+            <Route path="/help" element={<Navigate to="/community/help" replace />} />
+            <Route path="/wallet/*" element={<Navigate to="/wallet" replace />} />
 
             {/* SERVICES CUSTOMER LAYOUT - Customer-facing services */}
             <Route element={<ServicesCustomerLayout />}>
               <Route path="/services" element={<ServiceDiscovery />} />
               <Route path="/services/request" element={<ServiceRequest />} />
               <Route element={<ServicesRoute><Outlet /></ServicesRoute>}>
-                <Route path="/services/dashboard" element={<ServicesDashboard />} />
-                <Route path="/services/data" element={<ComingSoon feature="Data Bundles" description="Buy internet data bundles for all networks." />} />
-                <Route path="/services/airtime" element={<ComingSoon feature="Airtime Recharge" description="Recharge airtime for all Nigerian networks instantly." />} />
-                <Route path="/services/electricity" element={<ComingSoon feature="Electricity Bills" description="Pay electricity bills for all distribution companies." />} />
-                <Route path="/services/tv" element={<ComingSoon feature="TV Subscriptions" description="Renew your cable TV subscriptions (DStv, GOtv, Startimes)." />} />
-                <Route path="/services/education" element={<ComingSoon feature="Education Payments" description="Pay school fees, exam fees, and other education expenses." />} />
-                <Route path="/services/recharge-pin" element={<ComingSoon feature="Recharge PIN" description="Buy recharge card PINs for all networks." />} />
-                <Route path="/services/digital-products" element={<ComingSoon feature="Digital Products" description="Purchase digital goods and subscriptions." />} />
-                <Route path="/services/games" element={<ComingSoon feature="Games & Entertainment" description="Buy game credits, gift cards, and entertainment subscriptions." />} />
-                <Route path="/services/social-media" element={<ComingSoon feature="Social Media Services" description="Boost your social media presence with followers, likes, and views." />} />
-                <Route path="/services/wallet" element={<ComingSoon feature="Wallet" description="Manage your funds and transactions." />} />
-                <Route path="/services/wallet/fund" element={<ComingSoon feature="Wallet Funding" description="Add funds to your wallet." />} />
-                <Route path="/services/transactions" element={<ComingSoon feature="Transactions" description="View your transaction history." />} />
-                <Route path="/services/profile" element={<ProfileSettings />} />
+                <Route path="/services/dashboard" element={<ServiceDiscovery />} />
+                <Route path="/services/data" element={<VTUPurchase type="data" />} />
+                <Route path="/services/airtime" element={<VTUPurchase type="airtime" />} />
+                <Route path="/services/electricity" element={<ServiceUnavailablePage feature="Electricity payments" description="Paying a utility bill requires a live disco and meter verification provider. That integration is not configured in this project yet." />} />
+                <Route path="/services/tv" element={<ServiceUnavailablePage feature="TV subscriptions" description="TV subscription checkout needs a connected provider for smartcard verification and current packages. That integration is not configured yet." />} />
+                <Route path="/services/education" element={<ServiceUnavailablePage feature="Education payments" description="Education products and candidate verification are not connected to a live provider yet." />} />
+                <Route path="/services/recharge-pin" element={<ServiceUnavailablePage feature="Recharge PIN" description="Recharge PIN availability, denominations, delivery, and secure PIN display require a connected provider that is not configured yet." />} />
+                <Route path="/services/digital-products" element={<ServiceUnavailablePage feature="Digital products" description="There is no live product catalog or delivery provider connected for digital products yet." />} />
+                <Route path="/services/games" element={<ServiceUnavailablePage feature="Games and entertainment" description="Game credits, gift cards, and subscription products require a connected catalog and fulfillment provider that is not configured yet." />} />
+                <Route path="/services/social-media" element={<ServiceUnavailablePage feature="Social media services" description="There is no connected provider for social media packages, order tracking, or delivery status yet." />} />
+                <Route path="/services/wallet" element={<ServicesWallet />} />
+                <Route path="/services/wallet/fund" element={<ServiceUnavailablePage feature="Wallet funding" description="A production wallet funding or virtual-account provider is not connected here yet. You can choose Paystack during supported data or airtime purchases." />} />
+                <Route path="/services/transactions" element={<ServicesTransactions />} />
+                <Route path="/services/profile" element={<ServicesProfile><ProfileSettings /></ServicesProfile>} />
               </Route>
             </Route>
 
@@ -279,7 +367,6 @@ function App() {
 
             {/* USER LAYOUT - User dashboard/profile/settings */}
             <Route element={<ProtectedRoute><UserLayout /></ProtectedRoute>}>
-              <Route path="/dashboard" element={<UserDashboard />} />
               <Route path="/user/dashboard" element={<UserDashboard />} />
               <Route path="/user/profile" element={<ProfileSettings />} />
               <Route path="/profile" element={<ProfileSettings />} />
@@ -288,21 +375,14 @@ function App() {
               <Route path="/settings/appearance" element={<SettingsAppearance />} />
               <Route path="/settings/privacy" element={<SettingsPrivacy />} />
               <Route path="/settings/security" element={<SettingsSecurity />} />
-              <Route path="/notifications" element={<Notifications />} />
               <Route path="/saved" element={<SavedBusinesses />} />
               <Route path="/favorites" element={<SavedBusinesses />} />
               <Route path="/account" element={<AccountPage />} />
               <Route path="/my-requests" element={<MyRequests />} />
             </Route>
 
-            {/* WALLET LAYOUT - Wallet and transactions */}
-            <Route element={<ProtectedRoute><WalletLayout /></ProtectedRoute>}>
-              <Route path="/wallet" element={<ComingSoon feature="Wallet" description="Wallet functionality is being developed. You'll be able to manage funds, track transactions, and make payments securely." />} />
-              <Route path="/wallet/fund" element={<ComingSoon feature="Wallet Funding" description="Add funds to your wallet using multiple payment methods." />} />
-              <Route path="/wallet/transactions" element={<ComingSoon feature="Wallet Transactions" description="View your complete transaction history." />} />
-              <Route path="/transactions" element={<ComingSoon feature="Transactions" description="View all your platform transactions in one place." />} />
-              <Route path="/transactions/:id" element={<ComingSoon feature="Transaction Details" description="View detailed information about a specific transaction." />} />
-            </Route>
+            {/* Notifications use the active account workspace while sharing one page and data source. */}
+            <Route path="/notifications" element={<ProtectedRoute><NotificationsWorkspace /></ProtectedRoute>} />
 
             {/* AFFILIATE LAYOUT - Affiliate/Share & Earn */}
             <Route element={<ProtectedRoute><AffiliateLayout /></ProtectedRoute>}>
@@ -314,7 +394,8 @@ function App() {
 
             {/* MESSAGES LAYOUT - Messages */}
             <Route element={<ProtectedRoute><MessagesLayout /></ProtectedRoute>}>
-              <Route path="/messages" element={<ComingSoon feature="Messages" description="Direct messages from businesses and support are being developed. You'll be able to chat securely from this dashboard." />} />
+              <Route path="/messages" element={<MessagesLandingPage />} />
+              <Route path="/messages/:conversationId" element={<ConversationPage />} />
             </Route>
 
             {/* PROVIDER WORKSPACE - Service provider workspace */}
@@ -327,7 +408,7 @@ function App() {
             </Route>
 
             {/* JOB SEEKER WORKSPACE - Job seeker dashboard */}
-            <Route element={<ProtectedRoute><JobSeekerLayout /></ProtectedRoute>}>
+            <Route element={<ProtectedRoute allowedRoles={['user', 'customer']}><JobSeekerLayout /></ProtectedRoute>}>
               <Route path="/job-seeker" element={<JobSeekerDashboard />} />
               <Route index element={<JobSeekerDashboard />} />
             </Route>

@@ -1,0 +1,110 @@
+.messages-games-panel { max-height: min(62vh, 590px); flex: none; overflow: auto; padding: 14px 16px 11px; border-top: 1px solid #dce8df; background: #f8fbf8; color: #26382e; }
+.messages-games-panel button { font: inherit; }
+.messages-games-panel__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.messages-games-panel__header h2 { margin: 4px 0 3px; color: #263b2f; font-size: 17px; line-height: 1.25; }
+.messages-games-panel__header p { margin: 0; color: #65766b; font-size: 11px; line-height: 1.45; }
+.messages-games-panel__eyebrow { display: flex; align-items: center; gap: 5px; color: #116340; font-size: 9px; font-weight: 800; letter-spacing: .8px; }
+.messages-games-panel__close { width: 34px; height: 34px; display: grid; flex: none; place-items: center; border: 1px solid #dce7de; border-radius: 9px; color: #4e6456; background: #fff; cursor: pointer; }
+.messages-games-panel__close:hover { color: #084c35; border-color: #98bca3; }
+.messages-games-search { height: 39px; display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 0 11px; border: 1px solid #dce6de; border-radius: 9px; color: #65806e; background: #fff; }
+.messages-games-search input { width: 100%; min-width: 0; border: 0; outline: 0; color: #24372b; background: transparent; font-size: 11px; }
+.messages-games-search:focus-within { border-color: #30865c; box-shadow: 0 0 0 3px rgba(48,134,92,.14); }
+.messages-games-tabs { display: flex; gap: 5px; overflow-x: auto; margin: 10px -2px 0; padding: 2px; scrollbar-width: thin; }
+.messages-games-tabs button { min-height: 33px; flex: none; padding: 0 10px; border: 1px solid #dce7df; border-radius: 999px; color: #5a6d60; background: #fff; font-size: 10px; font-weight: 650; white-space: nowrap; cursor: pointer; }
+.messages-games-tabs button.is-active { border-color: #14532d; color: #fff; background: #14532d; }
+.messages-games-tabs button:focus-visible, .messages-games-panel button:focus-visible, .message-game-invite button:focus-visible { outline: 2px solid #166534; outline-offset: 2px; }
+.messages-games-panel__content { padding-top: 10px; }
+.messages-games-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.messages-game-card { min-width: 0; display: grid; grid-template-columns: 36px minmax(0,1fr); align-items: start; gap: 8px; padding: 10px; border: 1px solid #e0e9e2; border-radius: 11px; background: #fff; }
+.messages-game-card__icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; color: #116340; background: #e8f4eb; }
+.messages-game-card__copy { min-width: 0; display: grid; gap: 4px; }
+.messages-game-card__copy > span { color: #357753; font-size: 8px; font-weight: 750; text-transform: uppercase; letter-spacing: .55px; }
+.messages-game-card__copy strong { color: #2c4034; font-size: 11px; }
+.messages-game-card__copy p { min-height: 31px; margin: 0; color: #68786d; font-size: 9px; line-height: 1.45; }
+.messages-game-card__copy small { display: flex; align-items: center; gap: 4px; color: #76867b; font-size: 8px; }
+.messages-game-card > button { grid-column: 1 / -1; min-height: 32px; width: 100%; border: 0; border-radius: 7px; color: #fff; background: #075c42; font-size: 10px; font-weight: 700; cursor: pointer; }
+.messages-game-card > button:hover, .messages-game-preview__actions > button:hover { background: #064a36; }
+.messages-game-preview { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 9px; padding: 11px 12px; border: 1px solid #b8d8c2; border-radius: 11px; background: #eff8f1; }
+.messages-game-preview > div:first-child { min-width: min(100%,220px); flex: 1; }
+.messages-game-preview > div:first-child > span { color: #226d48; font-size: 8px; font-weight: 800; letter-spacing: .8px; }
+.messages-game-preview h3 { margin: 3px 0; color: #21392a; font-size: 13px; }
+.messages-game-preview p { margin: 0; color: #52695a; font-size: 9px; line-height: 1.45; }
+.messages-game-preview small { display: block; margin-top: 4px; color: #617569; font-size: 8px; }
+.messages-game-preview__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.messages-game-preview__actions > button, .games-secondary-button { min-height: 34px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; border: 1px solid #075c42; border-radius: 8px; color: #fff; background: #075c42; font-size: 9px; font-weight: 700; cursor: pointer; }
+.messages-game-preview__actions > button.is-secondary { border-color: #b7cfbd; color: #205d3b; background: #fff; }
+.messages-game-preview__actions > button.is-secondary:hover { border-color: #619474; background: #f5fbf6; }
+.messages-game-preview__notice { flex-basis: 100%; color: #6d7e71 !important; }
+.messages-games-unavailable { min-height: 170px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 16px; color: #607268; text-align: center; }
+.messages-games-unavailable > svg { color: #28704b; }
+.messages-games-unavailable > span { margin-top: 7px; color: #367451; font-size: 8px; font-weight: 800; letter-spacing: .8px; }
+.messages-games-unavailable h3 { margin: 4px 0; color: #2b4033; font-size: 13px; }
+.messages-games-unavailable p { max-width: 480px; margin: 0; color: #66776b; font-size: 10px; line-height: 1.5; }
+.messages-games-unavailable small { max-width: 480px; margin-top: 7px; color: #75857a; font-size: 9px; }
+.messages-games-unavailable__icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; color: #266f49; background: #e8f4eb; }
+.messages-games-challenge-list { width: min(500px,100%); display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 12px; }
+.messages-games-challenge-list button { min-height: 32px; display: inline-flex; align-items: center; gap: 5px; padding: 0 9px; border: 1px solid #d7e4da; border-radius: 8px; color: #3b6248; background: #fff; font-size: 9px; cursor: pointer; }
+.messages-games-recent { width: min(470px,100%); display: flex; align-items: center; gap: 8px; margin-top: 6px; padding: 8px 10px; border: 1px solid #e2ebe4; border-radius: 8px; color: #344b3b; background: #fff; font-size: 10px; }
+.messages-games-recent > svg { color: #28704b; }
+.messages-games-recent small { margin-left: auto; color: #75857a; font-size: 8px; }
+.messages-games-empty { padding: 15px; color: #77867b; text-align: center; font-size: 10px; }
+.messages-games-panel__footer { display: flex; align-items: center; gap: 6px; margin-top: 9px; padding-top: 8px; border-top: 1px solid #e3ebe5; color: #6e7e72; font-size: 8px; line-height: 1.4; }
+.games-local-game { display: flex; flex-direction: column; align-items: center; padding: 3px 0 8px; text-align: center; }
+.games-local-game__top { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #708176; font-size: 9px; }
+.games-local-game__top button { min-height: 30px; display: inline-flex; align-items: center; gap: 5px; padding: 0 8px; border: 1px solid #dce7df; border-radius: 7px; color: #3a6048; background: #fff; font-size: 9px; cursor: pointer; }
+.games-local-game h3 { margin: 10px 0 2px; color: #243a2d; font-size: 15px; }
+.games-local-game > p { margin: 0 0 10px; color: #607268; font-size: 10px; }
+.games-ttt-board { width: min(225px,72vw); display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; }
+.games-ttt-board button { aspect-ratio: 1; border: 1px solid #b8d4c0; border-radius: 9px; color: #155a3b; background: #fff; font-size: 25px; font-weight: 800; cursor: pointer; }
+.games-ttt-board button:disabled { cursor: default; }
+.games-score { width: min(300px,100%); display: flex; align-items: center; justify-content: space-around; gap: 8px; margin: 10px 0; color: #637568; font-size: 9px; }
+.games-score span { display: flex; align-items: center; gap: 5px; }.games-score strong { color: #205d3b; }
+.games-secondary-button { min-height: 31px; border-color: #d1e1d5; color: #225e3a; background: #fff; }
+.games-secondary-button:hover { background: #eff8f1; }
+.games-memory-board { width: min(330px,92%); display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+.games-memory-board button { aspect-ratio: 1; border: 1px solid #c6dccb; border-radius: 9px; color: #175b3d; background: #fff; font-size: 21px; cursor: pointer; }
+.games-rps-choices { display: flex; gap: 7px; margin: 8px 0; }
+.games-rps-choices button { min-height: 38px; padding: 0 12px; border: 1px solid #c8dccd; border-radius: 9px; color: #205d3b; background: #fff; font-size: 10px; cursor: pointer; }
+.games-rps-reveal { margin: 0 0 8px; padding: 7px 9px; border-radius: 8px; color: #294431; background: #eff8f1; font-size: 10px; }.games-rps-reveal span { padding: 0 6px; color: #718178; }
+.message-game-invite { max-width: min(100%,420px); display: flex; gap: 10px; padding: 11px; border: 1px solid #b7d6c0; border-radius: 10px; color: #344b3a; background: #f2faf4; }
+.message-game-invite__icon { width: 34px; height: 34px; display: grid; flex: none; place-items: center; border-radius: 9px; color: #126340; background: #e2f1e6; }
+.message-game-invite__body { min-width: 0; display: grid; gap: 4px; }
+.message-game-invite__body > strong { color: #294433; font-size: 11px; }
+.message-game-invite__body > span, .message-game-invite__body > small { color: #617368; font-size: 9px; }
+.message-game-invite__body > small { font-size: 8px; }
+.message-game-invite__actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
+.message-game-invite__actions button { min-height: 29px; padding: 0 8px; border: 1px solid #b9d3c0; border-radius: 7px; color: #205e3b; background: #fff; font-size: 8px; font-weight: 700; cursor: pointer; }
+.message-game-invite__actions button:first-child { border-color: #075c42; color: #fff; background: #075c42; }
+.message-game-invite__status { margin-top: 2px; color: #55745e !important; font-size: 8px !important; }
+.message-game-result { max-width: min(100%,420px); display: flex; align-items: flex-start; gap: 9px; padding: 10px 11px; border: 1px solid #d7c78d; border-radius: 10px; color: #495332; background: #fffbed; }
+.message-game-result > svg { flex: none; margin-top: 1px; color: #907129; }
+.message-game-result > div { display: grid; gap: 3px; }
+.message-game-result strong { color: #4d4326; font-size: 10px; }
+.message-game-result span { color: #596245; font-size: 9px; }
+.message-game-result small { color: #77735f; font-size: 8px; }
+:root.dark .messages-games-panel { border-color: #2b4032; color: #e1ebe3; background: #17231b; }
+:root.dark .messages-games-panel__header h2, :root.dark .messages-game-preview h3, :root.dark .messages-games-unavailable h3, :root.dark .games-local-game h3 { color: #e6f0e8; }
+:root.dark .messages-games-panel__header p, :root.dark .messages-game-preview p, :root.dark .messages-game-preview small, :root.dark .messages-games-unavailable p, :root.dark .messages-games-unavailable small, :root.dark .messages-games-panel__footer, :root.dark .games-local-game > p { color: #b3c1b6; }
+:root.dark .messages-games-panel__close, :root.dark .messages-games-search, :root.dark .messages-games-tabs button, :root.dark .messages-game-card, :root.dark .messages-games-challenge-list button, :root.dark .messages-games-recent, :root.dark .games-local-game__top button, :root.dark .games-ttt-board button, :root.dark .games-memory-board button, :root.dark .games-rps-choices button, :root.dark .games-secondary-button, :root.dark .message-game-invite__actions button { border-color: #344c3a; color: #e0ebe2; background: #1e3024; }
+:root.dark .messages-games-search input, :root.dark .messages-game-card__copy strong, :root.dark .message-game-invite__body > strong { color: #e6f0e8; }
+:root.dark .messages-games-search:focus-within { border-color: #69aa7e; }
+:root.dark .messages-games-tabs button.is-active, :root.dark .messages-game-card > button, :root.dark .messages-game-preview__actions > button:not(.is-secondary), :root.dark .message-game-invite__actions button:first-child { border-color: #4e9d6c; color: #f4fff6; background: #17613e; }
+:root.dark .messages-game-card__copy p, :root.dark .messages-game-card__copy small, :root.dark .messages-game-preview > div:first-child > span, :root.dark .messages-games-recent, :root.dark .message-game-invite__body > span, :root.dark .message-game-invite__body > small { color: #bac9bd; }
+:root.dark .messages-game-preview { border-color: #335a40; background: #1b3624; }
+:root.dark .messages-game-preview__actions > button.is-secondary { border-color: #42664c; color: #d5ead9; background: #203627; }
+:root.dark .message-game-invite { border-color: #38583f; color: #dbe9de; background: #1d3424; }
+:root.dark .message-game-invite__icon { color: #a8dfb7; background: #274b32; }
+:root.dark .message-game-result { border-color: #615432; color: #ece2bf; background: #302b1d; }
+:root.dark .message-game-result strong, :root.dark .message-game-result span, :root.dark .message-game-result small { color: #e7dbb1; }
+@media (max-width: 900px) { .messages-games-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 600px) {
+  .messages-games-panel { max-height: 62dvh; padding: 12px 11px 9px; }
+  .messages-games-grid { grid-template-columns: minmax(0,1fr); }
+  .messages-game-card { grid-template-columns: 34px minmax(0,1fr) 75px; align-items: center; }
+  .messages-game-card > button { grid-column: auto; }
+  .messages-game-card__copy p { min-height: 0; }
+  .messages-game-preview { align-items: stretch; }
+  .messages-game-preview__actions { width: 100%; }
+  .messages-game-preview__actions > button { flex: 1; }
+  .messages-game-preview__notice { width: 100%; }
+}

@@ -97,7 +97,7 @@ function Transactions() {
   return (
     <main className="page">
       <div className="container">
-        <Link to="/wallet" className="back-link">
+        <Link to="/community/wallet" className="back-link">
           <ArrowLeft size={16} /> Back to Wallet
         </Link>
 

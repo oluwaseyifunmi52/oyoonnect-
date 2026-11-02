@@ -96,7 +96,7 @@ export function SupportRequestDetailsPage() {
       notificationService.addNotification({
         category: 'account',
         title: 'New Support Received',
-        message: `Someone supported your request "${request.title}" with ${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(selectedAmount)}!`,
+        message: `Someone supported your request "${request.title}" with ${formatCurrency(selectedAmount, { showDecimals: false })}!`,
         read: false,
         createdAt: new Date().toISOString(),
         href: `/help/requests/${request.id}`,
@@ -153,13 +153,13 @@ export function SupportRequestDetailsPage() {
   return (
     <div className="support-details-page">
       <div className="container">
-        <BackButton fallback="/help/requests" label="Back to requests" variant="ghost" size="sm" className="page-back-link" />
+        <BackButton fallback="/community/help/requests" label="Back to requests" variant="ghost" size="sm" className="page-back-link" />
         <nav className="support-details__breadcrumb" aria-label="Breadcrumb">
-          <Link to="/help" className="support-details__breadcrumb-link">
+          <Link to="/community/help" className="support-details__breadcrumb-link">
             Help
           </Link>
           <span aria-hidden="true">/</span>
-          <Link to="/help/requests" className="support-details__breadcrumb-link">
+          <Link to="/community/help/requests" className="support-details__breadcrumb-link">
             Requests
           </Link>
           <span aria-hidden="true">/</span>

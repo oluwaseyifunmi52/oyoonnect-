@@ -1,11 +1,13 @@
 import { useState, useCallback } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom'
 import { Mail, AlertCircle, CheckCircle2, Loader2, ArrowLeft, Info } from 'lucide-react'
 import { Input } from '../components/ui/Input'
 import { Button, ButtonLink } from '../components/ui/Button'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { authService, AUTH_PROVIDER } from '../services/authService'
+import { Logo } from '../components/layout/Logo'
+import './Login.css'
 
 const DEV_RECOVERY_MESSAGE = "Password recovery will be available when OyoConnect's backend authentication system is connected."
 
@@ -13,11 +15,22 @@ type ForgotPasswordStep = 'request' | 'success'
 
 function ForgotPassword() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
   const [step, setStep] = useState<ForgotPasswordStep>('request')
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  const stateFrom = (location.state as { from?: { pathname?: string; search?: string } | string } | null)?.from
+  const stateFromPath =
+    typeof stateFrom === 'string'
+      ? stateFrom
+      : stateFrom
+        ? `${stateFrom.pathname ?? ''}${stateFrom.search ?? ''}`
+        : ''
+  const redirect = searchParams.get('redirect') || stateFromPath
 
   const isDevAuth = AUTH_PROVIDER === 'dev'
 
@@ -55,35 +68,52 @@ function ForgotPassword() {
   }
 
   return (
-    <main className="page auth-page">
-      <div className="container container--narrow">
-        <div className="auth-card">
+    <main className="login-page">
+      <div className="login-page__hero" aria-hidden="true">
+        <div className="login-page__hero-gradient" />
+        <img
+          src="/images/oyo-hero.jpg"
+          alt=""
+          className="login-page__hero-image"
+          loading="eager"
+        />
+        <div className="login-page__hero-content">
+          <Logo subtitle />
+          <p className="login-page__eyebrow">OYO STATE, NIGERIA</p>
+          <h1 className="login-page__hero-title">Together for a better Oyo</h1>
+          <p className="login-page__hero-description">
+            One platform to find services, hire talent, grow your business,
+            and connect with your community across all 33 LGAs.
+          </p>
+        </div>
+      </div>
+
+      <div className="login-page__form-wrapper">
+        <div className="login-page__form-card">
+          <div className="login-page__form-header">
+            <Link to="/login" className="auth-back-link" aria-label="Back to login">
+              <ArrowLeft size={20} />
+            </Link>
+            <Logo subtitle link={false} />
+            <h1 className="section-heading__title">Reset your password</h1>
+            <p className="section-heading__subtitle">Enter your email address and we'll send you a link to reset your password.</p>
+          </div>
+
+          {isDevAuth && (
+            <div className="auth-notice" role="status">
+              <Info size={18} aria-hidden="true" />
+              <span>{DEV_RECOVERY_MESSAGE}</span>
+            </div>
+          )}
+          {error && (
+            <div className="auth-error" role="alert">
+              <AlertCircle size={18} aria-hidden="true" />
+              <span>{error}</span>
+            </div>
+          )}
+
           {step === 'request' && (
             <>
-              <div className="auth-header">
-                <Link to="/login" className="auth-back-link" aria-label="Back to login">
-                  <ArrowLeft size={20} />
-                </Link>
-                <SectionHeading
-                  eyebrow="Forgot Password"
-                  title="Reset your password"
-                  subtitle="Enter your email address and we'll send you a link to reset your password."
-                />
-              </div>
-
-              {isDevAuth && (
-                <div className="auth-notice" role="status">
-                  <Info size={18} aria-hidden="true" />
-                  <span>{DEV_RECOVERY_MESSAGE}</span>
-                </div>
-              )}
-              {error && (
-                <div className="auth-error" role="alert">
-                  <AlertCircle size={18} aria-hidden="true" />
-                  <span>{error}</span>
-                </div>
-              )}
-
               <form onSubmit={handleRequestReset} className="auth-form" noValidate>
                 <Input
                   label="Email address"
@@ -121,7 +151,7 @@ function ForgotPassword() {
           )}
 
           {step === 'success' && (
-            <div className="auth-card success-state">
+            <div className="auth-form signup-success">
               <div className="success-icon">
                 <CheckCircle2 size={48} />
               </div>
@@ -131,10 +161,10 @@ function ForgotPassword() {
                 The link will expire in 1 hour. If you don't see the email, check your spam folder.
               </p>
               <div className="auth-success-actions">
-                <ButtonLink to="/login" variant="primary" size="lg">
+                <ButtonLink to="/login" variant="primary" size="lg" fullWidth className="auth-submit">
                   Back to Sign In
                 </ButtonLink>
-                <ButtonLink to="/forgot-password" variant="outline" size="lg" onClick={() => { setEmail(''); setStep('request'); }}>
+                <ButtonLink to="/forgot-password" variant="outline" size="lg" fullWidth onClick={() => { setEmail(''); setStep('request'); }}>
                   Resend Email
                 </ButtonLink>
               </div>

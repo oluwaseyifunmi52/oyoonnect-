@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Shield, Lock, Key, UserCheck, AlertTriangle, Smartphone, Mail, CheckCircle2 } from 'lucide-react'
+import { Shield, Lock, Key, UserCheck, AlertTriangle, Smartphone, Mail, CheckCircle2, AlertCircle, Eye, EyeOff, Save, Loader2 } from 'lucide-react'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { useAuth } from '../context/AuthContext'
 import { BackButton } from '../components/ui/BackButton'
+import { Input } from '../components/ui/Input'
+import { Button } from '../components/ui/Button'
 
 interface SecurityState {
   twoFactorEnabled: boolean
@@ -13,12 +15,25 @@ interface SecurityState {
 type SecurityKey = 'twoFactorEnabled' | 'twoFactorMethod' | 'backupCodes'
 
 export function SettingsSecurity() {
-  const { isAuthenticated } = useAuth()
-  const [security, setSecurity] = useState<{ twoFactorEnabled: boolean; twoFactorMethod: 'authenticator' | 'sms'; backupCodes: boolean }>({
+  const { isAuthenticated, changePassword } = useAuth()
+  const [security, setSecurity] = useState<SecurityState>({
     twoFactorEnabled: false,
     twoFactorMethod: 'authenticator',
     backupCodes: false,
   })
+
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  })
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({})
+  const [passwordSaving, setPasswordSaving] = useState(false)
+  const [passwordStatus, setPasswordStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   if (!isAuthenticated) {
     return (
@@ -41,17 +56,57 @@ export function SettingsSecurity() {
     setSecurity(prev => ({ ...prev, [key]: value }))
   }
 
-  if (!isAuthenticated) {
-    return (
-      <main className="page auth-page">
-        <div className="container container--narrow">
-          <div className="auth-card">
-            <h1>Please sign in</h1>
-            <p>You need to be logged in to access security settings.</p>
-          </div>
-        </div>
-      </main>
-    )
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 8) return 'Password must be at least 8 characters'
+    if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter'
+    if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter'
+    if (!/[0-9]/.test(password)) return 'Password must contain at least one number'
+    return null
+  }
+
+  const validatePasswordForm = (): boolean => {
+    const errors: Record<string, string> = {}
+    if (!passwordForm.currentPassword) errors.currentPassword = 'Current password is required'
+    if (!passwordForm.newPassword) errors.newPassword = 'New password is required'
+    else {
+      const validationError = validatePassword(passwordForm.newPassword)
+      if (validationError) errors.newPassword = validationError
+    }
+    if (!passwordForm.confirmPassword) errors.confirmPassword = 'Please confirm your new password'
+    else if (passwordForm.confirmPassword !== passwordForm.newPassword) errors.confirmPassword = 'Passwords do not match'
+    setPasswordErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validatePasswordForm()) return
+
+    setPasswordSaving(true)
+    setPasswordStatus('idle')
+    try {
+      await changePassword(passwordForm.currentPassword, passwordForm.newPassword)
+      setPasswordStatus('success')
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      setShowPasswordForm(false)
+      setTimeout(() => setPasswordStatus('idle'), 3000)
+    } catch (err) {
+      setPasswordErrors({ form: err instanceof Error ? err.message : 'Failed to change password. Please try again.' })
+      setPasswordStatus('error')
+    } finally {
+      setPasswordSaving(false)
+    }
+  }
+
+  const handlePasswordInputChange = (field: keyof typeof passwordForm, value: string) => {
+    setPasswordForm(prev => ({ ...prev, [field]: value }))
+    if (passwordErrors[field]) {
+      setPasswordErrors(prev => {
+        const next = { ...prev }
+        delete next[field]
+        return next
+      })
+    }
   }
 
   return (
@@ -138,8 +193,8 @@ export function SettingsSecurity() {
           )}
 
           <div className="security-actions">
-            <button className="btn btn--outline">View Backup Codes</button>
-            <button className="btn btn--primary">Setup 2FA</button>
+            <Button variant="outline" disabled>View Backup Codes</Button>
+            <Button variant="primary" disabled>Setup 2FA</Button>
           </div>
         </section>
 
@@ -148,20 +203,138 @@ export function SettingsSecurity() {
             <h2>Password</h2>
             <p>Your password is the first line of defense for your account.</p>
           </header>
-          <div className="security-setting">
-            <div className="security-setting-info">
-              <div className="security-setting-icon">
-                <Lock size={24} />
+
+          {!showPasswordForm ? (
+            <div className="security-setting">
+              <div className="security-setting-info">
+                <div className="security-setting-icon">
+                  <Lock size={24} />
+                </div>
+                <div className="security-setting-content">
+                  <h3>Change Password</h3>
+                  <p>Update your password regularly to keep your account secure.</p>
+                </div>
               </div>
-              <div className="security-setting-content">
-                <h3>Change Password</h3>
-                <p>Update your password regularly to keep your account secure.</p>
+              <div className="security-setting-control">
+                <Button variant="primary" onClick={() => setShowPasswordForm(true)}>
+                  <Key size={16} aria-hidden="true" />
+                  Change Password
+                </Button>
               </div>
             </div>
-            <div className="security-setting-control">
-              <button className="btn btn--primary">Change Password</button>
+          ) : (
+            <div className="security-setting">
+              <div className="security-setting-info">
+                <div className="security-setting-icon">
+                  <Lock size={24} />
+                </div>
+                <div className="security-setting-content">
+                  <h3>Change Password</h3>
+                  <p>Enter your current password and a new secure password.</p>
+                </div>
+              </div>
+
+              <form onSubmit={handlePasswordChange} className="password-change-form" noValidate>
+                {passwordStatus === 'success' && (
+                  <div className="password-success" role="status">
+                    <CheckCircle2 size={18} aria-hidden="true" />
+                    <span>Password changed successfully</span>
+                  </div>
+                )}
+
+                {passwordStatus === 'error' && passwordErrors.form && (
+                  <div className="password-error" role="alert">
+                    <AlertCircle size={18} aria-hidden="true" />
+                    <span>{passwordErrors.form}</span>
+                  </div>
+                )}
+
+                <Input
+                  label="Current Password"
+                  name="currentPassword"
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
+                  autoComplete="current-password"
+                  required
+                  error={passwordErrors.currentPassword}
+                  rightIcon={
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShowCurrentPassword(v => !v)}
+                      aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  }
+                />
+
+                <Input
+                  label="New Password"
+                  name="newPassword"
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={passwordForm.newPassword}
+                  onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
+                  autoComplete="new-password"
+                  required
+                  error={passwordErrors.newPassword}
+                  hint="At least 8 characters with uppercase, lowercase, and number"
+                  rightIcon={
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShowNewPassword(v => !v)}
+                      aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  }
+                />
+
+                <Input
+                  label="Confirm New Password"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
+                  autoComplete="new-password"
+                  required
+                  error={passwordErrors.confirmPassword}
+                  rightIcon={
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShowConfirmPassword(v => !v)}
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  }
+                />
+
+                <div className="password-form-actions">
+                  <Button type="button" variant="outline" onClick={() => { setShowPasswordForm(false); setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' }); setPasswordErrors({}); setPasswordStatus('idle'); }}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" variant="primary" disabled={passwordSaving}>
+                    {passwordSaving ? (
+                      <>
+                        <Loader2 size={18} className="btn__spinner" aria-hidden="true" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={16} aria-hidden="true" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
             </div>
-          </div>
+          )}
+
         </section>
 
         <section className="settings-card-group">
@@ -180,7 +353,7 @@ export function SettingsSecurity() {
               </div>
             </div>
             <div className="security-setting-control">
-              <button className="btn btn--outline">View Sessions</button>
+              <Button variant="outline" disabled>View Sessions</Button>
             </div>
           </div>
           <div className="security-setting-note">
@@ -204,7 +377,7 @@ export function SettingsSecurity() {
               </div>
             </div>
             <div className="security-setting-control">
-              <button className="btn btn--primary" disabled>Create Passkey</button>
+              <Button variant="primary" disabled>Create Passkey</Button>
             </div>
             <div className="security-setting-note">
               <p>Passkey support requires WebAuthn backend integration.</p>
@@ -228,13 +401,13 @@ export function SettingsSecurity() {
               </div>
             </div>
             <div className="security-setting-control">
-              <button className="btn btn--danger" onClick={() => {
+              <Button variant="danger" onClick={() => {
                 if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
                   alert('Account deletion requires backend integration.')
                 }
               }}>
                 Delete Account
-              </button>
+              </Button>
             </div>
           </div>
         </section>

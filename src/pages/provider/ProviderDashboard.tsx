@@ -1,150 +1,96 @@
-import { Navigate } from 'react-router-dom'
-import { Inbox, Briefcase, Search, UserCog, FileText } from 'lucide-react'
-import { useAuth } from '../../context/AuthContext'
-import { useDashboardData } from '../../hooks/useDashboardData'
+import { Navigate, Link } from 'react-router-dom'
 import {
-  DashboardHeader,
-  StatCard,
-  QuickActionCard,
-  ActivityList,
-  DashboardSkeleton,
-} from '../../components/dashboard'
-import type { ActivityItem } from '../../components/dashboard'
-import type { LucideIcon } from 'lucide-react'
+  ArrowRight, Briefcase, CheckCircle2, ChevronRight, Inbox, Search, UserRound,
+} from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
+import { Avatar } from '../../components/profile/Avatar'
+import { StatCard } from '../../components/dashboard'
 
-const PROVIDER_QUICK_ACTIONS: { to: string; icon: LucideIcon; title: string; description: string; cta: string }[] = [
-  { to: '/provider/services', icon: Briefcase, title: 'Manage Services', description: 'Add or edit the services you offer.', cta: 'Manage Services' },
-  { to: '/provider/requests', icon: Inbox, title: 'Service Requests', description: 'View requests from customers.', cta: 'View Requests' },
-  { to: '/jobs', icon: Search, title: 'Find Work', description: 'Browse available work opportunities.', cta: 'Find Work' },
-  { to: '/provider/profile', icon: UserCog, title: 'Edit Professional Profile', description: 'Update your skills and professional information.', cta: 'Edit Profile' },
-]
-
-function buildActivityItems(data: ReturnType<typeof useDashboardData>['data']): ActivityItem[] {
-  const items: ActivityItem[] = []
-
-  data.savedJobs.data.slice(0, 3).forEach((job) => {
-    items.push({
-      id: `sj-${job.id}`,
-      icon: Briefcase,
-      title: 'Job saved',
-      description: job.title,
-      timestamp: job.createdAt,
-      to: `/jobs/${job.id}`,
-    })
-  })
-
-  data.interviews.data.slice(0, 3).forEach((interview) => {
-    items.push({
-      id: `int-${interview.id}`,
-      icon: FileText,
-      title: 'Interview scheduled',
-      description: interview.status,
-      timestamp: interview.scheduledStart,
-    })
-  })
-
-  data.applications.data.slice(0, 3).forEach((app) => {
-    const job = data.jobMap.data.get(app.jobId)
-    items.push({
-      id: `app-${app.id}`,
-      icon: FileText,
-      title: 'Application submitted',
-      description: job ? `"${job.title}" — status: ${app.status}` : `Application (ID: ${app.id}) — status: ${app.status}`,
-      timestamp: app.appliedAt,
-    })
-  })
-
-  data.helpRequests.data.slice(0, 3).forEach((request) => {
-    items.push({
-      id: `hr-${request.id}`,
-      icon: Inbox,
-      title: 'Help request submitted',
-      description: request.title,
-      timestamp: request.createdAt,
-      to: `/help/requests/${request.id}`,
-    })
-  })
-
-  return items.sort((a, b) => {
-    const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0
-    const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0
-    return tb - ta
-  })
+function EmptyPanel({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+  return (
+    <div className="provider-panel__empty">
+      <span className="provider-panel__empty-icon">{icon}</span>
+      <strong>{title}</strong>
+      <p>{description}</p>
+    </div>
+  )
 }
 
 export default function ProviderDashboard() {
   const { user, isAuthenticated, isServiceProvider, initializing } = useAuth()
-  const { data, loading } = useDashboardData(user)
 
-  if (initializing) return <DashboardSkeleton cards={4} sections={2} />
+  if (initializing) return <div className="provider-view" aria-label="Loading dashboard"><div className="provider-hero" /><div className="provider-stats">{[0, 1, 2].map((key) => <div className="provider-panel" key={key} />)}</div></div>
   if (!isAuthenticated) return <Navigate to="/login" replace />
   if (!isServiceProvider) return <Navigate to="/dashboard" replace />
 
-  const firstName = user?.name?.trim().split(/\s+/)[0]
-  const displayName = firstName ? `${firstName}, manage your services and respond to new opportunities.` : 'Manage your services and respond to new opportunities.'
+  const displayName = user?.name?.trim() || 'Service Provider'
+  const profileFields = [user?.name, user?.email, user?.phone, user?.avatar]
+  const profileCompletion = Math.round(profileFields.filter(Boolean).length / profileFields.length * 100)
 
   return (
-    <>
-      <DashboardHeader title="Professional Dashboard" subtitle={displayName} />
-
-      <section className="dash-section" aria-label="Overview">
-        <div className="dash-stats">
-          <StatCard
-            label="Saved Jobs"
-            value={data.savedJobs.data.length}
-            icon={Briefcase}
-            loading={data.savedJobs.loading}
-            hint={data.savedJobs.error ? 'Unable to load' : undefined}
-          />
-          <StatCard
-            label="Applications"
-            value={data.applications.data.length}
-            icon={FileText}
-            loading={data.applications.loading}
-            hint={data.applications.error ? 'Unable to load' : undefined}
-          />
-          <StatCard
-            label="Upcoming Interviews"
-            value={data.interviews.data.filter((i) => i.status === 'SCHEDULED').length}
-            icon={FileText}
-            loading={data.interviews.loading}
-            hint={data.interviews.error ? 'Unable to load' : undefined}
-          />
-          <StatCard
-            label="Help Requests"
-            value={data.helpRequests.data.length}
-            icon={Inbox}
-            loading={data.helpRequests.loading}
-            hint={data.helpRequests.error ? 'Unable to load' : undefined}
-          />
+    <div className="provider-view provider-dashboard">
+      <section className="provider-hero" aria-labelledby="provider-hero-title">
+        <img className="provider-hero__image" src="/images/oyo-hero.jpg" alt="Oyo State monument and landscape" />
+        <div className="provider-hero__overlay" />
+        <div className="provider-hero__content">
+          <span className="provider-hero__eyebrow">PROFESSIONAL WORKSPACE</span>
+          <h1 className="provider-hero__title" id="provider-hero-title">Welcome back, {displayName}</h1>
+          <p className="provider-hero__description">Grow your services and reach more customers across Oyo.</p>
         </div>
       </section>
 
-      <section className="dash-section" aria-label="Quick actions">
-        <div className="quick-action-grid">
-          {PROVIDER_QUICK_ACTIONS.map((action) => (
-            <QuickActionCard
-              key={action.title}
-              to={action.to}
-              icon={action.icon}
-              title={action.title}
-              description={action.description}
-              cta={action.cta}
-            />
-          ))}
-        </div>
-      </section>
+      <div className="provider-dashboard-grid">
+        <main className="provider-dashboard-main">
+          <section className="provider-stats" aria-label="Your work activity">
+            <StatCard label="New requests" value={null} icon={Inbox} hint="Request data unavailable" />
+            <StatCard label="Active services" value={null} icon={Briefcase} hint="Service data unavailable" />
+            <StatCard label="Profile complete" value={`${profileCompletion}%`} icon={UserRound} />
+            <StatCard label="Rating" value={null} icon={CheckCircle2} hint="No rating data" />
+          </section>
 
-      <section className="dash-panel" aria-labelledby="provider-activity-title">
-        <h2 id="provider-activity-title" className="dash-panel__title">Recent Activity</h2>
-        <ActivityList
-          items={buildActivityItems(data)}
-          loading={loading}
-          emptyIcon={<Inbox size={28} />}
-          emptyTitle="No activity yet"
-          emptyDescription="New service requests and opportunities will appear here."
-        />
-      </section>
-    </>
+          <section className="provider-panel" aria-labelledby="provider-requests-title">
+            <header className="provider-panel__header">
+              <div><span className="provider-panel__eyebrow">CUSTOMER ACTIVITY</span><h2 className="provider-panel__title" id="provider-requests-title">Recent service requests</h2></div>
+              <Link className="provider-panel__link" to="/provider/requests">View requests <ArrowRight /></Link>
+            </header>
+            <EmptyPanel icon={<Inbox />} title="No service requests yet" description="Customer requests will appear here when provider request management is connected." />
+          </section>
+
+          <section className="provider-panel" aria-labelledby="provider-services-title">
+            <header className="provider-panel__header">
+              <div><span className="provider-panel__eyebrow">YOUR LISTINGS</span><h2 className="provider-panel__title" id="provider-services-title">My services</h2></div>
+              <Link className="provider-panel__link" to="/provider/services">Manage services <ArrowRight /></Link>
+            </header>
+            <EmptyPanel icon={<Briefcase />} title="No service listings available" description="Provider service listings are not connected to a live data source yet." />
+          </section>
+        </main>
+
+        <aside className="provider-dashboard-aside" aria-label="Provider account and activity">
+          <section className="provider-profile-summary">
+            <span className="provider-panel__eyebrow">YOUR PROFILE</span>
+            <div className="provider-profile-summary__person">
+              <Avatar src={user?.avatar} initials={displayName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('')} size="lg" variant={user?.avatar ? 'image' : 'gradient'} />
+              <span className="provider-profile-summary__copy"><strong className="provider-profile-summary__name">{displayName}</strong><small className="provider-profile-summary__role">Service Provider</small></span>
+            </div>
+            <Link className="provider-profile-summary__link" to="/provider/profile">View Profile <ArrowRight /></Link>
+          </section>
+
+          <section className="provider-panel" aria-labelledby="provider-quick-actions-title">
+            <header className="provider-panel__header"><div><span className="provider-panel__eyebrow">GET THINGS DONE</span><h2 className="provider-panel__title" id="provider-quick-actions-title">Quick Actions</h2></div></header>
+            <nav className="provider-quick-actions" aria-label="Provider quick actions">
+              <Link className="provider-quick-action" to="/provider/services"><span className="provider-quick-action__icon"><Briefcase /></span><span className="provider-quick-action__label">My Services</span><ChevronRight /></Link>
+              <Link className="provider-quick-action" to="/provider/requests"><span className="provider-quick-action__icon"><Inbox /></span><span className="provider-quick-action__label">View Requests</span><ChevronRight /></Link>
+              <Link className="provider-quick-action" to="/provider/profile"><span className="provider-quick-action__icon"><UserRound /></span><span className="provider-quick-action__label">Edit Profile</span><ChevronRight /></Link>
+              <Link className="provider-quick-action" to="/jobs"><span className="provider-quick-action__icon"><Search /></span><span className="provider-quick-action__label">Find Work</span><ChevronRight /></Link>
+            </nav>
+          </section>
+
+          <section className="provider-panel" aria-labelledby="provider-activity-title">
+            <header className="provider-panel__header"><div><span className="provider-panel__eyebrow">YOUR WORKSPACE</span><h2 className="provider-panel__title" id="provider-activity-title">Recent Activity</h2></div></header>
+            <EmptyPanel icon={<Inbox />} title="No recent activity" description="Updates about customer requests and your service listings will appear here when available." />
+          </section>
+        </aside>
+      </div>
+    </div>
   )
 }

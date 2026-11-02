@@ -2,7 +2,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   Activity, Bell, BriefcaseBusiness, Building2, ClipboardList, FileText, FolderOpen, Heart, Home, Inbox, LayoutDashboard, LifeBuoy, LogOut,
   MessageCircle, Settings, UserRound, Wallet, Users, DollarSign, Banknote, HelpCircle,
-  Image, Star, MessageSquare, BarChart2, ShieldCheck, Search, CreditCard, Receipt, Truck, Zap, Tv,
+  Image, Star, MessageSquare, BarChart2, ShieldCheck, Search, CreditCard, Receipt, Truck, Zap, Tv, ChevronLeft, ChevronRight,
   GraduationCap, Key, Box, Gamepad2, Smartphone, User, type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
@@ -93,7 +93,7 @@ const walletNavigation: NavigationItem[] = [
 
 const servicesNavigation: NavigationItem[] = [
   { label: 'Home', to: '/', icon: Home, end: true },
-  { label: 'Services Home', to: '/services', icon: CreditCard, end: true },
+  { section: 'Services', label: 'Services Home', to: '/services', icon: CreditCard, end: true },
   { label: 'Data Bundles', to: '/services/data', icon: Smartphone },
   { label: 'Airtime', to: '/services/airtime', icon: Smartphone },
   { label: 'Electricity', to: '/services/electricity', icon: Zap },
@@ -103,7 +103,7 @@ const servicesNavigation: NavigationItem[] = [
   { label: 'Digital Products', to: '/services/digital-products', icon: Box },
   { label: 'Games', to: '/services/games', icon: Gamepad2 },
   { label: 'Social Media', to: '/services/social-media', icon: MessageSquare },
-  { label: 'Wallet', to: '/services/wallet', icon: Wallet },
+  { section: 'Account', label: 'Wallet', to: '/services/wallet', icon: Wallet },
   { label: 'Profile', to: '/services/profile', icon: User },
 ]
 
@@ -131,6 +131,8 @@ interface DashboardSidebarProps {
   onClose: () => void
   mode?: 'platform' | 'provider' | 'jobseeker' | 'business' | 'customer' | 'affiliate' | 'messages' | 'wallet' | 'services' | 'admin'
   onSignOut?: () => void
+  collapsed?: boolean
+  onToggleCollapsed?: () => void
 }
 
 function CustomerSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -221,12 +223,16 @@ function CustomerSidebar({ open, onClose }: { open: boolean; onClose: () => void
   )
 }
 
-export function DashboardSidebar({ open, onClose, mode = 'platform', onSignOut }: DashboardSidebarProps) {
-  // Use new Tailwind-based sidebar for customer mode
+export function DashboardSidebar(props: DashboardSidebarProps) {
+  const mode = props.mode ?? 'platform'
   if (mode === 'customer') {
-    return <CustomerSidebar open={open} onClose={onClose} />
+    return <CustomerSidebar open={props.open} onClose={props.onClose} />
   }
 
+  return <PlatformDashboardSidebar {...props} mode={mode} />
+}
+
+function PlatformDashboardSidebar({ open, onClose, mode = 'platform', onSignOut, collapsed = false, onToggleCollapsed }: DashboardSidebarProps) {
   const { pathname, hash } = useLocation()
   const { logout, user } = useAuth()
   const navigate = useNavigate()
@@ -274,11 +280,24 @@ export function DashboardSidebar({ open, onClose, mode = 'platform', onSignOut }
   return (
     <>
       {open && <button className="dashboard-sidebar-scrim" aria-label="Close navigation" onClick={onClose} />}
-      <aside className={`dashboard-sidebar${open ? ' is-open' : ''}`} aria-label="Dashboard navigation">
-        <Link className="dashboard-sidebar-brand" to={getBrandLink(mode)} onClick={onClose}>
-          <span className="dashboard-sidebar-logo" aria-hidden="true">OC</span>
-          <span>Oyo<span>Connect</span></span>
-        </Link>
+      <aside className={`dashboard-sidebar dashboard-sidebar--${mode}${open ? ' is-open' : ''}${collapsed && mode === 'services' ? ' is-collapsed' : ''}`} aria-label="Dashboard navigation">
+        <div className="dashboard-sidebar-brand-row">
+          <Link className="dashboard-sidebar-brand" to={getBrandLink(mode)} onClick={onClose} title={collapsed && mode === 'services' ? 'OyoConnect' : undefined}>
+            <span className="dashboard-sidebar-logo" aria-hidden="true">OC</span>
+            <span>Oyo<span>Connect</span></span>
+          </Link>
+          {mode === 'services' && onToggleCollapsed && (
+            <button
+              type="button"
+              className="dashboard-sidebar-collapse"
+              onClick={onToggleCollapsed}
+              aria-label={collapsed ? 'Expand Services navigation' : 'Collapse Services navigation'}
+              title={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+            >
+              {collapsed ? <ChevronRight size={17} /> : <ChevronLeft size={17} />}
+            </button>
+          )}
+        </div>
         <nav className="dashboard-sidebar-nav" aria-label="Main">
           {getNavigation(mode).map(({ label, to, icon: Icon, end, section }) => (
             <div key={to}>
@@ -286,11 +305,12 @@ export function DashboardSidebar({ open, onClose, mode = 'platform', onSignOut }
               <NavLink
                 to={to}
                 end={end ?? to === '/'}
+                title={collapsed && mode === 'services' ? label : undefined}
                 className={({ isActive }) => {
                 const tab = mode === 'jobseeker' && to.startsWith('/job-seeker#') ? to.split('#')[1] : null
                 const seekerTabActive = tab ? pathname === '/job-seeker' && hash === `#${tab}` : mode === 'jobseeker' && label === 'Dashboard' ? pathname === '/job-seeker' && !hash : false
                 const seekerNavigationActive = seekerTabActive || (mode === 'jobseeker' && label === 'Browse Jobs' && pathname === '/jobs') || (mode === 'jobseeker' && label === 'Jobs' && pathname !== '/jobs' && isActive) || (mode === 'jobseeker' && !['Dashboard', 'My Applications', 'Saved Jobs', 'My Profile', 'Browse Jobs', 'Jobs'].includes(label) && isActive)
-                const active = mode === 'jobseeker' ? seekerNavigationActive : isActive || (mode === 'provider' && label === 'Dashboard' && pathname === '/provider') || (mode === 'platform' && label === 'Home' && pathname === '/dashboard') || (mode === 'business' && label === 'Dashboard' && pathname === '/business/dashboard') || (String(mode) === 'customer' && label === 'Dashboard' && pathname === '/dashboard') || (mode === 'affiliate' && label === 'Dashboard' && pathname === '/affiliate') || (mode === 'messages' && label === 'Messages' && pathname === '/messages') || (mode === 'wallet' && label === 'Wallet' && pathname === '/wallet') || (mode === 'services' && label === 'Services Home' && pathname === '/services')
+                const active = mode === 'jobseeker' ? seekerNavigationActive : isActive || (mode === 'provider' && label === 'Dashboard' && pathname === '/provider') || (mode === 'platform' && label === 'Home' && pathname === '/dashboard') || (mode === 'business' && label === 'Dashboard' && pathname === '/business/dashboard') || (String(mode) === 'customer' && label === 'Dashboard' && pathname === '/dashboard') || (mode === 'affiliate' && label === 'Dashboard' && pathname === '/affiliate') || (mode === 'messages' && label === 'Messages' && pathname === '/messages') || (mode === 'wallet' && label === 'Wallet' && pathname === '/wallet') || (mode === 'services' && label === 'Services Home' && ['/services', '/services/dashboard'].includes(pathname))
                 return `dashboard-sidebar-link${active ? ' is-active' : ''}`
                 }}
                 onClick={onClose}
@@ -317,8 +337,12 @@ export function DashboardSidebar({ open, onClose, mode = 'platform', onSignOut }
           <span className="dashboard-proud-icon" aria-hidden="true">◎</span>
           <span><strong>Proudly Oyo.</strong><small>Built for our people.</small></span>
         </div>}
-        <button className="dashboard-sidebar-logout" type="button" onClick={() => { onClose(); onSignOut ? onSignOut() : void handleLogout() }}>
-          <LogOut size={20} aria-hidden="true" /> Sign out
+        <button className="dashboard-sidebar-logout" type="button" title={collapsed && mode === 'services' ? 'Sign out' : undefined} onClick={() => {
+          onClose()
+          if (onSignOut) onSignOut()
+          else void handleLogout()
+        }}>
+          <LogOut size={20} aria-hidden="true" /><span>Sign out</span>
         </button>
       </aside>
     </>

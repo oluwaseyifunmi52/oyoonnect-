@@ -31,9 +31,13 @@ export function StatCard({ label, value, icon: Icon, loading, hint }: StatCardPr
         <span className="stat-card-icon"><Icon size={18} aria-hidden="true" /></span>
       </div>
       <div className="stat-card-value">
-        {hasValue ? value : <span className="stat-card-value--empty">—</span>}
+        {hasValue ? (
+          <span className="stat-card-value">{value}</span>
+        ) : (
+          <span className="stat-card-value--empty">—</span>
+        )}
       </div>
-      {hint ? <div className="stat-card-hint">{hint}</div> : null}
+      {hint ? <p className="stat-card-hint">{hint}</p> : null}
     </div>
   )
 }

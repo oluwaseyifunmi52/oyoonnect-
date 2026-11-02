@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
 import { Mail, Phone, MapPin } from 'lucide-react'
+import { PLATFORM_NAV } from '../navigation/PlatformNav'
 import { siteConfig } from '../../config/site'
-import { Logo } from './Logo'
 import { categories } from '../../data/categories'
 import { locations } from '../../data/locations'
+import { Logo } from './Logo'
 
 export function Footer() {
   return (
@@ -28,7 +29,7 @@ export function Footer() {
         <div className="footer__col footer-explore">
           <h3 className="footer__title">Explore</h3>
           <ul className="footer__links">
-            {siteConfig.nav.map((item) => (
+            {PLATFORM_NAV.map((item) => (
               <li key={item.to}>
                 <Link to={item.to}>{item.label}</Link>
               </li>
@@ -59,20 +60,15 @@ export function Footer() {
         </div>
       </div>
 
-<div className="footer__bottom">
+      <div className="footer__bottom">
         <div className="container footer__bottom-inner">
           <p>
-            &copy {new Date().getFullYear()} {siteConfig.name}. All rights
-            reserved.
+            &copy {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
           </p>
           <p>{siteConfig.tagline}.</p>
           <div style={{ marginTop: 8, fontSize: '12px' }}>
-            <Link to="/terms" style={{ marginRight: 16 }}>
-              Terms of Service
-            </Link>
-            <Link to="/privacy">
-              Privacy Policy
-            </Link>
+            <Link to="/terms" style={{ marginRight: 16 }}>Terms of Service</Link>
+            <Link to="/privacy">Privacy Policy</Link>
           </div>
         </div>
       </div>

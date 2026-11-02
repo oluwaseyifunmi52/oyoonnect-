@@ -1,20 +1,20 @@
-export type HelpCategoryType =
-  | 'school-fees'
-  | 'emergency-rent'
-  | 'medical-emergency'
-  | 'small-business'
-  | 'tools-equipment'
-  | 'family-emergency'
+export type HelpCategoryValue = 
+  | 'school-fees' 
+  | 'emergency-rent' 
+  | 'medical-emergency' 
+  | 'small-business' 
+  | 'tools-equipment' 
+  | 'family-emergency' 
   | 'other-emergency'
 
 export interface HelpCategory {
-  id: HelpCategoryType
+  value: HelpCategoryValue
+  label: string
+  id?: HelpCategoryValue
   name: string
   icon: string
   description: string
   color: string
-  value: HelpCategoryType
-  label: string
 }
 
 export type SupportRequestStatus =
@@ -71,7 +71,7 @@ export interface SupportRequest {
   requesterName: string
   requesterAvatar?: string
   requesterLocation: string
-  category: HelpCategoryType
+  category: HelpCategoryValue
   title: string
   description: string
   fullStory: string
@@ -167,7 +167,7 @@ export interface PayoutAttempt {
 }
 
 export interface RequestHelpFormData {
-  category: HelpCategoryType | ''
+  category: HelpCategoryValue | ''
   title: string
   description: string
   fullStory: string
@@ -181,7 +181,7 @@ export interface RequestHelpFormData {
 
 export interface HelpFilters {
   query?: string
-  category?: HelpCategoryType
+  category?: HelpCategoryValue
   location?: string
   minAmount?: number
   maxAmount?: number
@@ -223,72 +223,65 @@ export interface EscrowTransparencyInfo {
 
 export const HELP_CATEGORIES: HelpCategory[] = [
   {
-    id: 'school-fees',
+    value: 'school-fees',
+    label: 'School Fees',
     name: 'School Fees',
     icon: 'graduation-cap',
     description: 'Help students cover tuition, school charges, books, or other approved education expenses.',
-    color: '#3b82f6',
-    value: 'school-fees',
-    label: 'School Fees'
+    color: '#3b82f6'
   },
   {
-    id: 'emergency-rent',
+    value: 'emergency-rent',
+    label: 'Emergency Rent',
     name: 'Emergency Rent',
     icon: 'home',
     description: 'Support someone facing an urgent housing or rent situation.',
-    color: '#f59e0b',
-    value: 'emergency-rent',
-    label: 'Emergency Rent'
+    color: '#f59e0b'
   },
   {
-    id: 'medical-emergency',
+    value: 'medical-emergency',
+    label: 'Medical & Emergency Support',
     name: 'Medical & Emergency Support',
     icon: 'heart-pulse',
     description: 'Help with verified medical expenses or urgent emergency needs.',
-    color: '#ef4444',
-    value: 'medical-emergency',
-    label: 'Medical & Emergency Support'
+    color: '#ef4444'
   },
   {
-    id: 'small-business',
+    value: 'small-business',
+    label: 'Small Business Support',
     name: 'Small Business Support',
     icon: 'briefcase',
     description: 'Help someone start or restart a small business and become financially independent.',
-    color: '#10b981',
-    value: 'small-business',
-    label: 'Small Business Support'
+    color: '#10b981'
   },
   {
-    id: 'tools-equipment',
+    value: 'tools-equipment',
+    label: 'Tools & Work Equipment',
     name: 'Tools & Work Equipment',
     icon: 'wrench',
     description: 'Help skilled workers get the tools or equipment they need to work and earn.',
-    color: '#8b5cf6',
-    value: 'tools-equipment',
-    label: 'Tools & Work Equipment'
+    color: '#8b5cf6'
   },
   {
-    id: 'family-emergency',
+    value: 'family-emergency',
+    label: 'Family Emergency',
     name: 'Family Emergency',
     icon: 'users',
     description: 'Support families facing genuine unexpected financial difficulties.',
-    color: '#ec4899',
-    value: 'family-emergency',
-    label: 'Family Emergency'
+    color: '#ec4899'
   },
   {
-    id: 'other-emergency',
+    value: 'other-emergency',
+    label: 'Other Genuine Emergencies',
     name: 'Other Genuine Emergencies',
     icon: 'alert-triangle',
     description: 'Request community support for another serious and genuine emergency.',
-    color: '#64748b',
-    value: 'other-emergency',
-    label: 'Other Genuine Emergencies'
+    color: '#64748b'
   }
 ]
 
-export function getCategoryById(id: HelpCategoryType): HelpCategory | undefined {
-  return HELP_CATEGORIES.find((cat) => cat.id === id)
+export function getCategoryById(id: HelpCategoryValue): HelpCategory | undefined {
+  return HELP_CATEGORIES.find((cat) => cat.value === id)
 }
 
 export const REQUEST_HELP_STEPS = [

@@ -1,0 +1,798 @@
+/* Job Seeker Dashboard — adire/Ibadan design inspired by Oyo State tradition */
+/* Colors from the design spec */
+:root {
+  --sidebar: #141b47;
+  --banner: #1d2760;
+  --active-nav-bg: #2b3680;
+  --page-bg: #f2f4fa;
+  --card: #ffffff;
+  --border-line: #dde1ee;
+  --main-text: #161a33;
+  --muted: #5d6385;
+  --accent: #d4552a;
+  --accent-soft: rgba(212, 85, 42, 0.12);
+  --success: #16a34a;
+}
+
+/* --- Page container — use max-width from existing layout --- */
+.dashboard-page *,
+.dashboard-page *::before,
+.dashboard-page *::after {
+  box-sizing: border-box;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+/* --- Typography --- */
+.dashboard-page h1,
+.dashboard-page h2,
+.dashboard-page h3,
+.dashboard-page h4,
+.dashboard-page h5,
+.dashboard-page h6 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 600;
+  color: var(--main-text);
+  line-height: 1.3;
+}
+
+.dashboard-page h1 { font-size: clamp(1.75rem, 4vw, 2.25rem); }
+.dashboard-page h2 { font-size: clamp(1.5rem, 3vw, 1.875rem); }
+.dashboard-page h3 { font-size: 1.25rem; }
+.dashboard-page h4 { font-size: 1.125rem; }
+
+.dashboard-page p,
+.dashboard-page span,
+.dashboard-page li,
+.dashboard-page label,
+.dashboard-page div {
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--main-text);
+}
+
+.dashboard-page small,
+.dashboard-page .text-small {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+/* Sentence case — no all-caps */
+.dashboard-page .uppercase,
+.dashboard-page .text-uppercase {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.dashboard-page a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dashboard-page a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.dashboard-page a:hover {
+  color: #b84a26;
+}
+
+/* --- Focus visible for all interactive elements --- */
+.dashboard-page button:focus-visible,
+.dashboard-page a:focus-visible,
+.dashboard-page input:focus-visible,
+.dashboard-page select:focus-visible,
+.dashboard-page textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  background: var(--accent-soft);
+}
+
+/* --- Sidebar (existing dash-sidebar class from original JSX) --- */
+/* The original JSX has a fixed sidebar; we style it here for the adire look */
+.dash-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  background: var(--sidebar);
+  color: #e0e4e8;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  padding: 24px 0;
+  z-index: 100;
+}
+
+/* Logo inside sidebar */
+.dash-sidebar .logo {
+  text-align: center;
+  padding: 0 20px 32px;
+}
+
+.dash-sidebar .logo img {
+  max-height: 32px;
+  margin-bottom: 12px;
+}
+
+.dash-sidebar .logo-text {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #e0e4e8;
+  letter-spacing: -0.02em;
+}
+
+/* Nav groups */
+.dash-sidebar .nav-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash-sidebar .nav-group {
+  margin-bottom: 24px;
+}
+
+.dash-sidebar .nav-group-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  padding: 0 20px 8px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-family: 'Instrument Sans', sans-serif;
+}
+
+/* Nav links */
+.dash-sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  color: #aab0ba;
+  border-radius: 6px;
+  margin: 2px 20px;
+  font-size: 0.9375rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dash-sidebar .nav-link .icon {
+  width: 18px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.dash-sidebar .nav-link span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-sidebar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.dash-sidebar .nav-link.is-active {
+  background: var(--active-nav-bg);
+  color: #fff;
+  position: relative;
+}
+
+.dash-sidebar .nav-link.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+}
+
+/* Sign out button */
+.dash-sidebar .signout {
+  margin-top: auto;
+  padding: 0 20px;
+}
+
+.dash-sidebar .signout .nav-link {
+  padding: 10px 20px;
+  color: #aab0ba;
+  font-size: 0.875rem;
+}
+
+.dash-sidebar .signout .nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+/* --- Main content --- */
+.dash-main {
+  margin-left: 250px;
+  padding: 24px;
+  transition: margin-left 0.3s ease;
+}
+
+/* Below 900px, the sidebar collapses - handled by media query in JS */
+
+/* --- Welcome banner (original JSX didn't have this; adding as enhancement) --- */
+/* Since the original JSX doesn't have a welcome banner, we'll style the stats area instead */
+/* The design spec calls for a welcome banner, but we keep changes minimal */
+
+/* --- Stats strip (original: .dash-stats) --- */
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0 12px;
+  margin: 0 -24px 24px;
+  padding: 0 24px;
+}
+
+.dash-stats .stat-col {
+  background: var(--card);
+  border: 1px solid var(--border-line);
+  border-radius: 8px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex start;
+  position: relative;
+}
+
+.dash-stats .stat-col .divider {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 50%;
+  background: var(--border-line);
+}
+
+.dash-stats .stat-col:last-child .divider {
+  display: none;
+}
+
+.dash-stats .stat-number {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: var(--accent);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.dash-stats .stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.dash-stats .stat-hint {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+/* Below 900px: stats become 2x2 grid */
+@media (max-width: 900px) {
+  .dash-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .dash-stats .stat-col .divider {
+    display: none;
+  }
+}
+
+/* --- Recent applications (original: .dashboard-tabpanel .recent) --- */
+/* The original JSX uses dashboard-tabpanel for tab content; we style the content within */
+
+.dash-panel__section-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--main-text);
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-line);
+}
+
+.dash-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.dash-empty-state .title {
+  font-size: 1rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.dash-empty-state .description {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.dash-empty-state .btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.dash-empty-state .btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.dash-empty-state .btn:hover {
+  background: #b84a26;
+}
+
+/* --- Applications table --- */
+.applications-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.applications-table th,
+.applications-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border-line);
+  font-size: 0.875rem;
+}
+
+.applications-table th {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: left;
+}
+
+.applications-table td {
+  vertical-align: middle;
+}
+
+.application-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.application-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.application-link:hover {
+  color: #b84a26;
+}
+
+.application-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.application-status .status--submitted {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.application-status .status--reviewing {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.application-status .status--shortlisted {
+  background: rgba(147, 51, 234, 0.1);
+  color: #8b5cf6;
+}
+
+.application-status .status--rejected {
+  background: rgba(236, 72, 153, 0.1);
+  color: #ec4899;
+}
+
+.application-status .status--accepted {
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+}
+
+.application-status .icon {
+  width: 14px;
+}
+
+/* Status pill in recent apps */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-pill .icon {
+  width: 14px;
+}
+
+/* --- Saved jobs grid --- */
+.saved-jobs-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.saved-job-card {
+  background: var(--card);
+  border: 1px solid var(--border-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.saved-job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-line);
+}
+
+.saved-job-header h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--main-text);
+}
+
+.saved-job-remove {
+  background: none;
+  border: none;
+  color: var(--muted);
+  padding: 4px;
+  cursor: pointer;
+}
+
+.saved-job-remove .XCircle {
+  width: 18px;
+}
+
+.saved-job-employer {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin: 8px 0;
+}
+
+.saved-job-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.saved-job-type,
+.saved-job-salary {
+  display: block;
+}
+
+/* --- Quick actions --- */
+.quick-action-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.quick-link {
+  display: block;
+  padding: 8px 12px;
+  background: var(--card);
+  border: 1px solid var(--border-line);
+  border-radius: 6px;
+  color: var(--main-text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: background 0.2s;
+}
+
+.quick-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.quick-link:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.quick-link .icon {
+  width: 18px;
+  color: var(--muted);
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+/--- Dashboard tabs ---
+.dash-tab {
+  display: block;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: #aab0ba;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  border-radius: 4px;
+}
+
+.dash-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.dash-tab:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.dash-tab.is-active {
+  background: var(--active-nav-bg);
+  color: #fff;
+}
+
+/* --- Dashboard tab panels --- */
+.dashboard-tabpanel {
+  padding: 24px 0;
+}
+
+.dash-panel__section-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--main-text);
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-line);
+}
+
+.dash-panel__title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--main-text);
+  margin-bottom: 24px;
+}
+
+.dash-panel {
+  background: var(--card);
+  border: 1px solid var(--border-line);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+/* --- Activity list --- */
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activity-list__item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-line);
+}
+
+.activity-list__item:last-child {
+  border-bottom: none;
+}
+
+.activity-list__link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.activity-list__link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.activity-list__link:hover {
+  color: #b84a26;
+}
+
+.activity-list__icon {
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.activity-list__body {
+  flex: 1;
+}
+
+.activity-list__title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--main-text);
+}
+
+.activity-list__desc {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.activity-list__meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* --- Profile editor --- */
+.profile-editor {
+  background: var(--card);
+  border: 1px solid var(--border-line);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.profile-editor__avatar {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.profile-editor__avatar img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+}
+
+.profile-editor__avatar .avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--border-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.profile-editor__fields .field-group {
+  margin-bottom: 16px;
+}
+
+.profile-editor__fields label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.profile-editor__fields .field-value {
+  font-size: 1rem;
+  color: var(--main-text);
+}
+
+.profile-editor__fields .field-value span {
+  color: var(--muted);
+}
+
+.skills-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skill-tag {
+  padding: 4px 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/--- Buttons ---
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border: none;
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn--primary:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.btn--primary:hover {
+  background: #b84a26;
+}
+
+.btn--outline {
+  background: none;
+  border: 1px solid var(--border-line);
+  color: var(--main-text);
+}
+
+.btn--outline:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn--outline:hover {
+  border-color: #b84a26;
+}
+
+.btn--sm {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+}
+
+/--- Divider between stat columns ---
+.stat-col .divider {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 50%;
+  background: var(--border-line);
+}
+
+/--- Reduced motion ---
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

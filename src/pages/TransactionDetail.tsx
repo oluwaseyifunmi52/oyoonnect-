@@ -140,7 +140,7 @@ Date: ${new Date(transaction.createdAt).toLocaleString()}
           title="Transaction not found"
           description="The transaction you're looking for doesn't exist or has been removed."
           action={
-            <ButtonLink to="/wallet/transactions" variant="primary">
+            <ButtonLink to="/community/wallet/transactions" variant="primary">
               Back to Transactions
             </ButtonLink>
           }
@@ -189,7 +189,7 @@ Date: ${new Date(transaction.createdAt).toLocaleString()}
   return (
     <main className="page">
       <div className="container">
-        <Link to="/wallet/transactions" className="back-link">
+        <Link to="/community/wallet/transactions" className="back-link">
           <ArrowLeft size={16} /> Back to Transactions
         </Link>
 
@@ -285,7 +285,7 @@ Date: ${new Date(transaction.createdAt).toLocaleString()}
           </div>
 
           <div className="transaction-actions">
-            <ButtonLink to="/wallet/transactions" variant="outline">
+            <ButtonLink to="/community/wallet/transactions" variant="outline">
               <ArrowLeft size={16} /> Back to Transactions
             </ButtonLink>
             <ButtonLink

@@ -1,98 +1,72 @@
 /* ==========================================================================
    OYOCONNECT - DESIGN TOKENS (src/styles/theme.css)
-   ==========================================================================
    Single source of truth for design tokens (CSS custom properties).
    Imported before index.css so every component style can reference tokens
    via var(--token-name).
-
    Dark mode is handled by overriding tokens under [data-theme="dark"], so never
    hard-code colors that should adapt to the theme.
    ========================================================================== */
 
-:root {
-  /* ===== Brand ===== */
-  --brand: #0F7A5C;
-  --brand-dark: #0E6B4F;
-  --brand-deeper: #0f3d32;
-  --brand-soft: #ECFDF5;
-  --brand-line: #A7F3D0;
+:root,
+[data-theme="light"] {
+  /* ===== Color Scheme — White Mode ===== */
+  color-scheme: light;
 
-  --whatsapp: #16A34A;
-  --whatsapp-dark: #15803d;
+  --bg: #f3f6f4;
+  --surface: #ffffff;
+  --surface-secondary: #e9f2ed;
+  --line: #dce7e0;
 
-  /* ===== Neutral Colors ===== */
-  --ink: #0F172A;
-  --muted: #334155;
-  --subtle: #64748B;
-  --line: #E2E8F0;
-  --line-strong: #cbd5e1;
+  --ink: #1c2b24;
+  --muted: #718078;
 
-  --bg: #ffffff;
-  --surface: #F8FAF9;
-  --surface-2: #f1f5f9;
+  --indigo: #07543b;
+  --indigo-deep: #043d2d;
+  --indigo-soft: #0b7050;
 
-  /* ===== Semantic Color Aliases ===== */
-  --background: var(--bg);
-  --surface-secondary: var(--surface);
-  --surface-hover: var(--surface-2);
-  --border: var(--line);
-  --border-strong: var(--line-strong);
-  --text-primary: var(--ink);
-  --text-secondary: var(--muted);
-  --text-muted: var(--subtle);
-  --primary: var(--brand);
-  --primary-hover: var(--brand-dark);
-  --primary-light: var(--brand-soft);
-  --danger: var(--error);
-  --info: #0EA5E9;
+  --hero: #07543b;
+  --laterite: #d4552a;
+
+  --ok-bg: #dcf3e4;
+  --ok-ink: #14532d;
+
+  --danger: #b42318;
+  --danger-bg: #fde8e7;
+
+  --focus: #d4552a;
+  --overlay: rgba(4, 48, 35, 0.48);
+  --shadow: 0 2px 8px rgba(4, 48, 35, 0.06);
+
+  /* ===== Auth Page Green Theme ===== */
+  --auth-bg: #f3f6f4;
+  --auth-green: #064e3b;
+  --auth-green-dark: #043d2e;
+  --auth-green-soft: #d1fadf;
+  --auth-green-line: #6ee7b7;
+  --auth-green-focus: #064e3b;
+
+  /* ===== Index.css-compatible variables ===== */
+  --card: var(--surface);
+  --brand: var(--indigo);
   --on-primary: #ffffff;
-
-  /* ===== Semantic Colors ===== */
-  --success: #16A34A;
-  --success-soft: #f0fdf4;
-  --success-line: #bbf7d0;
-  --warning: #D97706;
-  --warning-soft: #fffbeb;
-  --warning-line: #fde68a;
-  --error: #DC2626;
-  --error-soft: #fef2f2;
-  --error-line: #fecaca;
-
-  /* ===== Typography ===== */
-  --font: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-
-  /* Fluid type scale — mobile to desktop */
-  --text-display: clamp(2rem, 8vw, 3.5rem);      /* 32-56px — hero only */
-  --text-h1: clamp(1.75rem, 6vw, 2.5rem);         /* 28-40px — page titles */
-  --text-h2: clamp(1.375rem, 4vw, 2rem);          /* 22-32px — section titles */
-  --text-h3: clamp(1.125rem, 3vw, 1.5rem);        /* 18-24px — card titles */
-  --text-h4: clamp(1rem, 2.5vw, 1.25rem);         /* 16-20px — subsection */
-  --text-lg: 1.125rem;   /* 18px — large body */
-  --text-base: 1rem;     /* 16px — body */
-  --text-sm: 0.875rem;   /* 14px — secondary */
-  --text-xs: 0.75rem;    /* 12px — caption */
-
-  /* Aliases for shorthand usage (kept in sync with --text-* above) */
-  --fs-xs: var(--text-xs);
-  --fs-sm: var(--text-sm);
-  --fs-base: var(--text-base);
-  --fs-lg: var(--text-lg);
-  --fs-xl: 1.25rem;
-  --fs-2xl: 1.5rem;
-  --fs-3xl: 1.75rem;
-
-  --lh-tight: 1.15;
-  --lh-normal: 1.5;
-  --lh-relaxed: 1.65;
-
-  --fw-normal: 400;
-  --fw-medium: 500;
-  --fw-semibold: 600;
-  --fw-bold: 700;
-  --fw-extrabold: 800;
-
-  /* ===== Spacing Scale (8-point grid) ===== */
+  --brand-dark: var(--indigo-deep);
+  --brand-soft: var(--indigo-soft);
+  --brand-line: var(--indigo-soft);
+  --subtle: var(--muted);
+  --error: var(--danger);
+  --error-soft: var(--danger-bg);
+  --error-line: var(--danger);
+  --warning: var(--laterite);
+  --radius-md: 10px;
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-full: 999px;
+  --text-sm: 0.8125rem;
+  --lh-relaxed: 1.6;
+  --font: 'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
   --space-0: 0px;
   --space-1: 4px;
   --space-2: 8px;
@@ -110,41 +84,6 @@
   --space-16: 64px;
   --space-20: 80px;
   --space-24: 96px;
-
-  /* ===== Border Radius ===== */
-  --radius-none: 0px;
-  --radius-sm: 6px;
-  --radius: 8px;
-  --radius-md: 10px;
-  --radius-lg: 12px;
-  --radius-xl: 14px;
-  --radius-2xl: 16px;
-  --radius-full: 999px;
-
-  /* ===== Shadow Scale ===== */
-  --shadow-xs: 0 1px 2px rgb(17 24 39 / 0.04);
-  --shadow-sm: 0 1px 2px rgb(17 24 39 / 0.06), 0 1px 1px rgb(17 24 39 / 0.04);
-  --shadow-md: 0 2px 6px rgb(17 24 39 / 0.07), 0 1px 2px rgb(17 24 39 / 0.05);
-  --shadow-lg: 0 4px 12px rgb(17 24 39 / 0.08), 0 2px 4px rgb(17 24 39 / 0.05);
-  --shadow-xl: 0 8px 24px rgb(17 24 39 / 0.09);
-  --shadow-2xl: 0 16px 40px rgb(17 24 39 / 0.1);
-
-  /* ===== Container Widths ===== */
-  --container-sm: 640px;
-  --container-md: 768px;
-  --container-lg: 1024px;
-  --container-xl: 1160px;
-  --container-2xl: 1280px;
-
-  /* ===== Breakpoints ===== */
-  --bp-sm: 480px;
-  --bp-md: 640px;
-  --bp-lg: 768px;
-  --bp-xl: 900px;
-  --bp-2xl: 1000px;
-  --bp-3xl: 1200px;
-
-  /* ===== Z-Index Scale ===== */
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-fixed: 300;
@@ -155,76 +94,153 @@
   --z-toast: 800;
   --z-drawer: 1000;
 
-  /* ===== Transitions ===== */
+  /* ===== Layout ===== */
+  --header-h: 68px;
+  --header-h-mobile: 64px;
+  --bottom-nav-h: 72px;
+
+  /* ===== Navbar ===== */
+  --navbar-height: var(--header-h);
+  --navbar-bg: var(--surface);
+  --navbar-border: var(--line);
+  --navbar-link-color: var(--muted);
+  --navbar-link-color-hover: var(--ink);
+  --navbar-link-color-active: var(--indigo);
+  --navbar-link-font-size: 15px;
+  --navbar-link-font-weight: 500;
+  --navbar-link-font-weight-active: 600;
+  --navbar-link-padding-x: 16px;
+  --navbar-link-padding-y: 8px;
+  --navbar-link-gap: 4px;
+  --navbar-active-indicator-height: 3px;
+  --navbar-active-indicator-color: var(--laterite);
+  --navbar-logo-width: 140px;
+  --navbar-avatar-size: 36px;
+  --navbar-icon-size: 20px;
+
+  /* ===== Transition ===== */
   --transition-fast: 120ms ease;
   --transition-normal: 180ms ease;
   --transition-slow: 280ms ease;
-
-  /* ===== Layout ===== */
-  --header-h: 68px;
-  --header-h-mobile: 72px;
-  --bottom-nav-h: 72px;
-
-  /* ===== Card ===== */
-  --card: #ffffff;
-  --card-bg: var(--card);
-  --border: var(--line);
-  --text: var(--ink);
-
-  /* ===== Touch Targets ===== */
-  --touch-target: 48px;
-  --touch-target-sm: 44px;
 }
 
 /* ===== Dark Mode ===== */
+[data-theme="dark"] {
+  color-scheme: dark;
 
-[data-theme="dark"], :root.dark {
-  --brand: #14B8A6;
-  --brand-dark: #5EEAD4;
-  --brand-deeper: #0e3028;
-  --brand-soft: #123E35;
-  --brand-line: #205047;
-  --on-primary: #042f2e;
-  --info: #14B8A6;
+  --bg: #0d1d17;
+  --surface: #132920;
+  --surface-secondary: #10231b;
+  --line: #294739;
 
-  --whatsapp: #22c55e;
-  --whatsapp-dark: #16a34a;
+  --ink: #edf7f0;
+  --muted: #a7b9ae;
 
-  --ink: #e5e7eb;
-  --muted: #9ca3af;
-  --subtle: #8a9e99;
-  --line: #2a3634;
-  --line-strong: #344744;
+  --indigo: #50bd8c;
+  --indigo-deep: #063d2d;
+  --indigo-soft: #1b5f46;
 
-  --bg: #0F172A;
-  --surface: #1E293B;
-  --surface-2: #1e2e2b;
+  --hero: #07543b;
+  --laterite: #f2784a;
 
-  --card: #1E293B;
-  --card-bg: var(--card);
-  --border: var(--line);
-  --text: var(--ink);
+  --ok-bg: #123d2a;
+  --ok-ink: #8fe3b4;
 
-  --success: #22c55e;
-  --success-soft: #1e2e2b;
-  --success-line: #2d3f3c;
-  --warning: #f59e0b;
-  --warning-soft: #2a2418;
-  --warning-line: #4a3a28;
-  --error: #ef4444;
-  --error-soft: #2a1a1a;
-  --error-line: #4a2a2a;
+  --danger: #ff8a7a;
+  --danger-bg: #482020;
 
-  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.25);
-  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 10px rgb(0 0 0 / 0.35);
-  --shadow-lg: 0 8px 20px rgb(0 0 0 / 0.4);
-  --shadow-xl: 0 12px 28px rgb(0 0 0 / 0.45);
-  --shadow-2xl: 0 16px 40px rgb(0 0 0 / 0.5);
+  --focus: #f2784a;
+  --overlay: rgba(0, 0, 0, 0.68);
+  --shadow: none;
+
+  /* ===== Auth Page Green Theme (Dark Mode) ===== */
+  --auth-bg: #0f1a15;
+  --auth-green: #10b981;
+  --auth-green-dark: #059669;
+  --auth-green-soft: #064e3b;
+  --auth-green-line: #047857;
+  --auth-green-focus: #10b981;
+
+  /* ===== Index.css-compatible variables ===== */
+  --card: var(--surface);
+  --brand: var(--indigo);
+  --on-primary: #ffffff;
+  --brand-dark: var(--indigo-deep);
+  --brand-soft: var(--indigo-soft);
+  --brand-line: var(--indigo-soft);
+  --subtle: var(--muted);
+  --error: var(--danger);
+  --error-soft: var(--danger-bg);
+  --error-line: var(--danger);
+  --warning: var(--laterite);
+  --radius-md: 10px;
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-full: 999px;
+  --text-sm: 0.8125rem;
+  --lh-relaxed: 1.6;
+  --font: 'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+  --z-drawer: 1000;
+
+  /* ===== Layout ===== */
+  --header-h: 68px;
+  --header-h-mobile: 64px;
+  --bottom-nav-h: 72px;
+
+  /* ===== Navbar ===== */
+  --navbar-height: var(--header-h);
+  --navbar-bg: var(--surface);
+  --navbar-border: var(--line);
+  --navbar-link-color: var(--muted);
+  --navbar-link-color-hover: var(--ink);
+  --navbar-link-color-active: var(--indigo);
+  --navbar-link-font-size: 15px;
+  --navbar-link-font-weight: 500;
+  --navbar-link-font-weight-active: 600;
+  --navbar-link-padding-x: 16px;
+  --navbar-link-padding-y: 8px;
+  --navbar-link-gap: 4px;
+  --navbar-active-indicator-height: 3px;
+  --navbar-active-indicator-color: var(--laterite);
+  --navbar-logo-width: 140px;
+  --navbar-avatar-size: 36px;
+  --navbar-icon-size: 20px;
+
+  /* ===== Transition ===== */
+  --transition-fast: 120ms ease;
+  --transition-normal: 180ms ease;
+  --transition-slow: 280ms ease;
 }
 
 /* ===== Reduced Motion ===== */
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -237,9 +253,8 @@
 }
 
 /* ===== Focus Visible — Consistent focus rings ===== */
-
 :focus-visible {
-  outline: 2px solid var(--brand);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -249,15 +264,14 @@
 }
 
 /* ===== Selection ===== */
-
 ::selection {
-  background: var(--brand-line);
-  color: var(--brand);
+  background: var(--laterite);
+  color: var(--bg);
 }
 
 [data-theme="dark"] ::selection {
-  background: var(--brand-line);
-  color: var(--brand-dark);
+  background: var(--laterite);
+  color: var(--bg);
 }
 
 /* ===== Global overflow prevention ===== */

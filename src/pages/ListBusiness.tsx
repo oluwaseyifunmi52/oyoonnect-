@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, MessageCircle, Image, MapPin, Phone, Mail, Globe, X, Save, User, ChevronLeft, ChevronRight } from 'lucide-react'
+import { CheckCircle2, MessageCircle, Image, MapPin, Phone, Mail, Globe, X, Save, User, ChevronLeft, ChevronRight, AlertCircle, Lightbulb, FileText, Building2, ArrowLeft } from 'lucide-react'
 import { Input, Select } from '../components/ui/Input'
 import { Button, ButtonLink } from '../components/ui/Button'
 import { SectionHeading } from '../components/ui/SectionHeading'
@@ -14,6 +14,9 @@ import { categories } from '../data/categories'
 import { locations, getAreasForLocation, getTownsForLocation, getBusStopsForLocation, getLocationCenter } from '../data/locations'
 import { GoogleLocationPicker } from '../components/maps/GoogleLocationPicker'
 import type { BusinessLocation } from '../types/business'
+import { Card, CardBody } from '../components/ui/Card'
+import { EmptyState } from '../components/ui/EmptyState'
+import './FormPages.css'
 
 const STEPS = [
   { label: 'Basic Info', href: '/list-business?step=1' },
@@ -31,16 +34,13 @@ const initialForm = {
   description: '',
   ownerName: '',
   category: '',
-  // New location hierarchy
   lga: '',
   town: '',
   area: '',
   busStop: '',
-  // Legacy fields (kept for compatibility)
   address: '',
   city: '',
   state: 'Oyo',
-  // Map coordinates
   latitude: 0,
   longitude: 0,
   placeId: '',
@@ -58,9 +58,51 @@ const initialForm = {
   openingHours: DAYS.reduce((acc, day) => ({ ...acc, [day]: { open: '09:00', close: '18:00', closed: false } }), {} as Record<string, { open: string; close: string; closed: boolean }>),
 }
 
-function ListBusiness() {
+function PhotoUploadField({
+  label,
+  preview,
+  onUpload,
+  onRemove,
+  accept,
+}: {
+  label: string
+  preview: string
+  onUpload: (files: FileList) => void
+  onRemove: () => void
+  accept: string
+}) {
+  return (
+    <div className="photo-upload-field">
+      <label className="field__label">{label}</label>
+      <div className="photo-upload-dropzone">
+        {preview ? (
+          <div className="photo-preview">
+            <img src={preview} alt={`${label} preview`} />
+            <button type="button" className="photo-remove" onClick={onRemove} aria-label={`Remove ${label}`}>
+              <X size={20} aria-hidden="true" />
+            </button>
+          </div>
+        ) : (
+          <label className="photo-upload-label">
+            <input
+              type="file"
+              accept={accept}
+              onChange={(e) => e.target.files && onUpload(e.target.files)}
+              className="photo-file-input"
+            />
+            <Image size={32} aria-hidden="true" />
+            <span>Click to upload {label.toLowerCase()}</span>
+            <span className="photo-upload-hint">PNG, JPG up to 5MB</span>
+          </label>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function ListBusiness() {
   const navigate = useNavigate()
-  const { user, isAuthenticated, isBusinessOwner: _isBusinessOwner } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<typeof initialForm>({ ...initialForm })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -186,7 +228,6 @@ function ListBusiness() {
         } as BusinessLocation,
       })
 
-      // Create notification for the business owner
       notificationService.addNotification({
         category: 'business',
         title: 'Business Listing Submitted',
@@ -246,36 +287,52 @@ function ListBusiness() {
 
   const completedSteps = useMemo(() => {
     const steps: number[] = []
-    // Only mark steps as completed if the user has actually reached them
     for (let i = 1; i <= maxStepReached && i <= 5; i++) {
       steps.push(i)
     }
-    // Step 6 (Review) is only completed when all previous steps are done
     if (maxStepReached >= 6) {
       steps.push(6)
     }
     return steps
   }, [maxStepReached])
 
+  const requiredFields = useMemo(() => {
+    const fields = [
+      { step: 1, label: 'Business name', done: !!form.name.trim() },
+      { step: 1, label: 'Description', done: !!form.description.trim() },
+      { step: 1, label: 'Owner name', done: !!form.ownerName.trim() },
+      { step: 2, label: 'Category', done: !!form.category },
+      { step: 2, label: 'LGA', done: !!form.lga },
+      { step: 2, label: 'Town/City', done: !!form.town },
+      { step: 2, label: 'Street address', done: !!form.address.trim() },
+      { step: 3, label: 'Phone number', done: !!form.phone.trim() },
+    ]
+    return fields
+  }, [form])
+
+  const completedRequiredCount = requiredFields.filter(f => f.done).length
+
   if (submitted) {
     return (
-      <main className="page container">
-        <div className="success-card">
-          <div className="success-card__icon" aria-hidden="true">
-            <CheckCircle2 size={44} />
-          </div>
-          <h1 className="success-card__title">Listing submitted for review!</h1>
-          <p className="success-card__text">
-            Thanks, {form.name}. Your business listing has been submitted and is now <strong>pending review</strong>.
-            Our team will review your details and get in touch within 1–2 working days to activate your listing.
-          </p>
-          <div className="success-card__actions">
-            <ButtonLink to="/" variant="outline">
-              Back to home
-            </ButtonLink>
-            <ButtonLink to="/owner/dashboard" variant="primary">
-              View my dashboard
-            </ButtonLink>
+      <main className="form-page">
+        <div className="form-page__container">
+          <div className="form-success">
+            <div className="form-success__icon">
+              <CheckCircle2 size={44} aria-hidden="true" />
+            </div>
+            <h1 className="form-success__title">Listing submitted for review!</h1>
+            <p className="form-success__description">
+              Thanks, {form.name}. Your business listing has been submitted and is now <strong>pending review</strong>.
+              Our team will review your details and get in touch within 1–2 working days to activate your listing.
+            </p>
+            <div className="form-success__actions">
+              <ButtonLink to="/" variant="outline" size="lg">
+                Back to home
+              </ButtonLink>
+              <ButtonLink to="/business/dashboard" variant="primary" size="lg">
+                View my dashboard
+              </ButtonLink>
+            </div>
           </div>
         </div>
       </main>
@@ -283,536 +340,593 @@ function ListBusiness() {
   }
 
   return (
-    <main className="page list-business-page">
-      <div className="container container--narrow">
+    <main className="form-page">
+      <div className="form-page__header">
         <SectionHeading
           eyebrow="Grow your reach"
-          title="List your business"
+          title="List Your Business"
           subtitle="Join hundreds of businesses across Oyo State getting discovered every day. Sign up for free and create your listing in minutes."
+          align="left"
         />
+      </div>
 
-        <FormProgress
-          steps={STEPS}
-          currentStep={step}
-          completedSteps={completedSteps}
-          className="list-business-progress"
-        />
+      <FormProgress
+        steps={STEPS}
+        currentStep={step}
+        completedSteps={completedSteps}
+        className="form-page__progress"
+      />
 
-        <form onSubmit={handleSubmit} className="list-business-form" noValidate>
-          {step === 1 && (
-            <div className="form-step" role="step" aria-labelledby="step1-heading">
-              <h2 id="step1-heading" className="form-step-title">Basic Information</h2>
-              <p className="form-step-description">Tell us about your business</p>
+      {step === 6 && (
+        <div className="form-page__terms-notice" role="note">
+          <AlertCircle size={18} aria-hidden="true" />
+          <div>
+            <strong>Before submitting:</strong> Please review all details carefully. By submitting, you agree to our
+            <a href="/terms" className="auth-link">Terms of Service</a> and confirm this information is accurate.
+          </div>
+        </div>
+      )}
 
-              <Input
-                label="Business name"
-                name="name"
-                placeholder="e.g. Adebayo Auto Works"
-                required
-                value={form.name}
-                onChange={(e) => updateForm('name', e.target.value)}
-                error={errors.name}
-                icon={<User size={18} />}
-              />
-
-              <div className="field">
-                <label className="field__label" htmlFor="description">
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  className={`input textarea ${errors.description ? 'input--error' : ''}`}
-                  rows={5}
-                  placeholder="Describe your business, services, and what makes you unique..."
-                  required
-                  value={form.description}
-                  onChange={(e) => updateForm('description', e.target.value)}
-                />
-                {errors.description && <p className="field__error">{errors.description}</p>}
-              </div>
-
-              <Input
-                label="Owner name"
-                name="ownerName"
-                placeholder="Your full name"
-                required
-                value={form.ownerName}
-                onChange={(e) => updateForm('ownerName', e.target.value)}
-                error={errors.ownerName}
-                icon={<User size={18} />}
-              />
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="form-step" role="step" aria-labelledby="step2-heading">
-              <h2 id="step2-heading" className="form-step-title">Category & Location</h2>
-              <p className="form-step-description">Where can customers find you? Select your LGA, then town, area, and nearest landmark. Finally, place a pin on the map for the exact location.</p>
-
-              <Select
-                label="Category"
-                name="category"
-                required
-                value={form.category}
-                onChange={(value) => updateForm('category', value)}
-                options={categories.map((c) => ({ value: c.slug, label: c.name }))}
-                placeholder="Select a category"
-              />
-
-              <div className="location-hierarchy">
-                <div className="form-row">
-                  <Select
-                    label="LGA (Local Government Area)"
-                    name="lga"
-                    required
-                    value={form.lga}
-                    onChange={(value) => {
-                      updateForm('lga', value)
-                      if (value) {
-                        updateForm('town', '')
-                        updateForm('area', '')
-                        updateForm('busStop', '')
-                      }
-                    }}
-                    options={locations.map((l) => ({ value: l.name, label: l.name }))}
-                    placeholder="Select LGA"
-                  />
-
-                  <Select
-                    label="Town / City"
-                    name="town"
-                    value={form.town}
-                    onChange={(value) => {
-                      updateForm('town', value)
-                      if (value) {
-                        updateForm('area', '')
-                        updateForm('busStop', '')
-                      }
-                    }}
-                    options={form.lga
-                        ? getTownsForLocation(locations.find((l) => l.name === form.lga)?.id ?? '').map((t) => ({ value: t, label: t }))
-                        : []}
-                    placeholder="Select town"
-                    disabled={!form.lga}
-                  />
-                </div>
-
-                <div className="form-row">
-                  <Select
-                    label="Area / Neighborhood"
-                    name="area"
-                    value={form.area}
-                    onChange={(value) => updateForm('area', value)}
-                    options={form.town ? getAreasForLocation(form.town).map((a) => ({ value: a, label: a })) : []}
-                    placeholder="Select area"
-                    disabled={!form.town}
-                  />
-
-                  <Select
-                    label="Nearest Bus Stop / Landmark"
-                    name="busStop"
-                    value={form.busStop}
-                    onChange={(value) => updateForm('busStop', value)}
-                    options={form.lga
-                        ? getBusStopsForLocation(locations.find((l) => l.name === form.lga)?.id ?? '').map((b) => ({ value: b, label: b }))
-                        : []}
-                    placeholder="Select landmark"
-                    disabled={!form.lga}
-                  />
-                </div>
-              </div>
-
-              <Input
-                label="Street address"
-                name="address"
-                placeholder="e.g. 12 Ring Road, Challenge"
-                required
-                value={form.address}
-                onChange={(e) => updateForm('address', e.target.value)}
-                error={errors.address}
-                icon={<MapPin size={18} />}
-              />
-
-              <div className="map-section">
-                <label className="field__label">Exact Location on Map</label>
-                <p className="field__hint">Drag the marker or click on the map to set the exact business location. Use the crosshair button to use your current location.</p>
-                <GoogleLocationPicker
-                  latitude={form.latitude ? Number(form.latitude) : undefined}
-                  longitude={form.longitude ? Number(form.longitude) : undefined}
-                  onLocationChange={(loc) => {
-                    updateForm('latitude', String(loc.lat))
-                    updateForm('longitude', String(loc.lng))
-                    if (loc.address) updateForm('formattedAddress', loc.address)
-                    if (loc.placeId) updateForm('placeId', loc.placeId)
-                  }}
-                  apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-                  height={350}
-                  defaultCenter={form.lga
-                    ? getLocationCenter(locations.find((l) => l.name === form.lga)?.id ?? '')
-                    : { lat: 7.3775, lng: 3.9470 }}
-                  defaultZoom={form.lga ? 13 : 12}
-                />
-                {(form.latitude || form.longitude) && (
-                  <div className="map-coords-display">
-                    <p><strong>Coordinates:</strong> {form.latitude}, {form.longitude}</p>
-                    {form.formattedAddress && <p><strong>Address:</strong> {form.formattedAddress}</p>}
+      <div className="form-page__grid">
+        <div className="form-page__main">
+          <form onSubmit={handleSubmit} className="form-page__form" noValidate>
+            {step === 1 && (
+              <Card variant="default" padding="lg" className="form-step-card">
+                <CardBody>
+                  <div className="form-step-header">
+                    <h2 className="form-step-title">Basic Information</h2>
+                    <p className="form-step-description">Tell us about your business</p>
                   </div>
-                )}
-              </div>
-            </div>
-          )}
 
-          {step === 3 && (
-            <div className="form-step" role="step" aria-labelledby="step3-heading">
-              <h2 id="step3-heading" className="form-step-title">Contact Information</h2>
-              <p className="form-step-description">How can customers reach you?</p>
-
-              <div className="form-row">
-                <Input
-                  label="Phone number"
-                  name="phone"
-                  type="tel"
-                  placeholder="+234 800 000 0000"
-                  required
-                  value={form.phone}
-                  onChange={(e) => updateForm('phone', e.target.value)}
-                  error={errors.phone}
-                  icon={<Phone size={18} />}
-                />
-
-                <Input
-                  label="WhatsApp number"
-                  name="whatsapp"
-                  type="tel"
-                  placeholder="+234 800 000 0000"
-                  value={form.whatsapp}
-                  onChange={(e) => updateForm('whatsapp', e.target.value)}
-                  hint="Optional - defaults to phone number"
-                  icon={<MessageCircle size={18} />}
-                />
-              </div>
-
-              <div className="form-row">
-                <Input
-                  label="Email address"
-                  name="email"
-                  type="email"
-                  placeholder="business@example.com"
-                  value={form.email}
-                  onChange={(e) => updateForm('email', e.target.value)}
-                  icon={<Mail size={18} />}
-                />
-
-                <Input
-                  label="Website"
-                  name="website"
-                  type="url"
-                  placeholder="https://yourbusiness.com"
-                  value={form.website}
-                  onChange={(e) => updateForm('website', e.target.value)}
-                  icon={<Globe size={18} />}
-                />
-              </div>
-            </div>
-          )}
-
-          {step === 4 && (
-            <div className="form-step" role="step" aria-labelledby="step4-heading">
-              <h2 id="step4-heading" className="form-step-title">Photos</h2>
-              <p className="form-step-description">Add photos to showcase your business (optional)</p>
-
-              <div className="photo-upload-grid">
-                <PhotoUploadField
-                  label="Logo"
-                  preview={form.logoPreview}
-                  onUpload={(files) => handleImageUpload('logo', files)}
-                  onRemove={() => removeImage('logo')}
-                  accept="image/*"
-                />
-
-                <PhotoUploadField
-                  label="Cover image"
-                  preview={form.coverPreview}
-                  onUpload={(files) => handleImageUpload('coverImage', files)}
-                  onRemove={() => removeImage('coverImage')}
-                  accept="image/*"
-                />
-              </div>
-
-              <div className="photo-upload-field">
-                <label className="field__label">Gallery</label>
-                <div className="gallery-upload">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => e.target.files && handleImageUpload('gallery', e.target.files)}
-                    className="gallery-file-input"
-                    id="gallery-upload"
+                  <Input
+                    label="Business name"
+                    name="name"
+                    placeholder="e.g. Adebayo Auto Works"
+                    required
+                    value={form.name}
+                    onChange={(e) => updateForm('name', e.target.value)}
+                    error={errors.name}
+                    icon={<User size={18} aria-hidden="true" />}
                   />
-                  <label htmlFor="gallery-upload" className="gallery-upload-label">
-                    <Image size={24} aria-hidden="true" />
-                    <span>Add gallery photos</span>
-                    <span className="gallery-count">{form.gallery.length} photos</span>
-                  </label>
-                  {form.galleryPreviews.length > 0 && (
-                    <div className="gallery-previews">
-                      {form.galleryPreviews.map((preview, index) => (
-                        <div key={index} className="gallery-preview">
-                          <img src={preview} alt={`Gallery ${index + 1}`} />
-                          <button
-                            type="button"
-                            className="gallery-remove"
-                            onClick={() => removeImage('gallery', index)}
-                            aria-label={`Remove photo ${index + 1}`}
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                      ))}
+
+                  <div className="field">
+                    <label className="field__label" htmlFor="description">Description</label>
+                    <textarea
+                      id="description"
+                      className={`input textarea ${errors.description ? 'input--error' : ''}`}
+                      rows={5}
+                      placeholder="Describe your business, services, and what makes you unique..."
+                      required
+                      value={form.description}
+                      onChange={(e) => updateForm('description', e.target.value)}
+                    />
+                    {errors.description && <p className="field__error">{errors.description}</p>}
+                  </div>
+
+                  <Input
+                    label="Owner name"
+                    name="ownerName"
+                    placeholder="Your full name"
+                    required
+                    value={form.ownerName}
+                    onChange={(e) => updateForm('ownerName', e.target.value)}
+                    error={errors.ownerName}
+                    icon={<User size={18} aria-hidden="true" />}
+                  />
+                </CardBody>
+              </Card>
+            )}
+
+            {step === 2 && (
+              <Card variant="default" padding="lg" className="form-step-card">
+                <CardBody>
+                  <div className="form-step-header">
+                    <h2 className="form-step-title">Category & Location</h2>
+                    <p className="form-step-description">Where can customers find you? Select your LGA, then town, area, and nearest landmark. Finally, place a pin on the map for the exact location.</p>
+                  </div>
+
+                  <Select
+                    label="Category"
+                    name="category"
+                    required
+                    value={form.category}
+                    onChange={(value) => updateForm('category', value)}
+                    options={categories.map((c) => ({ value: c.slug, label: c.name }))}
+                    placeholder="Select a category"
+                    error={errors.category}
+                  />
+
+                  <div className="location-hierarchy">
+                    <div className="form-row">
+                      <Select
+                        label="LGA (Local Government Area)"
+                        name="lga"
+                        required
+                        value={form.lga}
+                        onChange={(value) => {
+                          updateForm('lga', value)
+                          if (value) {
+                            updateForm('town', '')
+                            updateForm('area', '')
+                            updateForm('busStop', '')
+                          }
+                        }}
+                        options={locations.map((l) => ({ value: l.name, label: l.name }))}
+                        placeholder="Select LGA"
+                        error={errors.lga}
+                        icon={<MapPin size={18} aria-hidden="true" />}
+                      />
+
+                      <Select
+                        label="Town / City"
+                        name="town"
+                        value={form.town}
+                        onChange={(value) => {
+                          updateForm('town', value)
+                          if (value) {
+                            updateForm('area', '')
+                            updateForm('busStop', '')
+                          }
+                        }}
+                        options={form.lga
+                          ? getTownsForLocation(locations.find((l) => l.name === form.lga)?.id ?? '').map((t) => ({ value: t, label: t }))
+                          : []}
+                        placeholder="Select town"
+                        disabled={!form.lga}
+                        error={errors.town}
+                        icon={<MapPin size={18} aria-hidden="true" />}
+                      />
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
 
-          {step === 5 && (
-            <div className="form-step" role="step" aria-labelledby="step5-heading">
-              <h2 id="step5-heading" className="form-step-title">Opening Hours</h2>
-              <p className="form-step-description">Set your business hours for each day</p>
+                    <div className="form-row">
+                      <Select
+                        label="Area / Neighborhood"
+                        name="area"
+                        value={form.area}
+                        onChange={(value) => updateForm('area', value)}
+                        options={form.town ? getAreasForLocation(form.town).map((a) => ({ value: a, label: a })) : []}
+                        placeholder="Select area"
+                        disabled={!form.town}
+                        icon={<MapPin size={18} aria-hidden="true" />}
+                      />
 
-              <div className="hours-grid">
-                {DAYS.map((day) => {
-                  const hours = form.openingHours[day] || { open: '09:00', close: '18:00', closed: false }
-                  return (
-                    <div key={day} className={`hours-day ${hours.closed ? 'closed' : ''}`}>
-                      <label className="hours-day-label">
-                        <input
-                          type="checkbox"
-                          checked={hours.closed}
-                          onChange={(e) => updateNestedForm('openingHours', day, { ...hours, closed: e.target.checked })}
-                        />
-                        <span>{day}</span>
+                      <Select
+                        label="Nearest Bus Stop / Landmark"
+                        name="busStop"
+                        value={form.busStop}
+                        onChange={(value) => updateForm('busStop', value)}
+                        options={form.lga
+                          ? getBusStopsForLocation(locations.find((l) => l.name === form.lga)?.id ?? '').map((b) => ({ value: b, label: b }))
+                          : []}
+                        placeholder="Select landmark"
+                        disabled={!form.lga}
+                        icon={<MapPin size={18} aria-hidden="true" />}
+                      />
+                    </div>
+                  </div>
+
+                  <Input
+                    label="Street address"
+                    name="address"
+                    placeholder="e.g. 12 Ring Road, Challenge"
+                    required
+                    value={form.address}
+                    onChange={(e) => updateForm('address', e.target.value)}
+                    error={errors.address}
+                    icon={<MapPin size={18} aria-hidden="true" />}
+                  />
+
+                  <div className="map-section">
+                    <label className="field__label">Exact Location on Map</label>
+                    <p className="field__hint">Drag the marker or click on the map to set the exact business location. Use the crosshair button to use your current location.</p>
+                    <GoogleLocationPicker
+                      latitude={form.latitude ? Number(form.latitude) : undefined}
+                      longitude={form.longitude ? Number(form.longitude) : undefined}
+                      onLocationChange={(loc) => {
+                        updateForm('latitude', String(loc.lat))
+                        updateForm('longitude', String(loc.lng))
+                        if (loc.address) updateForm('formattedAddress', loc.address)
+                        if (loc.placeId) updateForm('placeId', loc.placeId)
+                      }}
+                      apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                      height={350}
+                      defaultCenter={form.lga
+                        ? getLocationCenter(locations.find((l) => l.name === form.lga)?.id ?? '')
+                        : { lat: 7.3775, lng: 3.9470 }}
+                      defaultZoom={form.lga ? 13 : 12}
+                    />
+                    {(form.latitude || form.longitude) && (
+                      <div className="map-coords-display">
+                        <p><strong>Coordinates:</strong> {form.latitude}, {form.longitude}</p>
+                        {form.formattedAddress && <p><strong>Address:</strong> {form.formattedAddress}</p>}
+                      </div>
+                    )}
+                  </div>
+                </CardBody>
+              </Card>
+            )}
+
+            {step === 3 && (
+              <Card variant="default" padding="lg" className="form-step-card">
+                <CardBody>
+                  <div className="form-step-header">
+                    <h2 className="form-step-title">Contact Information</h2>
+                    <p className="form-step-description">How can customers reach you?</p>
+                  </div>
+
+                  <div className="form-row">
+                    <Input
+                      label="Phone number"
+                      name="phone"
+                      type="tel"
+                      placeholder="+234 800 000 0000"
+                      required
+                      value={form.phone}
+                      onChange={(e) => updateForm('phone', e.target.value)}
+                      error={errors.phone}
+                      icon={<Phone size={18} aria-hidden="true" />}
+                    />
+
+                    <Input
+                      label="WhatsApp number"
+                      name="whatsapp"
+                      type="tel"
+                      placeholder="+234 800 000 0000"
+                      value={form.whatsapp}
+                      onChange={(e) => updateForm('whatsapp', e.target.value)}
+                      hint="Optional - defaults to phone number"
+                      icon={<MessageCircle size={18} aria-hidden="true" />}
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <Input
+                      label="Email address"
+                      name="email"
+                      type="email"
+                      placeholder="business@example.com"
+                      value={form.email}
+                      onChange={(e) => updateForm('email', e.target.value)}
+                      icon={<Mail size={18} aria-hidden="true" />}
+                    />
+
+                    <Input
+                      label="Website"
+                      name="website"
+                      type="url"
+                      placeholder="https://yourbusiness.com"
+                      value={form.website}
+                      onChange={(e) => updateForm('website', e.target.value)}
+                      icon={<Globe size={18} aria-hidden="true" />}
+                    />
+                  </div>
+                </CardBody>
+              </Card>
+            )}
+
+            {step === 4 && (
+              <Card variant="default" padding="lg" className="form-step-card">
+                <CardBody>
+                  <div className="form-step-header">
+                    <h2 className="form-step-title">Photos</h2>
+                    <p className="form-step-description">Add photos to showcase your business (optional)</p>
+                  </div>
+
+                  <div className="photo-upload-grid">
+                    <PhotoUploadField
+                      label="Logo"
+                      preview={form.logoPreview}
+                      onUpload={(files) => handleImageUpload('logo', files)}
+                      onRemove={() => removeImage('logo')}
+                      accept="image/*"
+                    />
+
+                    <PhotoUploadField
+                      label="Cover image"
+                      preview={form.coverPreview}
+                      onUpload={(files) => handleImageUpload('coverImage', files)}
+                      onRemove={() => removeImage('coverImage')}
+                      accept="image/*"
+                    />
+                  </div>
+
+                  <div className="photo-upload-field">
+                    <label className="field__label">Gallery</label>
+                    <div className="gallery-upload">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={(e) => e.target.files && handleImageUpload('gallery', e.target.files)}
+                        className="gallery-file-input"
+                        id="gallery-upload"
+                      />
+                      <label htmlFor="gallery-upload" className="gallery-upload-label">
+                        <Image size={24} aria-hidden="true" />
+                        <span>Add gallery photos</span>
+                        <span className="gallery-count">{form.gallery.length} photos</span>
                       </label>
-                      {!hours.closed && (
-                        <div className="hours-inputs">
-                          <Input
-                            label="Opens"
-                            name={`${day}-open`}
-                            type="time"
-                            value={hours.open}
-                            onChange={(e) => updateNestedForm('openingHours', day, { ...hours, open: e.target.value })}
-                            className="hours-time-input"
-                          />
-                          <Input
-                            label="Closes"
-                            name={`${day}-close`}
-                            type="time"
-                            value={hours.close}
-                            onChange={(e) => updateNestedForm('openingHours', day, { ...hours, close: e.target.value })}
-                            className="hours-time-input"
-                          />
+                      {form.galleryPreviews.length > 0 && (
+                        <div className="gallery-previews">
+                          {form.galleryPreviews.map((preview, index) => (
+                            <div key={index} className="gallery-preview">
+                              <img src={preview} alt={`Gallery ${index + 1}`} />
+                              <button
+                                type="button"
+                                className="gallery-remove"
+                                onClick={() => removeImage('gallery', index)}
+                                aria-label={`Remove photo ${index + 1}`}
+                              >
+                                <X size={16} aria-hidden="true" />
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
-                  )
-                })}
-              </div>
+                  </div>
+                </CardBody>
+              </Card>
+            )}
 
-              <div className="hours-actions">
-                <Button type="button" variant="outline" onClick={() => {
-                  const newHours = DAYS.reduce((acc, day) => ({ ...acc, [day]: { open: '09:00', close: '18:00', closed: day === 'Sunday' } }), {} as typeof form.openingHours)
-                  setForm((prev) => ({ ...prev, openingHours: newHours }))
-                }}>
-                  Reset to defaults
-                </Button>
-                <Button type="button" variant="outline" onClick={() => {
-                  const newHours = DAYS.reduce((acc, day) => ({ ...acc, [day]: { open: '00:00', close: '00:00', closed: true } }), {} as typeof form.openingHours)
-                  setForm((prev) => ({ ...prev, openingHours: newHours }))
-                }}>
-                  Mark all closed
-                </Button>
-              </div>
-            </div>
-          )}
+            {step === 5 && (
+              <Card variant="default" padding="lg" className="form-step-card">
+                <CardBody>
+                  <div className="form-step-header">
+                    <h2 className="form-step-title">Opening Hours</h2>
+                    <p className="form-step-description">Set your business hours for each day</p>
+                  </div>
 
-          {step === 6 && (
-            <div className="form-step" role="step" aria-labelledby="step6-heading">
-              <h2 id="step6-heading" className="form-step-title">Review & Submit</h2>
-              <p className="form-step-description">Please review your listing before submitting</p>
-
-              <div className="review-summary">
-                <div className="review-section">
-                  <h3>Basic Information</h3>
-                  <dl>
-                    <dt>Business name</dt>
-                    <dd>{form.name || '—'}</dd>
-                    <dt>Description</dt>
-                    <dd>{form.description.substring(0, 100)}...</dd>
-                    <dt>Owner</dt>
-                    <dd>{form.ownerName || '—'}</dd>
-                  </dl>
-                </div>
-
-                <div className="review-section">
-                  <h3>Category & Location</h3>
-                  <dl>
-                    <dt>Category</dt>
-                    <dd>{categories.find((c) => c.slug === form.category)?.name || form.category || '—'}</dd>
-                    <dt>LGA</dt>
-                    <dd>{form.lga || '—'}</dd>
-                    <dt>Town / City</dt>
-                    <dd>{form.town || '—'}</dd>
-                    <dt>Area</dt>
-                    <dd>{form.area || '—'}</dd>
-                    <dt>Bus Stop / Landmark</dt>
-                    <dd>{form.busStop || '—'}</dd>
-                    <dt>Street Address</dt>
-                    <dd>{form.address || '—'}</dd>
-                    {form.latitude && form.longitude && (
-                      <>
-                        <dt>Coordinates</dt>
-                        <dd>{form.latitude}, {form.longitude}</dd>
-                      </>
-                    )}
-                    {form.formattedAddress && (
-                      <>
-                        <dt>Map Address</dt>
-                        <dd>{form.formattedAddress}</dd>
-                      </>
-                    )}
-                  </dl>
-                </div>
-
-                <div className="review-section">
-                  <h3>Contact</h3>
-                  <dl>
-                    <dt>Phone</dt>
-                    <dd>{form.phone || '—'}</dd>
-                    <dt>WhatsApp</dt>
-                    <dd>{form.whatsapp || 'Same as phone'}</dd>
-                    <dt>Email</dt>
-                    <dd>{form.email || '—'}</dd>
-                    <dt>Website</dt>
-                    <dd>{form.website || '—'}</dd>
-                  </dl>
-                </div>
-
-                <div className="review-section">
-                  <h3>Photos</h3>
-                  <dl>
-                    <dt>Logo</dt>
-                    <dd>{form.logoPreview ? 'Uploaded' : 'Not provided'}</dd>
-                    <dt>Cover</dt>
-                    <dd>{form.coverPreview ? 'Uploaded' : 'Not provided'}</dd>
-                    <dt>Gallery</dt>
-                    <dd>{form.gallery.length} photo(s)</dd>
-                  </dl>
-                </div>
-
-                <div className="review-section">
-                  <h3>Opening Hours</h3>
-                  <dl>
+                  <div className="hours-grid">
                     {DAYS.map((day) => {
-                      const hours = form.openingHours[day]
-                      return hours ? (
-                        <>
-                          <dt>{day}</dt>
-                          <dd>{hours.closed ? 'Closed' : `${hours.open} – ${hours.close}`}</dd>
-                        </>
-                      ) : null
+                      const hours = form.openingHours[day] || { open: '09:00', close: '18:00', closed: false }
+                      return (
+                        <div key={day} className={`hours-day ${hours.closed ? 'closed' : ''}`}>
+                          <label className="hours-day-label">
+                            <input
+                              type="checkbox"
+                              checked={hours.closed}
+                              onChange={(e) => updateNestedForm('openingHours', day, { ...hours, closed: e.target.checked })}
+                            />
+                            <span>{day}</span>
+                          </label>
+                          {!hours.closed && (
+                            <div className="hours-inputs">
+                              <Input
+                                label="Opens"
+                                name={`${day}-open`}
+                                type="time"
+                                value={hours.open}
+                                onChange={(e) => updateNestedForm('openingHours', day, { ...hours, open: e.target.value })}
+                                className="hours-time-input"
+                              />
+                              <Input
+                                label="Closes"
+                                name={`${day}-close`}
+                                type="time"
+                                value={hours.close}
+                                onChange={(e) => updateNestedForm('openingHours', day, { ...hours, close: e.target.value })}
+                                className="hours-time-input"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )
                     })}
-                  </dl>
-                </div>
-              </div>
+                  </div>
 
-              <div className="review-actions">
-                <label className="checkbox-wrapper">
-                  <input type="checkbox" name="terms" required />
-                  <span className="checkbox-custom" aria-hidden="true" />
-                  <span>
-                    I confirm this information is accurate and agree to the
-                    <a href="/terms" className="auth-link">Terms of Service</a>
-                  </span>
-                </label>
-              </div>
+                  <div className="hours-actions">
+                    <Button type="button" variant="outline" onClick={() => {
+                      const newHours = DAYS.reduce((acc, day) => ({ ...acc, [day]: { open: '09:00', close: '18:00', closed: day === 'Sunday' } }), {} as typeof form.openingHours)
+                      setForm((prev) => ({ ...prev, openingHours: newHours }))
+                    }}>
+                      Reset to defaults
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => {
+                      const newHours = DAYS.reduce((acc, day) => ({ ...acc, [day]: { open: '00:00', close: '00:00', closed: true } }), {} as typeof form.openingHours)
+                      setForm((prev) => ({ ...prev, openingHours: newHours }))
+                    }}>
+                      Mark all closed
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
+            )}
+
+            {step === 6 && (
+              <Card variant="default" padding="lg" className="form-step-card">
+                <CardBody>
+                  <div className="form-step-header">
+                    <h2 className="form-step-title">Review & Submit</h2>
+                    <p className="form-step-description">Please review your listing before submitting</p>
+                  </div>
+
+                  <div className="review-summary">
+                    <div className="review-section">
+                      <h3>Basic Information</h3>
+                      <dl>
+                        <dt>Business name</dt>
+                        <dd>{form.name || '—'}</dd>
+                        <dt>Description</dt>
+                        <dd>{form.description.substring(0, 100)}...</dd>
+                        <dt>Owner</dt>
+                        <dd>{form.ownerName || '—'}</dd>
+                      </dl>
+                    </div>
+
+                    <div className="review-section">
+                      <h3>Category & Location</h3>
+                      <dl>
+                        <dt>Category</dt>
+                        <dd>{categories.find((c) => c.slug === form.category)?.name || form.category || '—'}</dd>
+                        <dt>LGA</dt>
+                        <dd>{form.lga || '—'}</dd>
+                        <dt>Town / City</dt>
+                        <dd>{form.town || '—'}</dd>
+                        <dt>Area</dt>
+                        <dd>{form.area || '—'}</dd>
+                        <dt>Bus Stop / Landmark</dt>
+                        <dd>{form.busStop || '—'}</dd>
+                        <dt>Street Address</dt>
+                        <dd>{form.address || '—'}</dd>
+                        {form.latitude && form.longitude && (
+                          <>
+                            <dt>Coordinates</dt>
+                            <dd>{form.latitude}, {form.longitude}</dd>
+                          </>
+                        )}
+                        {form.formattedAddress && (
+                          <>
+                            <dt>Map Address</dt>
+                            <dd>{form.formattedAddress}</dd>
+                          </>
+                        )}
+                      </dl>
+                    </div>
+
+                    <div className="review-section">
+                      <h3>Contact</h3>
+                      <dl>
+                        <dt>Phone</dt>
+                        <dd>{form.phone || '—'}</dd>
+                        <dt>WhatsApp</dt>
+                        <dd>{form.whatsapp || 'Same as phone'}</dd>
+                        <dt>Email</dt>
+                        <dd>{form.email || '—'}</dd>
+                        <dt>Website</dt>
+                        <dd>{form.website || '—'}</dd>
+                      </dl>
+                    </div>
+
+                    <div className="review-section">
+                      <h3>Photos</h3>
+                      <dl>
+                        <dt>Logo</dt>
+                        <dd>{form.logoPreview ? 'Uploaded' : 'Not provided'}</dd>
+                        <dt>Cover</dt>
+                        <dd>{form.coverPreview ? 'Uploaded' : 'Not provided'}</dd>
+                        <dt>Gallery</dt>
+                        <dd>{form.gallery.length} photo(s)</dd>
+                      </dl>
+                    </div>
+
+                    <div className="review-section">
+                      <h3>Opening Hours</h3>
+                      <dl>
+                        {DAYS.map((day) => {
+                          const hours = form.openingHours[day]
+                          return hours ? (
+                            <>
+                              <dt>{day}</dt>
+                              <dd>{hours.closed ? 'Closed' : `${hours.open} – ${hours.close}`}</dd>
+                            </>
+                          ) : null
+                        })}
+                      </dl>
+                    </div>
+                  </div>
+
+                  <div className="review-actions">
+                    <label className="checkbox-wrapper">
+                      <input type="checkbox" name="terms" required />
+                      <span className="checkbox-custom" aria-hidden="true" />
+                      <span>
+                        I confirm this information is accurate and agree to the
+                        <a href="/terms" className="auth-link">Terms of Service</a>
+                      </span>
+                    </label>
+                  </div>
+                </CardBody>
+              </Card>
+            )}
+
+            <div className="form-page__navigation">
+              {step > 1 && (
+                <Button type="button" variant="outline" onClick={handleBack} disabled={submitting}>
+                  <ChevronLeft size={18} aria-hidden="true" /> Back
+                </Button>
+              )}
+              {step < 6 ? (
+                <Button type="button" onClick={handleNext} disabled={submitting}>
+                  Next <ChevronRight size={18} aria-hidden="true" />
+                </Button>
+              ) : (
+                <Button type="submit" size="lg" disabled={submitting}>
+                  {submitting ? 'Submitting...' : 'Submit for Review'}
+                </Button>
+              )}
+              {step < 6 && (
+                <Button type="button" variant="ghost" onClick={saveDraft} disabled={submitting}>
+                  <Save size={18} aria-hidden="true" /> Save draft
+                </Button>
+              )}
+            </div>
+          </form>
+
+          {draftSaved && (
+            <div className="form-page__draft-toast" role="status">
+              <CheckCircle2 size={18} aria-hidden="true" />
+              Draft saved automatically
             </div>
           )}
+        </div>
 
-          <div className="form-navigation">
-            {step > 1 && (
-              <Button type="button" variant="outline" onClick={handleBack} disabled={submitting}>
-                <ChevronLeft size={18} /> Back
-              </Button>
-            )}
-            {step < 6 ? (
-              <Button type="button" onClick={handleNext} disabled={submitting}>
-                Next <ChevronRight size={18} />
-              </Button>
-            ) : (
-              <Button type="submit" size="lg" disabled={submitting}>
-                {submitting ? 'Submitting...' : 'Submit for Review'}
-              </Button>
-            )}
-            {step < 6 && (
-              <Button type="button" variant="ghost" onClick={saveDraft} disabled={submitting}>
-                <Save size={18} /> Save draft
-              </Button>
-            )}
-          </div>
-        </form>
+        <aside className="form-page__aside" aria-label="Listing progress">
+          <Card variant="default" padding="lg" className="form-tips-card">
+            <CardBody>
+              <div className="form-tips-header">
+                <Building2 size={20} aria-hidden="true" />
+                <h3>Why List Your Business?</h3>
+              </div>
+              <ul className="form-tips-list">
+                <li><strong>Get discovered</strong> — Appear in local searches across all 33 LGAs in Oyo State</li>
+                <li><strong>Build trust</strong> — Verified listings show a trust badge to customers</li>
+                <li><strong>Free to start</strong> — No cost to create and submit your listing</li>
+                <li><strong>Manage enquiries</strong> — Receive and respond to customer messages in one place</li>
+                <li><strong>Track performance</strong> — See views, clicks, and enquiries on your dashboard</li>
+              </ul>
+            </CardBody>
+          </Card>
 
-        {draftSaved && (
-          <div className="draft-saved-toast" role="status">
-            <CheckCircle2 size={18} />
-            Draft saved automatically
-          </div>
-        )}
+          <Card variant="default" padding="lg" className="form-checklist-card">
+            <CardBody>
+              <div className="form-checklist-header">
+                <FileText size={20} aria-hidden="true" />
+                <h3>Required Fields Checklist</h3>
+                <span className="form-checklist-progress">{completedRequiredCount} / {requiredFields.length} complete</span>
+              </div>
+              <ul className="form-checklist">
+                {requiredFields.map((field, index) => (
+                  <li key={index} className={field.done ? 'done' : ''}>
+                    <span className="form-checklist-icon">
+                      {field.done ? <CheckCircle2 size={16} aria-hidden="true" /> : <span className="form-checklist-number">{index + 1}</span>}
+                    </span>
+                    <span className="form-checklist-label">{field.label}</span>
+                    {field.done && <span className="form-checklist-step">Step {field.step}</span>}
+                  </li>
+                ))}
+              </ul>
+              <div className="form-checklist-progress-bar">
+                <div className="form-checklist-progress-fill" style={{ width: `${(completedRequiredCount / requiredFields.length) * 100}%` }} />
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card variant="default" padding="lg" className="form-tips-card">
+            <CardBody>
+              <div className="form-tips-header">
+                <Lightbulb size={20} aria-hidden="true" />
+                <h3>Find More Businesses</h3>
+              </div>
+              <p className="form-tips-text">Browse existing listings to see how other businesses present themselves.</p>
+              <ButtonLink to="/businesses" variant="primary" fullWidth size="md">
+                Browse Businesses
+              </ButtonLink>
+            </CardBody>
+          </Card>
+        </aside>
       </div>
     </main>
-  )
-}
-
-function PhotoUploadField({
-  label,
-  preview,
-  onUpload,
-  onRemove,
-  accept,
-}: {
-  label: string
-  preview: string
-  onUpload: (files: FileList) => void
-  onRemove: () => void
-  accept: string
-}) {
-  return (
-    <div className="photo-upload-field">
-      <label className="field__label">{label}</label>
-      <div className="photo-upload-dropzone">
-        {preview ? (
-          <div className="photo-preview">
-            <img src={preview} alt={`${label} preview`} />
-            <button type="button" className="photo-remove" onClick={onRemove} aria-label={`Remove ${label}`}>
-              <X size={20} />
-            </button>
-          </div>
-        ) : (
-          <label className="photo-upload-label">
-            <input
-              type="file"
-              accept={accept}
-              onChange={(e) => e.target.files && onUpload(e.target.files)}
-              className="photo-file-input"
-            />
-            <Image size={32} aria-hidden="true" />
-            <span>Click to upload {label.toLowerCase()}</span>
-            <span className="photo-upload-hint">PNG, JPG up to 5MB</span>
-          </label>
-        )}
-      </div>
-    </div>
   )
 }
 

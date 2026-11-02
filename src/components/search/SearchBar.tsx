@@ -37,18 +37,72 @@ export function SearchBar({
     navigate(qs ? `/search?${qs}` : '/search')
   }
 
+  const pillStyles = {
+    display: 'flex',
+    alignItems: 'center',
+    background: '#fff',
+    borderRadius: '9999px',
+    boxShadow: '0 10px 30px rgba(2, 44, 34, 0.12), 0 4px 12px rgba(2, 44, 34, 0.08)',
+    padding: '6px 8px',
+    transition: 'box-shadow 0.2s ease',
+    maxWidth: size === 'lg' ? '680px' : '640px',
+    width: '100%',
+  }
+
+  const fieldStyles = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '10px 16px',
+    flex: 1,
+    minWidth: 0,
+    color: '#64748b',
+  }
+
+  const inputStyles = {
+    border: 'none',
+    outline: 'none',
+    background: 'transparent',
+    width: '100%',
+    fontSize: '15px',
+    color: '#0f172a',
+  }
+
+  const dividerStyles = {
+    width: '1px',
+    height: '24px',
+    background: '#e2e8f0',
+    margin: '0 4px',
+  }
+
+  const submitStyles = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    border: 'none',
+    borderRadius: '9999px',
+    background: '#022c22',
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: '14px',
+    padding: '10px 20px',
+    cursor: 'pointer',
+    transition: 'background-color 0.18s ease, transform 0.05s ease',
+  }
+
   return (
     <form
-      className={`search-bar search-bar--${size}`}
+      style={pillStyles}
       role="search"
       onSubmit={handleSubmit}
     >
-      <label className="search-bar__field search-bar__field--query">
-        <Search size={20} aria-hidden="true" />
+      <label style={fieldStyles}>
+        <Search size={20} aria-hidden="true" style={{ color: '#64748b', flexShrink: 0 }} />
 
         <input
           type="search"
-          className="search-bar__input"
+          style={inputStyles}
           placeholder="What service or business are you looking for?"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
@@ -56,12 +110,9 @@ export function SearchBar({
         />
       </label>
 
-      <span
-        className="search-bar__divider"
-        aria-hidden="true"
-      />
+      <span style={dividerStyles} aria-hidden="true" />
 
-      <label className="search-bar__field search-bar__field--location">
+      <label style={fieldStyles}>
         <LocationSelector
           id="search-location"
           value={location}
@@ -73,15 +124,11 @@ export function SearchBar({
 
       <button
         type="submit"
-        className="search-bar__submit"
+        style={submitStyles}
+        onMouseDown={() => {}}
       >
-        <Search size={18} aria-hidden="true" />
         <span>Search</span>
-        <ArrowRight
-          size={16}
-          className="search-bar__submit-arrow"
-          aria-hidden="true"
-        />
+        <ArrowRight size={16} aria-hidden="true" />
       </button>
     </form>
   )

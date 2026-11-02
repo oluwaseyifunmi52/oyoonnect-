@@ -10,13 +10,15 @@ const ICONS: Record<string, typeof User> = {
   building: Building2,
 }
 
-export function WorkspaceSwitcher() {
+export function WorkspaceSwitcher({ activeKey }: { activeKey?: 'customer' | 'service_provider' | 'business_owner' }) {
   const { getWorkspaces, upgradeToServiceProvider, upgradeToBusinessOwner, isServiceProvider, isBusinessOwner } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [open, setOpen] = useState(false)
   const workspaces = getWorkspaces()
-  const active = workspaces.find((w) => location.pathname.startsWith(w.to.split('/').slice(0, 2).join('/'))) ?? workspaces[0]
+  const active = workspaces.find((w) => w.key === activeKey)
+    ?? workspaces.find((w) => location.pathname.startsWith(w.to.split('/').slice(0, 2).join('/')))
+    ?? workspaces[0]
 
   const handleUpgrade = async (type: 'provider' | 'business') => {
     setOpen(false)

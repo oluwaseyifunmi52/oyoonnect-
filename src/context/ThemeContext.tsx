@@ -1,9 +1,16 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 type Theme = 'light'|'dark'|'system'
-const KEY='oyoconnect_theme'
+const KEY='oyoconnect.theme'
 const Ctx=createContext<{theme:Theme, resolved:'light'|'dark', setTheme:(t:Theme)=>void}|null>(null)
+function isValidTheme(t: string): t is Theme {
+  return t === 'light' || t === 'dark' || t === 'system'
+}
 export function ThemeProvider({children}:{children:React.ReactNode}){
-  const [theme,setTheme]=useState<Theme>(()=>(localStorage.getItem(KEY) as Theme)||'system')
+  const saved = localStorage.getItem(KEY)
+  const [theme,setTheme]=useState<Theme>(()=>{
+    if(saved && isValidTheme(saved)) return saved as Theme
+    return 'light'
+  })
   const [resolved,setResolved]=useState<'light'|'dark'>('light')
   useEffect(()=>{
     const mq=window.matchMedia('(prefers-color-scheme: dark)')
@@ -16,7 +23,8 @@ export function ThemeProvider({children}:{children:React.ReactNode}){
       else document.documentElement.classList.remove('dark')
     }
     apply()
-    localStorage.setItem(KEY, theme)
+    const themeToSave = theme === 'system' ? 'light' : theme
+    localStorage.setItem(KEY, themeToSave)
     if(theme==='system'){
       mq.addEventListener('change', apply)
       return ()=>mq.removeEventListener('change', apply)

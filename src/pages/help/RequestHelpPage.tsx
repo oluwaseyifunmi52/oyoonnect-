@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Check, X, Upload, FileText, AlertCircle, Shield, Loader2, Banknote, CheckCircle2, Clock, MapPin, User } from 'lucide-react'
-import { REQUEST_HELP_STEPS, type RequestHelpStepId, type RequestHelpFormData, HELP_CATEGORIES, type BankVerificationRequest, type BankVerificationStatus, type HelpCategoryType } from '../../types/help'
+import { REQUEST_HELP_STEPS, type RequestHelpStepId, type RequestHelpFormData, HELP_CATEGORIES, type BankVerificationRequest, type BankVerificationStatus, type HelpCategoryValue } from '../../types/help'
 import { formatCurrency } from '../../utils/currency'
 import { Button } from '../../components/ui/Button'
 import { Input, Select, Textarea } from '../../components/ui/Input'
+import { FormField } from '../../components/ui/FormField'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
 import { HelpIcon } from '../../components/help'
@@ -218,7 +219,7 @@ export function RequestHelpPage() {
         requesterId: 'current-user',
         requesterName: 'Current User',
         requesterLocation: formData.location,
-        category: formData.category as HelpCategoryType,
+        category: formData.category as HelpCategoryValue,
         title: formData.title,
         description: formData.description,
         fullStory: formData.fullStory,
@@ -238,12 +239,12 @@ export function RequestHelpPage() {
         message: `Your request "${formData.title}" has been submitted for review. You'll be notified once it's approved.`,
         read: false,
         createdAt: new Date().toISOString(),
-        href: `/help/requests/${created.id}`,
+        href: `/community/help/requests/${created.id}`,
       })
 
       setSubmitStatus('success')
       setTimeout(() => {
-        window.location.href = '/help/request/success'
+        window.location.href = '/community/help/request/success'
       }, 2000)
     } catch {
       setSubmitStatus('error')
@@ -252,7 +253,7 @@ export function RequestHelpPage() {
   }
 
   const formatCategoryName = (id: string) => {
-    const cat = HELP_CATEGORIES.find(c => c.id === id)
+    const cat = HELP_CATEGORIES.find((c) => c.value === id || c.id === id)
     return cat?.name || id
   }
 
@@ -301,10 +302,10 @@ export function RequestHelpPage() {
               <strong>Status: Pending Admin Review</strong> — Your request will not be visible to the community until approved.
             </p>
             <div className="request-help-page__success-actions">
-              <Link to="/help" className="btn btn--primary btn--lg" style={{ width: '100%' }}>
+              <Link to="/community/help" className="btn btn--primary btn--lg" style={{ width: '100%' }}>
                 Back to Help Home
               </Link>
-              <Link to="/help/requests" className="btn btn--outline btn--lg" style={{ width: '100%' }}>
+              <Link to="/community/help/requests" className="btn btn--outline btn--lg" style={{ width: '100%' }}>
                 Browse Other Requests
               </Link>
             </div>
@@ -335,7 +336,7 @@ export function RequestHelpPage() {
                         name="category"
                         value={category.id}
                         checked={formData.category === category.id}
-                        onChange={() => handleInputChange('category', category.id)}
+                        onChange={() => handleInputChange('category', category.id!)}
                         className="request-help-step__category-input"
                         aria-label={category.name}
                       />

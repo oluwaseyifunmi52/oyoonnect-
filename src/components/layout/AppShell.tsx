@@ -15,6 +15,7 @@ interface AppShellProps {
 
 export function AppLayout({ children, navigationMode = 'platform', showWorkspaceSwitcher = false, workspaceKey, onSignOut }: AppShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [servicesSidebarCollapsed, setServicesSidebarCollapsed] = useState(false)
   const closeDrawer = () => setDrawerOpen(false)
 
   useEffect(() => {
@@ -27,10 +28,17 @@ export function AppLayout({ children, navigationMode = 'platform', showWorkspace
   }, [drawerOpen])
 
   return (
-    <div className={`dashboard-app-shell dashboard-app-shell--${navigationMode}`}>
-      <DashboardSidebar open={drawerOpen} onClose={closeDrawer} mode={navigationMode} onSignOut={onSignOut} />
+    <div className={`dashboard-app-shell dashboard-app-shell--${navigationMode}${navigationMode === 'services' && servicesSidebarCollapsed ? ' is-sidebar-collapsed' : ''}`}>
+      <DashboardSidebar
+        open={drawerOpen}
+        onClose={closeDrawer}
+        mode={navigationMode}
+        onSignOut={onSignOut}
+        collapsed={navigationMode === 'services' && servicesSidebarCollapsed}
+        onToggleCollapsed={navigationMode === 'services' ? () => setServicesSidebarCollapsed(value => !value) : undefined}
+      />
       <div className="dashboard-app-content">
-        <DashboardHeader onMenuClick={() => setDrawerOpen(true)} showWorkspaceSwitcher={showWorkspaceSwitcher} workspaceKey={workspaceKey} />
+        <DashboardHeader onMenuClick={() => setDrawerOpen(true)} showWorkspaceSwitcher={showWorkspaceSwitcher} showWalletShortcut={navigationMode === 'services'} workspaceKey={workspaceKey} />
         <main className="dashboard-app-outlet" id="main-content">
           {children ?? <Outlet />}
         </main>

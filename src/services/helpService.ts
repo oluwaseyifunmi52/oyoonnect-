@@ -2,7 +2,7 @@ import type {
   SupportRequest,
   BankVerificationRequest,
   BankVerificationResponse,
-  HelpCategoryType,
+  HelpCategoryValue,
 } from '../types/help'
 import { HELP_CATEGORIES } from '../types/help'
 import { helpRequests } from '../data/helpRequests'
@@ -96,7 +96,7 @@ export const helpService = {
   },
 
   async search(filters?: {
-    category?: HelpCategoryType
+    category?: HelpCategoryValue
     location?: string
     status?: SupportRequest['status']
     verificationStatus?: SupportRequest['verificationStatus']

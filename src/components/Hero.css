@@ -1,0 +1,147 @@
+.oyo-hero {
+  position: relative;
+  width: 100%;
+  min-height: 290px;
+  border-radius: 16px;
+  overflow: hidden;
+  color: #fff;
+  background-color: #064e3b;
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(2, 44, 34, 0.97) 0%,
+      rgba(6, 78, 59, 0.9) 35%,
+      rgba(6, 78, 59, 0.35) 62%,
+      rgba(6, 78, 59, 0) 100%
+    ),
+    url('/images/oyo-state-hero.png');
+  background-size: cover;
+  background-position: right center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.oyo-hero * {
+  box-sizing: border-box;
+}
+
+.oyo-hero__content {
+  position: relative;
+  z-index: 2;
+  padding: 32px;
+  max-width: 620px;
+  width: 100%;
+}
+
+.oyo-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.oyo-hero__eyebrow svg {
+  width: 14px;
+  height: 14px;
+}
+
+.oyo-hero__title {
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 800;
+  margin: 0 0 12px;
+  max-width: 380px;
+}
+
+.oyo-hero__text {
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0 0 20px;
+  max-width: 400px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.oyo-hero__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 6px 6px 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  max-width: 560px;
+}
+
+.oyo-hero__search > svg {
+  width: 18px;
+  height: 18px;
+  color: #64748b;
+  flex: none;
+}
+
+.oyo-hero__search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 14px;
+  color: #0f172a;
+  padding: 10px 4px;
+}
+
+.oyo-hero__search select {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 14px;
+  color: #334155;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.oyo-hero__search button {
+  border: 0;
+  cursor: pointer;
+  background: #064e3b;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 24px;
+  border-radius: 999px;
+}
+
+.oyo-hero__search button:hover {
+  background: #022c22;
+}
+
+@media (max-width: 640px) {
+  .oyo-hero {
+    min-height: 360px;
+    background-image:
+      linear-gradient(
+        180deg,
+        rgba(2, 44, 34, 0.92) 0%,
+        rgba(6, 78, 59, 0.75) 100%
+      ),
+      url('/images/oyo-state-hero.png');
+  }
+
+  .oyo-hero__content {
+    padding: 24px 18px;
+  }
+
+  .oyo-hero__title {
+    font-size: 30px;
+  }
+
+  .oyo-hero__search select {
+    display: none;
+  }
+}

@@ -6,6 +6,7 @@ import { SectionHeading } from '../../components/ui/SectionHeading'
 import { Modal } from '../../components/common/Modal'
 import { propertyService } from '../../services/propertyService'
 import { propertyFavoritesService } from '../../services/propertyService'
+import { messageService } from '../../services/messageService'
 import { useAuth } from '../../context/AuthContext'
 import { useFavorites } from '../../context/FavoritesContext'
 import type { Property } from '../../types/rental'
@@ -70,6 +71,13 @@ function PropertyDetail() {
     setSendingInquiry(true)
     try {
       await propertyService.incrementInquiries(property.id)
+      // Send message to property owner
+      await messageService.sendMessage(
+        `prop-${property.id}`,
+        `Hi, I'm interested in your property: ${property.title}.`,
+        user.id,
+        property.ownerId || 'user_placeholder'
+      )
       setShowInquiryModal(false)
       setInquiryMessage('')
       alert('Your inquiry has been sent to the property owner.')
