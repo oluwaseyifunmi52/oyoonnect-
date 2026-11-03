@@ -1,16 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   ArrowRight, ArrowUpRight, Bell, BriefcaseBusiness, Building2,
-  ChevronDown, ChevronRight, Compass, FileWarning, HeartHandshake, Home as HomeIcon,
-  LogOut, MapPin, Menu, MessageCircle, Search, Share2, ShoppingBag, Sparkles, Users, Wallet, Clapperboard,
+  CalendarDays, ChevronDown, ChevronRight, FileWarning, HeartHandshake, Home as HomeIcon,
+  LogOut, MapPin, Megaphone, Menu, MessageCircle, Search, Share2, ShoppingBag, Sparkles, Users, Wallet, Clapperboard,
+  Zap,
   X, Gamepad2, type LucideIcon,
 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { PublicLayout } from '../components/Layout'
 import { AppLayout } from '../components/layout/AppShell'
 import { useAuth } from '../context/AuthContext'
+import { Logo } from '../components/layout/Logo'
+import { notificationService } from '../services/notificationService'
 import {
   homeMockSearchItems, homeMockUser,
   loadHomeEvents, loadHomeNotifications, loadHomeUpdates, loadHomeUser, relativeTime,
@@ -31,13 +34,13 @@ const primaryLinks: { label: string; to: string; icon: LucideIcon }[] = [
   { label: 'Watch', to: '/watch', icon: Clapperboard },
 ]
 
-const features: { title: string; description: string; to: string; icon: LucideIcon; color: string }[] = [
-  { title: 'Nearby places', description: 'Find services and places close to you.', to: '/nearby', icon: MapPin, color: 'green' },
-  { title: 'Jobs and careers', description: 'Find a new role or your next great hire.', to: '/jobs', icon: BriefcaseBusiness, color: 'teal' },
-  { title: 'Local marketplace', description: 'Buy and sell with people in your area.', to: '/marketplace', icon: ShoppingBag, color: 'orange' },
-  { title: 'Community reports', description: 'See local updates and raise an issue.', to: '/community', icon: FileWarning, color: 'red' },
-  { title: 'Get help', description: 'Find support and helpful local resources.', to: '/community/help', icon: HeartHandshake, color: 'blue' },
-  { title: 'Games and community', description: 'Play, share and connect with neighbors.', to: '/services/games', icon: Gamepad2, color: 'purple' },
+const features: { title: string; description: string; mobileTitle: string; mobileDescription: string; to: string; mobileTo: string; icon: LucideIcon; mobileIcon: LucideIcon; color: string }[] = [
+  { title: 'Nearby places', description: 'Find services and places close to you.', mobileTitle: 'Nearby Places', mobileDescription: 'Find useful places around you.', to: '/nearby', mobileTo: '/nearby', icon: MapPin, mobileIcon: MapPin, color: 'green' },
+  { title: 'Jobs and careers', description: 'Find a new role or your next great hire.', mobileTitle: 'Jobs & Careers', mobileDescription: 'Explore job opportunities.', to: '/jobs', mobileTo: '/jobs', icon: BriefcaseBusiness, mobileIcon: BriefcaseBusiness, color: 'teal' },
+  { title: 'Local marketplace', description: 'Buy and sell with people in your area.', mobileTitle: 'Local Marketplace', mobileDescription: 'Buy and sell locally.', to: '/marketplace', mobileTo: '/marketplace', icon: ShoppingBag, mobileIcon: ShoppingBag, color: 'orange' },
+  { title: 'Community reports', description: 'See local updates and raise an issue.', mobileTitle: 'Community Reports', mobileDescription: 'Report issues in your community.', to: '/community', mobileTo: '/community', icon: FileWarning, mobileIcon: FileWarning, color: 'red' },
+  { title: 'Get help', description: 'Find support and helpful local resources.', mobileTitle: 'Get Help', mobileDescription: 'Ask for help or support.', to: '/community/help', mobileTo: '/community/help', icon: HeartHandshake, mobileIcon: HeartHandshake, color: 'blue' },
+  { title: 'Games and community', description: 'Play, share and connect with neighbors.', mobileTitle: 'Events & Community', mobileDescription: 'Find events near you.', to: '/services/games', mobileTo: '/community/events', icon: Gamepad2, mobileIcon: CalendarDays, color: 'purple' },
 ]
 
 const quickActions: { label: string; to: string; icon: LucideIcon; protected?: boolean }[] = [
@@ -57,7 +60,7 @@ function formatEventTime(start: string, end: string) {
 }
 
 function Home() {
-  const { isAuthenticated, user: authUser } = useAuth()
+  const { isAuthenticated, user: authUser, logout: authLogout } = useAuth()
   const navigationMode = authUser?.role === 'business_owner'
     ? 'business'
     : authUser?.role === 'service_provider'
@@ -74,10 +77,12 @@ function Home() {
   const [inviteOpen, setInviteOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileUserMenuOpen, setMobileUserMenuOpen] = useState(false)
   const [user, setUser] = useState<HomeUser | null>(() => localStorage.getItem(loggedOutKey) === 'true' ? null : homeMockUser)
   const [notifications, setNotifications] = useState<HomeNotification[]>([])
   const [updates, setUpdates] = useState<HomeUpdate[]>([])
   const [events, setEvents] = useState<HomeEvent[]>([])
+  const [mobileNotifications, setMobileNotifications] = useState(() => notificationService.getNotifications())
   const [loading, setLoading] = useState({ user: true, notifications: true, updates: true, events: true })
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [, setClock] = useState(Date.now())
@@ -85,6 +90,7 @@ function Home() {
   const bellRef = useRef<HTMLDivElement>(null)
   const userRef = useRef<HTMLDivElement>(null)
   const unreadCount = notifications.filter((item) => !item.read).length
+  const mobileUnreadCount = mobileNotifications.filter((item) => !item.read).length
 
   const loadSection = async (section: 'user' | 'notifications' | 'updates' | 'events') => {
     const loader = { user: loadHomeUser, notifications: loadHomeNotifications, updates: loadHomeUpdates, events: loadHomeEvents }[section]
@@ -108,6 +114,12 @@ function Home() {
   }, [])
 
   useEffect(() => {
+    const syncNotifications = () => setMobileNotifications(notificationService.getNotifications())
+    window.addEventListener('dashboardNotificationsChanged', syncNotifications)
+    return () => window.removeEventListener('dashboardNotificationsChanged', syncNotifications)
+  }, [])
+
+  useEffect(() => {
     const timer = window.setTimeout(() => setSuggestionQuery(query.trim()), 300)
     return () => window.clearTimeout(timer)
   }, [query])
@@ -126,7 +138,7 @@ function Home() {
     }
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setNotificationsOpen(false); setUserMenuOpen(false); setSuggestionsOpen(false); setInviteOpen(false); setMobileMenuOpen(false)
+        setNotificationsOpen(false); setUserMenuOpen(false); setSuggestionsOpen(false); setInviteOpen(false); setMobileMenuOpen(false); setMobileUserMenuOpen(false)
       }
     }
     document.addEventListener('mousedown', closeOnOutside)
@@ -169,6 +181,30 @@ function Home() {
 
   const homeContent = (
     <div className={`home-app ${isAuthenticated ? 'home-app--authenticated' : 'home-app--public'}`}>
+      <header className="home-mobile-header">
+        <Logo />
+        <div className="home-mobile-header__actions">
+          <Link to="/notifications" className="home-mobile-icon" aria-label={`Notifications, ${mobileUnreadCount} unread`}>
+            <Bell size={20} aria-hidden="true" />
+            {mobileUnreadCount > 0 && <span className="home-mobile-badge">{mobileUnreadCount > 9 ? '9+' : mobileUnreadCount}</span>}
+          </Link>
+          {isAuthenticated ? (
+            <div className="home-mobile-user-menu">
+              <button type="button" className="home-mobile-avatar" aria-label="Account menu" aria-expanded={mobileUserMenuOpen} onClick={() => setMobileUserMenuOpen((open) => !open)}>
+                {authUser?.avatar
+                  ? <img src={authUser.avatar} alt="" />
+                  : <span>{authUser?.name?.trim().charAt(0).toUpperCase() || <Users size={17} aria-hidden="true" />}</span>}
+                <i aria-label="Online" />
+              </button>
+              {mobileUserMenuOpen && <div className="home-mobile-user-popover" role="menu">
+                <Link to="/profile" role="menuitem" onClick={() => setMobileUserMenuOpen(false)}>Profile</Link>
+                <Link to="/settings" role="menuitem" onClick={() => setMobileUserMenuOpen(false)}>Settings</Link>
+                <button type="button" role="menuitem" onClick={async () => { await authLogout(); setMobileUserMenuOpen(false); navigate('/login') }}>Sign out</button>
+              </div>}
+            </div>
+          ) : <Link to="/login" className="home-mobile-avatar" aria-label="Sign in"><Users size={17} aria-hidden="true" /></Link>}
+        </div>
+      </header>
       <aside className={`home-sidebar ${mobileMenuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
         <Link to="/" className="home-brand" aria-label="OyoConnect home">
           <span className="home-brand-mark"><span>O</span></span>
@@ -224,16 +260,53 @@ function Home() {
             <section className="home-hero" aria-label="Oyo State hero banner">
               <img className="home-hero-image" src="/images/oyo-hero.jpg" alt="Oyo State monument and green landscape" />
               <div className="home-hero-overlay" />
+              <div className="home-mobile-hero-content">
+                <p className="home-mobile-eyebrow"><MapPin size={14} aria-hidden="true" /> Oyo State, Nigeria</p>
+                <h1>Together for a better Oyo</h1>
+                <p className="home-mobile-hero-copy">Discover local services, jobs, businesses and community updates near you.</p>
+                <form className="home-mobile-hero-search" role="search" onSubmit={submitSearch}>
+                  <Search size={19} aria-hidden="true" />
+                  <input aria-label="Search OyoConnect" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search services, jobs, businesses..." />
+                  <button type="submit">Search</button>
+                </form>
+              </div>
             </section>
 
             <section className="home-features" aria-label="Explore OyoConnect">
-              {features.map(({ title, description, to, icon: Icon, color }) => <Link to={to} key={title} className="home-feature-card"><span className={`home-feature-icon ${color}`}><Icon size={20} /></span><span className="home-feature-copy"><strong>{title}</strong><small>{description}</small></span><span className="home-feature-arrow"><ArrowUpRight size={15} /></span></Link>)}
+              {features.map(({ title, description, mobileTitle, mobileDescription, to, mobileTo, icon: Icon, mobileIcon: MobileIcon, color }) => <Fragment key={title}><Link to={to} className="home-feature-card home-feature-card--desktop"><span className={`home-feature-icon ${color}`}><Icon size={20} /></span><span className="home-feature-copy"><strong>{title}</strong><small>{description}</small></span><span className="home-feature-arrow"><ArrowUpRight size={15} /></span></Link><Link to={mobileTo} className="home-feature-card home-feature-card--mobile"><span className={`home-feature-icon ${color === 'purple' ? 'mint' : color}`}><MobileIcon size={20} /></span><span className="home-feature-copy"><strong>{mobileTitle}</strong><small>{mobileDescription}</small></span><span className="home-feature-arrow"><ArrowUpRight size={15} /></span></Link></Fragment>)}
             </section>
 
             <section className="home-lower-grid" aria-label="Community highlights">
-              <article className="home-promo-card"><img src="/images/oyo-hero.jpg" alt="Oyo State monument" loading="lazy" /><div className="home-promo-wash" /><div className="home-promo-content"><span className="home-promo-label"><Sparkles size={12} /> STRONGER TOGETHER</span><h2>A better Oyo<br />is possible.</h2><p>Local people. Shared progress. A brighter future for everyone.</p><button onClick={() => goTo(user ? '/profile' : '/signup', !user)}>Be part of OyoConnect <ArrowRight size={15} /></button></div></article>
+              <article className="home-promo-card"><img src="/images/oyo-hero.jpg" alt="Oyo State landmark" loading="lazy" /><div className="home-promo-wash" /><div className="home-promo-content home-promo-content--desktop"><span className="home-promo-label"><Sparkles size={12} /> STRONGER TOGETHER</span><h2>A better Oyo<br />is possible.</h2><p>Local people. Shared progress. A brighter future for everyone.</p><button onClick={() => goTo(user ? '/profile' : '/signup', !user)}>Be part of OyoConnect <ArrowRight size={15} /></button></div><div className="home-mobile-promo-content"><span className="home-mobile-promo-label"><Zap size={14} fill="currentColor" /> LATEST UPDATES</span><h2>A better Oyo is possible</h2><p>Together, we can build a safer, cleaner and more developed Oyo State.</p><button onClick={() => navigate('/community')}>Explore OyoConnect <ArrowRight size={15} /></button></div></article>
               <section className="home-panel home-updates-panel"><header className="home-panel-heading"><div><span className="home-section-kicker">AROUND OYO</span><h2>Latest updates</h2></div><Link to="/community">View all <ArrowRight size={14} /></Link></header>{loading.updates ? renderSkeletons(3, 'home-update-list') : errors.updates ? <div className="home-error-state">Updates couldn’t load. <button onClick={() => void loadSection('updates')}>Retry</button></div> : filteredUpdates.length ? <div className="home-update-list">{filteredUpdates.slice(0, 3).map((item) => <Link className="home-update-row" to={item.href} key={item.id}><img src={item.image} alt="" loading="lazy" /><span className="home-update-info"><span className={`home-category-tag ${item.category.toLowerCase()}`}>{item.category}</span><strong>{item.title}</strong><small>{item.description} · {item.location}</small></span><time>{relativeTime(item.createdAt)}</time></Link>)}</div> : <p className="home-empty">No local updates in {selectedLocation} yet.</p>}</section>
               <section className="home-panel home-events-panel"><header className="home-panel-heading"><div><span className="home-section-kicker">SAVE THE DATE</span><h2>Upcoming events</h2></div><Link to="/community/events">View all <ArrowRight size={14} /></Link></header>{loading.events ? renderSkeletons(3, 'home-event-list') : errors.events ? <div className="home-error-state">Events couldn’t load. <button onClick={() => void loadSection('events')}>Retry</button></div> : filteredEvents.length ? <div className="home-event-list">{filteredEvents.map((event) => { const date = formatEventDate(event.startsAt); return <Link className="home-event-row" to={event.href} key={event.id}><span className="home-event-date"><small>{date.month}</small><strong>{date.day}</strong></span><span className="home-event-info"><strong>{event.title}</strong><small><MapPin size={12} /> {event.venue} · {event.location}</small><em>{formatEventTime(event.startsAt, event.endsAt)}</em></span><ChevronRight size={16} /></Link> })}</div> : <p className="home-empty">No upcoming events yet.</p>}</section>
+            </section>
+
+            <section className="home-mobile-live-section" aria-labelledby="home-mobile-events-title">
+              <header className="home-mobile-section-heading">
+                <h2 id="home-mobile-events-title"><CalendarDays size={19} aria-hidden="true" /> Upcoming Events</h2>
+                <Link to="/community/events">View all</Link>
+              </header>
+              <div className="home-mobile-live-card">
+                <span className="home-mobile-live-icon"><CalendarDays size={20} aria-hidden="true" /></span>
+                <span><strong>No live event listings</strong><small>New community events will appear here when available.</small></span>
+              </div>
+            </section>
+
+            <section className="home-mobile-live-section" aria-labelledby="home-mobile-activity-title">
+              <header className="home-mobile-section-heading">
+                <h2 id="home-mobile-activity-title"><Megaphone size={19} aria-hidden="true" /> Recent Activity</h2>
+                <Link to="/notifications">See more</Link>
+              </header>
+              {mobileNotifications.length ? <div className="home-mobile-activity-card">
+                {mobileNotifications.slice(0, 3).map((item) => <Link to={item.href || '/notifications'} className="home-mobile-activity-item" key={item.id}>
+                  <span className="home-mobile-activity-icon"><Bell size={16} aria-hidden="true" /></span>
+                  <span><strong>{item.title}</strong><small>{item.message}</small><time>{relativeTime(item.createdAt)}</time></span>
+                </Link>)}
+              </div> : <div className="home-mobile-live-card">
+                <span className="home-mobile-live-icon"><Megaphone size={20} aria-hidden="true" /></span>
+                <span><strong>No recent activity</strong><small>Community and account updates will appear here.</small></span>
+              </div>}
             </section>
           </div>
 
@@ -251,8 +324,6 @@ function Home() {
 
         <footer className="home-footer"><Link to="/" className="home-footer-brand">OyoConnect</Link><nav aria-label="Footer">{[['Home', '/'], ['Explore', '/categories'], ['Jobs', '/jobs'], ['Businesses', '/business'], ['Community', '/community'], ['Reports', '/community']].map(([label, to]) => <Link key={label} to={to}>{label}</Link>)}</nav><span className="home-footer-location"><MapPin size={13} /> Oyo State, Nigeria</span><span className="home-footer-copy">© 2026 OyoConnect</span></footer>
       </div>
-
-      <nav className="home-mobile-tabs" aria-label="Mobile navigation">{[{ label: 'Home', to: '/', icon: HomeIcon }, { label: 'Jobs', to: '/jobs', icon: BriefcaseBusiness }, { label: 'Explore', to: '/categories', icon: Compass }, { label: 'Messages', to: '/messages', icon: MessageCircle }, { label: 'Wallet', to: '/community/wallet', icon: Wallet }].map(({ label, to, icon: Icon }) => <Link key={label} to={to} className={location.pathname === to ? 'is-active' : ''}><Icon size={19} /><span>{label}</span></Link>)}</nav>
 
       {inviteOpen && <div className="home-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setInviteOpen(false) }}><section className="home-invite-modal" role="dialog" aria-modal="true" aria-labelledby="home-invite-title"><button className="home-modal-close" aria-label="Close invite dialog" onClick={() => setInviteOpen(false)}><X size={19} /></button><span className="home-invite-icon"><Share2 size={22} /></span><h2 id="home-invite-title">Invite your people</h2><p>Good things happen when we build Oyo together. Share your link with friends.</p><div className="home-referral-link"><span>oyoconnect.com/signup?ref=oyoconnect</span><button onClick={() => void copyReferral()}>{copied ? 'Copied!' : 'Copy link'}</button></div><div className="home-share-buttons"><a href={`https://wa.me/?text=${encodeURIComponent(`${window.location.origin}/signup?ref=oyoconnect`)}`} target="_blank" rel="noreferrer">WhatsApp</a><a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(`${window.location.origin}/signup?ref=oyoconnect`)}`} target="_blank" rel="noreferrer">Share on X</a></div></section></div>}
     </div>

@@ -14,6 +14,7 @@ import { WalletLayout } from './layouts/WalletLayout'
 import { AffiliateLayout } from './layouts/AffiliateLayout'
 import { MessagesLayout } from './layouts/MessagesLayout'
 import { DashboardLayout } from './components/layout/DashboardLayout'
+import { MobileBottomNav } from './components/layout/MobileBottomNav'
 import { useAuth } from './context/AuthContext'
 const MessagesLandingPage = lazy(() => import('./pages/MessagesLandingPage'))
 const ConversationPage = lazy(() => import('./pages/ConversationPage'))
@@ -172,6 +173,7 @@ function App() {
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
+      <MobileBottomNav />
       <ScrollToTop />
       <Suspense fallback={<PageSkeleton />}>
         <ErrorBoundary>
