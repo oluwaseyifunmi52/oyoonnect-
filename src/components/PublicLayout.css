@@ -3,9 +3,11 @@
 .navbar { position: sticky; top: 0; z-index: 100; min-height: 64px; height: 64px; border-bottom: 1px solid #e5ebe7; background: #fff !important; color: #1f3028; }
 .navbar .navbar__inner { height: 64px; min-height: 64px; }
 .public-navbar__actions { display: flex; align-items: center; gap: 12px; }
-.navbar__watch-link { display: inline-flex; min-height: 38px; align-items: center; gap: 7px; padding: 0 10px; border-radius: 8px; color: #075b3b; font-size: 13px; font-weight: 650; text-decoration: none; }
-.navbar__watch-link:hover { background: #edf6f0; }
-.navbar__watch-link:focus-visible { outline: 2px solid #12834c; outline-offset: 2px; }
+.public-navbar__nav { display: flex; min-width: 0; align-items: center; gap: 2px; }
+.public-navbar__nav a { display: inline-flex; min-height: 38px; align-items: center; gap: 5px; padding: 0 7px; border-radius: 8px; color: #365247; font-size: 11px; font-weight: 650; text-decoration: none; white-space: nowrap; }
+.public-navbar__nav a:hover,
+.public-navbar__nav a[aria-current="page"] { color: #075b3b; background: #edf6f0; }
+.public-navbar__nav a:focus-visible { outline: 2px solid #12834c; outline-offset: 2px; }
 .public-navbar__actions .navbar__cta { margin-left: 0; }
 .navbar .logo__name { color: #064e3b; }
 .navbar .logo__subtitle { color: #718078; }
@@ -14,11 +16,41 @@
 .dashboard-app-shell .home-search-header,
 .dashboard-app-shell .home-browse-header { display: none; }
 
+@media (max-width: 1050px) {
+  .navbar .navbar__inner { gap: 8px; }
+  .public-navbar__nav { overflow-x: auto; scrollbar-width: none; }
+  .public-navbar__nav::-webkit-scrollbar { display: none; }
+  .public-navbar__nav a { padding-inline: 5px; font-size: 10px; }
+  .public-navbar__nav svg { display: none; }
+}
+@media (max-width: 760px) {
+  .navbar { overflow: visible; }
+  .navbar .navbar__inner { height: auto; min-height: 64px; flex-wrap: wrap; padding-block: 7px; }
+  .public-navbar__nav { order: 3; width: 100%; min-height: 36px; justify-content: space-between; }
+  .public-navbar__nav a { min-height: 32px; }
+}
 @media (max-width: 480px) {
   .navbar .navbar__inner { padding-inline: 14px; gap: 8px; }
   .navbar .logo__subtitle { display: none; }
   .public-navbar__actions { gap: 5px; }
-  .navbar__watch-link { min-height: 34px; gap: 4px; padding-inline: 6px; font-size: 12px; }
+  .public-navbar__nav a { font-size: 9px; padding-inline: 3px; }
   .public-navbar__actions .navbar__theme-toggle { width: 34px; height: 34px; }
   .public-navbar__actions .btn { min-height: 36px; padding-inline: 10px; font-size: 12px; }
+}
+
+/* Public pages now share a fixed platform sidebar instead of the old top nav. */
+.public-layout__main { min-width: 0; margin-left: 260px; padding: 28px; }
+.public-layout > .footer { margin-left: 260px; }
+.platform-mobile-bar { display: none; }
+
+@media (max-width: 900px) {
+  .platform-mobile-bar { display: flex; }
+  .public-layout__main { margin-left: 0; padding: 20px; }
+  .public-layout > .footer { margin-left: 0; }
+  .public-layout__main:has(.home-app) { padding: 0; }
+}
+
+@media (max-width: 767px) {
+  .public-layout:has(.home-app--public) .home-mobile-header { min-height: 46px; justify-content: flex-end; padding-block: 4px; background: var(--surface); }
+  .public-layout:has(.home-app--public) .home-mobile-header .logo { display: none; }
 }

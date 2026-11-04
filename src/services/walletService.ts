@@ -1,10 +1,3 @@
-/**
- * DEVELOPMENT-ONLY wallet service.
- *
- * Uses localStorage for local dev state. In production this will be
- * replaced by API calls through apiClient. Do not treat the balances
- * or transactions here as real.
- */
 import type {
   Wallet,
   VirtualAccount,
@@ -13,110 +6,71 @@ import type {
   WalletAccount,
   WalletFundingSource,
 } from '../types/bills'
+import { ApiError, apiClient } from './apiClient'
 
-const STORAGE_KEY = 'wallet_data'
-const TRANSACTIONS_KEY = 'wallet_transactions'
-const ACCOUNT_KEY = 'virtual_account'
+type BackendWallet = Omit<Wallet, 'balance'> & { balance: number }
+type BackendTransaction = Omit<WalletTransaction, 'amount' | 'balanceBefore' | 'balanceAfter'> & {
+  amount: number
+  balanceBefore?: number
+  balanceAfter?: number
+}
+type BackendVirtualAccount = Record<string, unknown> & { id?: string; _id?: string; createdAt?: string }
 
-function generateVirtualAccount(): VirtualAccount {
-  const accountNumber = `0${Math.floor(100000000 + Math.random() * 900000000)}`
+function unwrap<T>(value: unknown): T {
+  if (value && typeof value === 'object' && 'success' in value) {
+    const result = value as { success?: boolean; data?: T; message?: string; error?: string }
+    if (result.success === false) throw new Error(result.message || result.error || 'Wallet request failed.')
+    if ('data' in result) return result.data as T
+  }
+  return value as T
+}
+
+function fromKobo(value: number | undefined): number | undefined {
+  return value === undefined ? undefined : value / 100
+}
+
+function normalizeWallet(wallet: BackendWallet): Wallet {
+  return { ...wallet, balance: wallet.balance / 100 }
+}
+
+function normalizeTransaction(transaction: BackendTransaction): WalletTransaction {
   return {
-    accountName: 'OyoConnect Escrow Account',
-    accountNumber,
-    bankName: 'Wema Bank',
-    provider: 'Opay',
-    accountStatus: 'active',
-    isVerified: true,
-    createdAt: new Date().toISOString(),
-    verifiedAt: new Date().toISOString(),
+    ...transaction,
+    amount: transaction.amount / 100,
+    balanceBefore: fromKobo(transaction.balanceBefore) ?? 0,
+    balanceAfter: fromKobo(transaction.balanceAfter) ?? 0,
   }
 }
 
-const defaultWallet: Wallet = {
-  userId: 'dev-user',
-  balance: 0,
-  currency: 'NGN',
-  lastUpdated: new Date().toISOString(),
-  isVerified: false,
-  kycStatus: 'unverified',
-}
-
-const defaultTransactions: WalletTransaction[] = []
-
-function getStoredWallet(): Wallet | null {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return stored ? JSON.parse(stored) : null
-  } catch {
-    return null
-  }
-}
-
-function setStoredWallet(wallet: Wallet): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(wallet))
-  } catch {
-    // ignore storage errors
-  }
-}
-
-function getStoredTransactions(): WalletTransaction[] {
-  try {
-    const stored = localStorage.getItem(TRANSACTIONS_KEY)
-    return stored ? JSON.parse(stored) : defaultTransactions
-  } catch {
-    return defaultTransactions
-  }
-}
-
-function setStoredTransactions(transactions: WalletTransaction[]): void {
-  try {
-    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions))
-  } catch {
-    // ignore storage errors
-  }
-}
-
-function getStoredVirtualAccount(): VirtualAccount | null {
-  try {
-    const stored = localStorage.getItem(ACCOUNT_KEY)
-    return stored ? JSON.parse(stored) : null
-  } catch {
-    return null
-  }
-}
-
-function setStoredVirtualAccount(account: VirtualAccount): void {
-  try {
-    localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account))
-  } catch {
-    // ignore storage errors
-  }
+function normalizeAccount(account: BackendVirtualAccount): VirtualAccount {
+  return {
+    ...account,
+    id: account.id || account._id || '',
+    createdAt: account.createdAt || new Date().toISOString(),
+  } as unknown as VirtualAccount
 }
 
 export const walletService = {
   async getWallet(): Promise<Wallet | null> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const stored = getStoredWallet()
-        resolve(stored ?? defaultWallet)
-      }, 100)
-    })
+    const response = await apiClient.get<BackendWallet>('/wallet')
+    const wallet = unwrap<BackendWallet | null>(response)
+    return wallet ? normalizeWallet(wallet) : null
+  },
+
+  async getVirtualAccount(): Promise<VirtualAccount | null> {
+    try {
+      const response = await apiClient.get<BackendVirtualAccount>('/wallet/virtual-account')
+      const account = unwrap<BackendVirtualAccount | null>(response)
+      return account ? normalizeAccount(account) : null
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) return null
+      throw error
+    }
   },
 
   async createVirtualAccount(): Promise<VirtualAccount> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const existing = getStoredVirtualAccount()
-        if (existing && existing.accountStatus === 'active') {
-          resolve(existing)
-          return
-        }
-        const account = generateVirtualAccount()
-        setStoredVirtualAccount(account)
-        resolve(account)
-      }, 200)
-    })
+    const response = await apiClient.post<BackendVirtualAccount>('/wallet/virtual-account', { provider: 'paystack' })
+    return normalizeAccount(unwrap<BackendVirtualAccount>(response))
   },
 
   async getTransactions(filters?: {
@@ -127,76 +81,40 @@ export const walletService = {
     dateFrom?: string
     dateTo?: string
   }): Promise<{ transactions: WalletTransaction[]; total: number }> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        let results = getStoredTransactions()
-
-        if (filters?.type) {
-          results = results.filter((t) => t.type === filters.type)
-        }
-        if (filters?.status) {
-          results = results.filter((t) => t.status === filters.status)
-        }
-        if (filters?.dateFrom) {
-          results = results.filter((t) => new Date(t.createdAt) >= new Date(filters.dateFrom!))
-        }
-        if (filters?.dateTo) {
-          results = results.filter((t) => new Date(t.createdAt) <= new Date(filters.dateTo!))
-        }
-
-        const total = results.length
-        const page = filters?.page ?? 1
-        const limit = filters?.limit ?? 10
-        const start = (page - 1) * limit
-        const paginated = results.slice(start, start + limit)
-
-        resolve({
-          transactions: paginated,
-          total,
-        })
-      }, 100)
-    })
+    const params = new URLSearchParams()
+    if (filters?.page) params.set('page', String(filters.page))
+    if (filters?.limit) params.set('limit', String(filters.limit))
+    if (filters?.type) params.set('type', filters.type)
+    if (filters?.status) params.set('status', filters.status)
+    if (filters?.dateFrom) params.set('dateFrom', filters.dateFrom)
+    if (filters?.dateTo) params.set('dateTo', filters.dateTo)
+    const response = await apiClient.get<{ items?: BackendTransaction[]; total?: number }>(`/wallet/transactions?${params.toString()}`)
+    const result = unwrap<{ items?: BackendTransaction[]; total?: number }>(response)
+    return {
+      transactions: (result.items || []).map(normalizeTransaction),
+      total: result.total || 0,
+    }
   },
 
   async getStats(): Promise<WalletStats> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const wallet = getStoredWallet() ?? defaultWallet
-        const transactions = getStoredTransactions()
-        const totalCredits = transactions
-          .filter((t) => t.type === 'credit')
-          .reduce((sum, t) => sum + t.amount, 0)
-        const totalDebits = transactions
-          .filter((t) => t.type === 'debit')
-          .reduce((sum, t) => sum + t.amount, 0)
-        const pendingTransactions = transactions.filter(
-          (t) => t.status === 'pending',
-        ).length
-
-        resolve({
-          balance: wallet.balance,
-          totalCredits,
-          totalDebits,
-          pendingTransactions,
-        })
-      }, 100)
-    })
+    const response = await apiClient.get<WalletStats>('/wallet/stats')
+    const stats = unwrap<WalletStats>(response)
+    return {
+      ...stats,
+      balance: stats.balance / 100,
+      totalCredits: stats.totalCredits / 100,
+      totalDebits: stats.totalDebits / 100,
+    }
   },
 
   async getWalletAccounts(): Promise<WalletAccount[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([])
-      }, 100)
-    })
+    const response = await apiClient.get<WalletAccount[]>('/wallet/virtual-accounts')
+    return unwrap<WalletAccount[]>(response)
   },
 
   async getFundingSources(): Promise<WalletFundingSource[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([])
-      }, 100)
-    })
+    const response = await apiClient.get<WalletFundingSource[]>('/wallet/funding-sources')
+    return unwrap<WalletFundingSource[]>(response)
   },
 
   async fundWallet(amount: number, paymentMethod: 'bank_transfer' | 'card' | 'ussd'): Promise<{
@@ -206,76 +124,22 @@ export const walletService = {
     redirectUrl?: string
     transactionId?: string
   }> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const wallet = getStoredWallet() ?? defaultWallet
-        const newBalance = wallet.balance + amount
-        setStoredWallet({ ...wallet, balance: newBalance, lastUpdated: new Date().toISOString() })
-
-        const deposit: WalletTransaction = {
-          id: `wt-${Date.now()}`,
-          walletId: 'wallet-001',
-          type: 'credit',
-          amount,
-          balanceBefore: wallet.balance,
-          balanceAfter: newBalance,
-          description: `Wallet funding via ${paymentMethod}`,
-          reference: `fund_${amount}_${Date.now()}`,
-          status: 'completed',
-          createdAt: new Date().toISOString(),
-          completedAt: new Date().toISOString(),
-        }
-        const txns = getStoredTransactions()
-        txns.unshift(deposit)
-        setStoredTransactions(txns)
-
-        resolve({
-          success: true,
-          reference: `fund_${amount}_${Date.now()}`,
-          message: `₦${amount} credited to your wallet successfully`,
-          transactionId: deposit.id,
-        })
-      }, 200)
-    })
+    const idempotencyKey = `web-wallet-fund-${crypto.randomUUID()}`
+    const response = await apiClient.post<Record<string, unknown>>('/wallet/fund', {
+      amount: Math.round(amount * 100),
+      paymentMethod,
+    }, { 'Idempotency-Key': idempotencyKey })
+    const result = unwrap<Record<string, unknown>>(response)
+    return {
+      success: result.success === true,
+      reference: typeof result.reference === 'string' ? result.reference : '',
+      message: typeof result.message === 'string' ? result.message : 'Funding request submitted.',
+      redirectUrl: typeof result.redirectUrl === 'string' ? result.redirectUrl : undefined,
+      transactionId: typeof result.transactionId === 'string' ? result.transactionId : undefined,
+    }
   },
 
-  async withdraw(amount: number): Promise<{
-    success: boolean
-    message: string
-    transactionId?: string
-  }> {
-    const wallet = getStoredWallet() ?? defaultWallet
-
-    if (wallet.balance < amount) {
-      return { success: false, message: 'Insufficient wallet balance' }
-    }
-
-    const newBalance = wallet.balance - amount
-    setStoredWallet({ ...wallet, balance: newBalance, lastUpdated: new Date().toISOString() })
-
-    const withdrawal: WalletTransaction = {
-      id: `wt-${Date.now()}`,
-      walletId: 'wallet-001',
-      type: 'debit',
-      amount,
-      balanceBefore: wallet.balance,
-      balanceAfter: newBalance,
-      description: 'Wallet withdrawal',
-      reference: `withdraw_${amount}_${Date.now()}`,
-      status: 'completed',
-      createdAt: new Date().toISOString(),
-      completedAt: new Date().toISOString(),
-    }
-    const txns = getStoredTransactions()
-    txns.unshift(withdrawal)
-    setStoredTransactions(txns)
-
-    return {
-      success: true,
-      message: `₦${amount} withdrawn successfully`,
-      transactionId: withdrawal.id,
-    }
+  async withdraw(): Promise<{ success: boolean; message: string }> {
+    return { success: false, message: 'A verified bank account is required before withdrawals can be enabled.' }
   },
 }
-
-export { defaultWallet, defaultTransactions }

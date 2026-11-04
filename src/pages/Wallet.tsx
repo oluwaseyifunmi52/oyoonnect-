@@ -34,7 +34,7 @@ function WalletPage() {
       try {
         const [walletData, account, txns] = await Promise.all([
           walletService.getWallet(),
-          walletService.createVirtualAccount(),
+          walletService.getVirtualAccount(),
           walletService.getTransactions({ limit: 5 }),
         ])
         setWallet(walletData ?? { balance: 0, currency: 'NGN' } as Wallet)

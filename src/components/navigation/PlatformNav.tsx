@@ -4,6 +4,8 @@ import {
   Briefcase,
   MessageSquare,
   Clapperboard,
+  CreditCard,
+  Wallet,
 } from 'lucide-react'
 
 export interface PlatformNavItem {
@@ -18,7 +20,7 @@ export interface PlatformNavItem {
 // cross-layout navigation components.
 //
 // Keep in sync with siteConfig.nav in src/config/site.ts:
-// - Home, Jobs, Businesses, Community, Messages, Wallet
+// - Home, Jobs, Businesses, Community, Watch, Messages, Services, Wallet
 // - Flat navigation, no submenus
 export const PLATFORM_NAV: readonly PlatformNavItem[] = [
   { to: '/', label: 'Home', icon: Home, end: true },
@@ -27,4 +29,6 @@ export const PLATFORM_NAV: readonly PlatformNavItem[] = [
   { to: '/community', label: 'Community', icon: MessageSquare },
   { to: '/watch', label: 'Watch', icon: Clapperboard },
   { to: '/messages', label: 'Messages', icon: MessageSquare, end: true },
+  { to: '/services', label: 'Services', icon: CreditCard },
+  { to: '/wallet', label: 'Wallet', icon: Wallet },
 ]

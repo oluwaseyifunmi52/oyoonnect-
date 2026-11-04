@@ -201,9 +201,10 @@ export default function ServiceDiscovery() {
           <div className="services-home__service-grid">
             {filteredServices.map((service) => {
               const Icon = service.icon
+              const comingSoon = ['Electricity', 'TV subscriptions', 'Education'].includes(service.label)
               const availabilityLabel = service.availability === 'available'
                 ? 'Available'
-                : service.availability === 'account' ? 'Account' : 'Not connected'
+                : service.availability === 'account' ? 'Account' : comingSoon ? 'Coming soon' : 'Not connected'
               return (
                 <Link to={service.path} className="services-home__service-card" key={service.path}>
                   <span className="services-home__service-icon"><Icon size={21} /></span>

@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { Navbar } from './layout/Navbar'
 import { Footer } from '../components/layout/Footer'
+import { PlatformSidebar } from './layout/PlatformSidebar'
 import './PublicLayout.css'
 
 interface PublicLayoutProps {
@@ -11,7 +11,7 @@ interface PublicLayoutProps {
 export function PublicLayout({ children }: PublicLayoutProps) {
   return (
     <div className="public-layout">
-      <Navbar />
+      <PlatformSidebar />
       <main id="main-content" className="public-layout__main">
         {children ?? <Outlet />}
       </main>

@@ -20,6 +20,7 @@ export const siteConfig = {
     { label: 'Community', to: '/community' },
     { label: 'Watch', to: '/watch' },
     { label: 'Messages', to: '/messages' },
+    { label: 'Services', to: '/services' },
     { label: 'Wallet', to: '/wallet' },
   ] as const satisfies readonly NavItem[],
 }

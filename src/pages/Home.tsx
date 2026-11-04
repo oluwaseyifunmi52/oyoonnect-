@@ -4,9 +4,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   ArrowRight, ArrowUpRight, Bell, BriefcaseBusiness, Building2,
   CalendarDays, ChevronDown, ChevronRight, FileWarning, HeartHandshake, Home as HomeIcon,
-  LogOut, MapPin, Megaphone, Menu, MessageCircle, Search, Share2, ShoppingBag, Sparkles, Users, Wallet, Clapperboard,
+  CreditCard, GraduationCap, KeyRound, LogOut, MapPin, Megaphone, Menu, MessageCircle, Monitor, Search, Share2, ShoppingBag, Sparkles, Users, Wallet, Clapperboard,
   Zap,
-  X, Gamepad2, type LucideIcon,
+  X, Gamepad2, Smartphone, Wifi, type LucideIcon,
 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { PublicLayout } from '../components/Layout'
@@ -32,6 +32,20 @@ const primaryLinks: { label: string; to: string; icon: LucideIcon }[] = [
   { label: 'Messages', to: '/messages', icon: MessageCircle },
   { label: 'Wallet', to: '/community/wallet', icon: Wallet },
   { label: 'Watch', to: '/watch', icon: Clapperboard },
+  { label: 'Services', to: '/services', icon: CreditCard },
+]
+
+const homeServices: { label: string; description: string; to: string; icon: LucideIcon }[] = [
+  { label: 'Data Bundles', description: 'Browse network plans', to: '/services/data', icon: Wifi },
+  { label: 'Airtime', description: 'Top up a mobile line', to: '/services/airtime', icon: Smartphone },
+  { label: 'Electricity', description: 'Utility payments', to: '/services/electricity', icon: Zap },
+  { label: 'TV Subscriptions', description: 'Explore TV services', to: '/services/tv', icon: Clapperboard },
+  { label: 'Education', description: 'Education services', to: '/services/education', icon: GraduationCap },
+  { label: 'Recharge PIN', description: 'PIN products', to: '/services/recharge-pin', icon: KeyRound },
+  { label: 'Digital Products', description: 'Browse digital items', to: '/services/digital-products', icon: Monitor },
+  { label: 'Games', description: 'Games and entertainment', to: '/services/games', icon: Gamepad2 },
+  { label: 'Social Media', description: 'Social media services', to: '/services/social-media', icon: Share2 },
+  { label: 'Wallet', description: 'Wallet and transactions', to: '/wallet', icon: Wallet },
 ]
 
 const features: { title: string; description: string; mobileTitle: string; mobileDescription: string; to: string; mobileTo: string; icon: LucideIcon; mobileIcon: LucideIcon; color: string }[] = [
@@ -41,6 +55,7 @@ const features: { title: string; description: string; mobileTitle: string; mobil
   { title: 'Community reports', description: 'See local updates and raise an issue.', mobileTitle: 'Community Reports', mobileDescription: 'Report issues in your community.', to: '/community', mobileTo: '/community', icon: FileWarning, mobileIcon: FileWarning, color: 'red' },
   { title: 'Get help', description: 'Find support and helpful local resources.', mobileTitle: 'Get Help', mobileDescription: 'Ask for help or support.', to: '/community/help', mobileTo: '/community/help', icon: HeartHandshake, mobileIcon: HeartHandshake, color: 'blue' },
   { title: 'Games and community', description: 'Play, share and connect with neighbors.', mobileTitle: 'Events & Community', mobileDescription: 'Find events near you.', to: '/services/games', mobileTo: '/community/events', icon: Gamepad2, mobileIcon: CalendarDays, color: 'purple' },
+  { title: 'Pay & Top Up', description: 'Data, airtime and bills.', mobileTitle: 'Pay & Top Up', mobileDescription: 'Data, airtime and bills.', to: '/services', mobileTo: '/services', icon: Smartphone, mobileIcon: Smartphone, color: 'green' },
 ]
 
 const quickActions: { label: string; to: string; icon: LucideIcon; protected?: boolean }[] = [
@@ -272,12 +287,40 @@ function Home() {
               </div>
             </section>
 
+            <section className="home-services" aria-labelledby="home-services-title">
+              <header className="home-services__heading">
+                <div><span className="home-section-kicker">EVERYDAY ESSENTIALS</span><h2 id="home-services-title">Services</h2><p>Access top-ups, bills and digital services in one place.</p></div>
+                <Link to="/services">Explore all services <ArrowRight size={15} aria-hidden="true" /></Link>
+              </header>
+              <div className="home-services__grid">
+                {homeServices.map(({ label, description, to, icon: Icon }) => <Link className="home-services__card" key={label} to={to}>
+                  <span className="home-services__icon"><Icon size={19} aria-hidden="true" /></span>
+                  <span className="home-services__copy"><strong>{label}</strong><small>{description}</small></span>
+                  <ChevronRight size={16} aria-hidden="true" />
+                </Link>)}
+              </div>
+            </section>
+
             <section className="home-features" aria-label="Explore OyoConnect">
-              {features.map(({ title, description, mobileTitle, mobileDescription, to, mobileTo, icon: Icon, mobileIcon: MobileIcon, color }) => <Fragment key={title}><Link to={to} className="home-feature-card home-feature-card--desktop"><span className={`home-feature-icon ${color}`}><Icon size={20} /></span><span className="home-feature-copy"><strong>{title}</strong><small>{description}</small></span><span className="home-feature-arrow"><ArrowUpRight size={15} /></span></Link><Link to={mobileTo} className="home-feature-card home-feature-card--mobile"><span className={`home-feature-icon ${color === 'purple' ? 'mint' : color}`}><MobileIcon size={20} /></span><span className="home-feature-copy"><strong>{mobileTitle}</strong><small>{mobileDescription}</small></span><span className="home-feature-arrow"><ArrowUpRight size={15} /></span></Link></Fragment>)}
+              {features.map(({ title, description, mobileTitle, mobileDescription, to, mobileTo, icon: Icon, mobileIcon: MobileIcon, color }) => {
+                const payAndTopUp = title === 'Pay & Top Up'
+                return <Fragment key={title}>
+                  <Link to={to} className={`home-feature-card home-feature-card--desktop${payAndTopUp ? ' home-feature-card--wide' : ''}`}>
+                    <span className={`home-feature-icon ${color}`}><Icon size={20} />{payAndTopUp ? <Wifi className="home-feature-icon-wifi" size={11} aria-hidden="true" /> : null}</span>
+                    <span className="home-feature-copy"><strong>{title}</strong><small>{description}</small></span>
+                    <span className="home-feature-arrow">{payAndTopUp ? <ChevronRight size={16} aria-hidden="true" /> : <ArrowUpRight size={15} aria-hidden="true" />}</span>
+                  </Link>
+                  <Link to={mobileTo} className={`home-feature-card home-feature-card--mobile${payAndTopUp ? ' home-feature-card--wide' : ''}`}>
+                    <span className={`home-feature-icon ${color === 'purple' ? 'mint' : color}`}><MobileIcon size={20} />{payAndTopUp ? <Wifi className="home-feature-icon-wifi" size={11} aria-hidden="true" /> : null}</span>
+                    <span className="home-feature-copy"><strong>{mobileTitle}</strong><small>{mobileDescription}</small></span>
+                    <span className="home-feature-arrow">{payAndTopUp ? <ChevronRight size={16} aria-hidden="true" /> : <ArrowUpRight size={15} aria-hidden="true" />}</span>
+                  </Link>
+                </Fragment>
+              })}
             </section>
 
             <section className="home-lower-grid" aria-label="Community highlights">
-              <article className="home-promo-card"><img src="/images/oyo-hero.jpg" alt="Oyo State landmark" loading="lazy" /><div className="home-promo-wash" /><div className="home-promo-content home-promo-content--desktop"><span className="home-promo-label"><Sparkles size={12} /> STRONGER TOGETHER</span><h2>A better Oyo<br />is possible.</h2><p>Local people. Shared progress. A brighter future for everyone.</p><button onClick={() => goTo(user ? '/profile' : '/signup', !user)}>Be part of OyoConnect <ArrowRight size={15} /></button></div><div className="home-mobile-promo-content"><span className="home-mobile-promo-label"><Zap size={14} fill="currentColor" /> LATEST UPDATES</span><h2>A better Oyo is possible</h2><p>Together, we can build a safer, cleaner and more developed Oyo State.</p><button onClick={() => navigate('/community')}>Explore OyoConnect <ArrowRight size={15} /></button></div></article>
+              <article className="home-promo-card"><img src="/images/oyo-hero.jpg" alt="Oyo State landmark" loading="lazy" /><div className="home-promo-wash" /><div className="home-promo-content"><span className="home-promo-label">STRONGER TOGETHER</span><h2>A better Oyo<br />is possible</h2><p>Report issues, support local businesses, find opportunities and build a safer community.</p><Link to="/signup" className="home-promo-join">Be part of OyoConnect <span aria-hidden="true">→</span></Link></div></article>
               <section className="home-panel home-updates-panel"><header className="home-panel-heading"><div><span className="home-section-kicker">AROUND OYO</span><h2>Latest updates</h2></div><Link to="/community">View all <ArrowRight size={14} /></Link></header>{loading.updates ? renderSkeletons(3, 'home-update-list') : errors.updates ? <div className="home-error-state">Updates couldn’t load. <button onClick={() => void loadSection('updates')}>Retry</button></div> : filteredUpdates.length ? <div className="home-update-list">{filteredUpdates.slice(0, 3).map((item) => <Link className="home-update-row" to={item.href} key={item.id}><img src={item.image} alt="" loading="lazy" /><span className="home-update-info"><span className={`home-category-tag ${item.category.toLowerCase()}`}>{item.category}</span><strong>{item.title}</strong><small>{item.description} · {item.location}</small></span><time>{relativeTime(item.createdAt)}</time></Link>)}</div> : <p className="home-empty">No local updates in {selectedLocation} yet.</p>}</section>
               <section className="home-panel home-events-panel"><header className="home-panel-heading"><div><span className="home-section-kicker">SAVE THE DATE</span><h2>Upcoming events</h2></div><Link to="/community/events">View all <ArrowRight size={14} /></Link></header>{loading.events ? renderSkeletons(3, 'home-event-list') : errors.events ? <div className="home-error-state">Events couldn’t load. <button onClick={() => void loadSection('events')}>Retry</button></div> : filteredEvents.length ? <div className="home-event-list">{filteredEvents.map((event) => { const date = formatEventDate(event.startsAt); return <Link className="home-event-row" to={event.href} key={event.id}><span className="home-event-date"><small>{date.month}</small><strong>{date.day}</strong></span><span className="home-event-info"><strong>{event.title}</strong><small><MapPin size={12} /> {event.venue} · {event.location}</small><em>{formatEventTime(event.startsAt, event.endsAt)}</em></span><ChevronRight size={16} /></Link> })}</div> : <p className="home-empty">No upcoming events yet.</p>}</section>
             </section>

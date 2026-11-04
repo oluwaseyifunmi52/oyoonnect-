@@ -38,7 +38,7 @@ function WalletFund() {
     try {
       const [wallet, account] = await Promise.all([
         walletService.getWallet(),
-        walletService.createVirtualAccount(),
+        walletService.getVirtualAccount(),
       ])
       if (wallet) setWalletBalance(wallet.balance)
       setVirtualAccount(account)

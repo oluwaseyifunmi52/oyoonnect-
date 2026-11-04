@@ -15,6 +15,7 @@ const platformNavigation: NavigationItem[] = [
   { label: 'Businesses', to: '/businesses', icon: Building2 },
   { label: 'Community', to: '/community', icon: MessageCircle },
   { label: 'Messages', to: '/messages', icon: MessageCircle },
+  { label: 'Services', to: '/services', icon: CreditCard },
   { label: 'Wallet', to: '/wallet', icon: Wallet },
   { label: 'Watch', to: '/watch', icon: Clapperboard },
 ]
